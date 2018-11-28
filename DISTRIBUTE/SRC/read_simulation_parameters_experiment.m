@@ -1,4 +1,4 @@
-function [gdir,bvalues,qvalues,sdeltavec,bdeltavec,seqvec,npervec,rtol,atol,dt_out,snapshots,const_q] ...
+function [gdir,bvalues,qvalues,sdeltavec,bdeltavec,seqvec,npervec,rtol,atol,dt_out,snapshots,const_q,tetgen_cmd] ...
     = read_simulation_parameters_experiment(fname_experiment);
 
 global QVAL
@@ -59,6 +59,11 @@ tline = fgetl(fid);
 snapshots= sscanf(tline,'%f',1);
 tline = fgetl(fid);
 const_q = sscanf(tline,'%f',1);
+
+tline = fgetl(fid);
+[strpos] = regexp(tline,"'");
+tetgen_cmd = tline(strpos(1)+1:strpos(2)-1);
+
 fclose(fid);
 
 gdir = gdir/norm(gdir);

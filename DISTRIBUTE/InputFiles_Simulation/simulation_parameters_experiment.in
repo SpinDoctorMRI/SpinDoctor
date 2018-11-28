@@ -10,4 +10,5 @@
 0.001 0.001 									% ODE rtol,atol
 500.0											% dt for outputting mass at each dt point
 0												% snapshots (t=t0 and t=tf automatically generated, snapshots between t0 and tf)
-0												% constant q experiement               
+0												% constant q experiement  
+'SRC\TETGEN\tetGen\win64\tetgen'							% tetgen_cmd

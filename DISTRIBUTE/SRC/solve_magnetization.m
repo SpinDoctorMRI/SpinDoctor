@@ -48,8 +48,6 @@ IC_cmpts(1,Nucleus_cmpt) = ic_nucleus;
 UG = gdir';
 UG = UG/norm(UG);
 
-kappa_vec
-
 if(Ncmpt ==1 | abs(max(kappa_vec)) <= 1e-16)
     DO_COUPLING = no;
 else

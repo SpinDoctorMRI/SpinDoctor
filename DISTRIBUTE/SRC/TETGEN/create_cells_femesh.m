@@ -1,6 +1,6 @@
 function [fname_tetgen_femesh] = ...
     create_cells_femesh(fname_cell,fname_out_tetgen,include_box,box_gap,Rratio_nucleus,...
-    cell_shape_name,hreq)
+    cell_shape_name,hreq,tetgen_cmd)
 
 ndim = 3;
 
@@ -147,7 +147,8 @@ if (nregions >= 1)
 end
 fclose(fid);
 
-tetgen_cmd = 'C:\Users\"Jing Rebecca LI"\WORK\WORK_RESEARCH\DMRI\CODE\gibbon\lib_ext\tetGen\win64\tetgen';
+
+
 if (hreq > 0) 
     tetgen_options = ['-pqA','a',num2str(hreq)];
 else
