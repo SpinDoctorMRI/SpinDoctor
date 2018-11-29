@@ -3,9 +3,9 @@
 0.001									% diffusion coefficient in nucleus
 0.001									% diffusion coefficient in cytoplasm
 0.001									% diffusion coefficient in exterior
-1.0			  							% initial density in nucleus
+0.8			  							% initial density in nucleus
 1.0			  							% initial density in cytoplasm
-1.0			  							% initial density in exterior
+0.2			  							% initial density in exterior
 -1000 -1000 -1000						% IC_llimit, limits initial density in a box
 1000 1000 1000							% IC_ulimit, limits initial density in a box
 0e8		   								% permeability nucleus-cytoplasm; 
@@ -16,7 +16,7 @@
 'ellipses2_R4'							% 'geometry name', it is stored in 'InputFiles_Geometry\',fname,'_description.in'
 2										% ncell
 50										% Hcyl
-2										% Rmean
-1.5										% Rmin
-2.5										% Rmax
+4										% Rmean
+3.5										% Rmin
+4.5										% Rmax
 -1										% Htetgen

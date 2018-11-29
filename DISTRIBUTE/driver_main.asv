@@ -1,10 +1,7 @@
 clear; 
 
 addpath SRC
-addpath SRC/PDE SRC/DMRI SRC/FEM SRC/GEOMETRY SRC/TETGEN SRC/UTILITIES
-
-mydefinitions;
-ncolor = length(colorvec_cell);
+addpath SRC/BTPDE SRC/DMRI SRC/FEM SRC/GEOMETRY SRC/TETGEN SRC/UTILITIES
 
 SEQ_DEFINITIONS
 
@@ -53,7 +50,7 @@ fname_tetgen = ['InputFiles_Tetgen\',fname,'_',box_str];
 [fname_tetgen_femesh] = create_cells_femesh(fname_cells_description,fname_tetgen,...
     include_box,box_gap,Rratio_nucleus,cell_shape_name,Htetgen,tetgen_cmd);
 
-[ADC_PDE_formulation,Ncmpt,DIFF_cmpts] ...
+[deff_PDE_formulation_src,deff_PDE_formulation_src_time,ADC_PDE_formulation,Ncmpt,DIFF_cmpts] ...
     = deff_PDE_formulation(fname_tetgen_femesh,ncell,Rratio_nucleus,...
     dcoeff_nucleus,dcoeff_cytoplasm,dcoeff_exterior,include_box,...
     gdir,sdeltavec,bdeltavec,seqvec,npervec,rtol_deff,atol_deff);
@@ -66,12 +63,6 @@ fname_tetgen = ['InputFiles_Tetgen\',fname,'_',box_str];
     ic_nucleus,ic_cytoplasm,ic_exterior,ic_llimit,ic_ulimit,kappa_nc,kappa_ce,include_box,...
     gdir,qvalues,sdeltavec,bdeltavec,seqvec,npervec,rtol_bt,atol_bt);
 
-[ADC_allcmpts,ADC_allcmpts_polydeg,ADC_allcmpts_S0,Deff_STA_allcmpts,...
-    ADC,ADC_polydeg,ADC_S0,Deff_STA,MF_allcmpts,M0_allcmpts,S0_allcmpts,...
-    MF,M0,S0,VOL,SA,SAu,VOL_frac,SoV]...
-    = post_processing(MT,bvalues,Ncmpt,Nboundary,sdeltavec,bdeltavec,seqvec,npervec,...
-    Pts_cmpt_reorder,Ele_cmpt_reorder,Fac_boundary_reorder,...
-    DIFF_cmpts,UG);
 
 for icmpt = 1:Ncmpt
     figure; hold on;
@@ -86,68 +77,40 @@ for icmpt = 1:Ncmpt
 end
 title('Finite Element Mesh');
 
-nexperi = length(difftime);
-Sig_free = zeros(size(bvalues(:)));
+[ADC_allcmpts,ADC_allcmpts_polydeg,ADC_allcmpts_S0,Deff_STA_allcmpts,...
+    ADC,ADC_polydeg,ADC_S0,Deff_STA,MF_allcmpts,M0_allcmpts,S0_allcmpts,...
+    MF,M0,S0,VOL,SA,SAu,VOL_frac,SoV]...
+    = post_processing(MT,bvalues,Ncmpt,Nboundary,sdeltavec,bdeltavec,seqvec,npervec,...
+    Pts_cmpt_reorder,Ele_cmpt_reorder,Fac_boundary_reorder,...
+    DIFF_cmpts,UG);
 
-vol = 0;
-for icmpt = 1:Ncmpt
-    Sig_free = Sig_free+IC_cmpts(1,icmpt)*VOL_frac(icmpt)*exp(-DIFF_cmpts(icmpt)*bvalues(:));
-    vol = vol+IC_cmpts(1,icmpt)*VOL_frac(icmpt);
-end
-Sig_free = Sig_free/vol;
+%plot_figures(UG,bvalues,difftime,...
+%    DIFF_cmpts,IC_cmpts,Ncmpt,ADC_allcmpts,ADC_allcmpts_S0,...
+%    Deff_STA_allcmpts,ADC,ADC_S0,...
+%    Deff_STA,MF_allcmpts,MF,VOL,SAu,VOL_frac);
 
-
-figure; hold on
-iplot = 0;
-for iexperi = 1:nexperi   
-    yvec = real(MF_allcmpts(iexperi,:));
-    bvec = bvalues(iexperi,:);
-    h = plot(bvec, log10(yvec),...
-        [colorvec_cell{1},markervec_cell{iexperi}]);
-    set(h,'MarkerSize', 10, 'LineWidth',1);
-    iplot = iplot + 1;
-    legend_vec{iplot} = [' Experi ',mynum2str(iexperi)];
-end
-yvec = Sig_free*sum(IC_cmpts.*VOL);
-h = plot(bvalues(:), log10(yvec),...
-    [colorvec_cell{2},'','-']);
-set(h,'MarkerSize', 10, 'LineWidth',1);
-iplot = iplot + 1;
-legend_vec{iplot} = ['free diffusion'];
-for iexperi = 1:nexperi
-    bvec = bvalues(iexperi,:);
-    yvec = ADC_allcmpts_S0(iexperi)*exp(-ADC_allcmpts(iexperi)*bvec);
-    h = plot(bvec, log10(yvec),...
-        [colorvec_cell{1},'-']);
-    set(h,'MarkerSize', 10, 'LineWidth',1);
-end
-legend(legend_vec{1:iplot},'Location','NorthEastOutside');
-set(legend, 'FontSize',10)
-set(gca, 'FontSize',10)
-xlabel('bvalue')
-ylabel('log10(Sig)')
-title(['UG = [',mynum2str(UG),']']);
+ntime = length(difftime);
 
 figure;
-for iexperi = 1:nexperi
-    subplot(nexperi,3,(iexperi-1)*3+1);
-    bar(ADC(:,iexperi));
+for itime = 1:ntime
+    subplot(ntime,3,(itime-1)*3+1);
+    bar(ADC(:,itime));
     title('ADC BT');
     set(gca,'ylim',[0,max(DIFF_cmpts)]);
     set(gca,'Ytick',linspace(0,max(DIFF_cmpts),6));
     grid on;
 end
-for iexperi = 1:nexperi
-    subplot(nexperi,3,(iexperi-1)*3+2);
-    bar(ADC_PDE_formulation(:,iexperi));
+for itime = 1:ntime
+    subplot(ntime,3,(itime-1)*3+2);
+    bar(ADC_PDE_formulation(:,itime));
     title('ADC DE');
     set(gca,'ylim',[0,max(DIFF_cmpts)]);
     set(gca,'Ytick',linspace(0,max(DIFF_cmpts),6));
     grid on;
 end
-for iexperi = 1:nexperi
-    subplot(nexperi,3,(iexperi-1)*3+3);
-    bar(Deff_STA(:,iexperi));
+for itime = 1:ntime
+    subplot(ntime,3,(itime-1)*3+3);
+    bar(Deff_STA(:,itime));
     title('ADC STA');
     set(gca,'ylim',[0,max(DIFF_cmpts)]);
     set(gca,'Ytick',linspace(0,max(DIFF_cmpts),6));
