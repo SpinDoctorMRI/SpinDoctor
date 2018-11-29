@@ -14,10 +14,13 @@ function ft = seqprofile(time);
     ft(time >= 0 & time <= SDELTA) = 1;
     ft(time >= BDELTA & time <= BDELTA+SDELTA) = -1;
   elseif (SEQ == OGSEsin)
+      
     [ii] = find(time >= 0 & time <= SDELTA);
     ft(ii) = sin(time(ii)/OGSEPER*2*pi);
     [ii] = find(time >= BDELTA & time <= BDELTA+SDELTA);
     ft(ii) = -sin((time(ii)-BDELTA)/OGSEPER*2*pi);  
+    
+    
   elseif (SEQ == OGSEcos)
     [ii] = find(time >= 0 & time <= SDELTA);
     ft(ii) = cos(time(ii)/OGSEPER*2*pi);

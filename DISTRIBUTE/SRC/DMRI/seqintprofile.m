@@ -9,16 +9,28 @@ function Ft = seqintprofile(time);
     Ft(time >= 0 & time <= SDELTA) = time(time >= 0 & time <= SDELTA);
     Ft(time < BDELTA & time > SDELTA ) = SDELTA ;
     Ft(time >= BDELTA & time <= BDELTA+SDELTA) = SDELTA-(time(time >= BDELTA & time <= BDELTA+SDELTA)-BDELTA);
+  
   elseif (SEQ == OGSEsin)
     [ii] = find(time >= 0 & time <= SDELTA);
-    Ft(ii) = sin(time(ii)/OGSEPER*2*pi);
+    %ft(ii) = sin(time(ii)/OGSEPER*2*pi);
+    
+    Ft(ii) = (1-cos(time(ii)/OGSEPER*2*pi))*OGSEPER/(2*pi);
+    tmp = (1-cos(SDELTA/OGSEPER*2*pi))*OGSEPER/(2*pi);
+    
     [ii] = find(time >= BDELTA & time <= BDELTA+SDELTA);
-    Ft(ii) = -sin((time(ii)-BDELTA)/OGSEPER*2*pi);  
+    %ft(ii) = -sin((time(ii)-BDELTA)/OGSEPER*2*pi);      
+    Ft(ii) = (-1+cos((time(ii)-BDELTA)/OGSEPER*2*pi))*OGSEPER/(2*pi)+tmp;
+    
   elseif (SEQ == OGSEcos)
     [ii] = find(time >= 0 & time <= SDELTA);
-    Ft(ii) = cos(time(ii)/OGSEPER*2*pi);
+    %ft(ii) = cos(time(ii)/OGSEPER*2*pi);
+    Ft(ii) = sin(time(ii)/OGSEPER*2*pi)*OGSEPER/(2*pi); 
+    
+    tmp = sin(SDELTA/OGSEPER*2*pi)*OGSEPER/(2*pi);
+    
     [ii] = find(time >= BDELTA & time <= BDELTA+SDELTA);
-    Ft(ii) = -cos((time(ii)-BDELTA)/OGSEPER*2*pi);  
+    %ft(ii) = -cos((time(ii)-BDELTA)/OGSEPER*2*pi);  
+    Ft(ii) = -sin((time(ii)-BDELTA)/OGSEPER*2*pi)*OGSEPER/(2*pi)+tmp;  
   else
     disp('error in seqprofile');
     stop    

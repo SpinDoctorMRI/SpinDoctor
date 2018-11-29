@@ -1,5 +1,5 @@
-1										% 1 = ellipsoids, 2 = cylinders
-0.0										% Rratio_nucleus; Within range [0,0.99]. Outside range, it is set to 0. 
+2										% 1 = ellipsoids, 2 = cylinders
+0.5										% Rratio_nucleus; Within range [0,0.99]. Outside range, it is set to 0. 
 0.001									% diffusion coefficient in nucleus
 0.001									% diffusion coefficient in cytoplasm
 0.001									% diffusion coefficient in exterior
@@ -8,15 +8,15 @@
 1.0			  							% initial density in exterior
 -1000 -1000 -1000						% IC_llimit, limits initial density in a box
 1000 1000 1000							% IC_ulimit, limits initial density in a box
-0e1		   								% permeability nucleus-cytoplasm; 
-0e1										% permeability cytoplasm-exterior;
+0e8		   								% permeability nucleus-cytoplasm; 
+0e8										% permeability cytoplasm-exterior;
 1 										% include_box;
 0.05									% box_gap; percentage in side length 
 1										% create geometry
 'ellipses2_R4'							% 'geometry name', it is stored in 'InputFiles_Geometry\',fname,'_description.in'
-1										% ncell
+2										% ncell
 50										% Hcyl
-10										% Rmean
-10										% Rmin
-10										% Rmax
-1										% Htetgen
+2										% Rmean
+1.5										% Rmin
+2.5										% Rmax
+-1										% Htetgen

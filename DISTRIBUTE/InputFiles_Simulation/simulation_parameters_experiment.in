@@ -1,14 +1,13 @@
 1.0 1.0 1.0 		     						% (g1,g2,g3)
-2 												% number of b-values
+4 												% number of b-values
 0												% 0=specify bvec,1=specify[bmin,bmax],2 = specify[gmin,gmax];
-0 10  											% bvalues 
-5 												% prob_numdelta
-5000 20000 20000 20000 20000					% prob_allsmalldel	
-5000 20000 20000 20000 20000					% prob_allbigdel	
-1 2 2 3 3       								% PGSE = 1, OGSEsin = 2, OGSEcos = 3
-0 2 4 2 4      									% period of OGSE
-0.001 0.001 									% ODE rtol,atol
-500.0											% dt for outputting mass at each dt point
-0												% snapshots (t=t0 and t=tf automatically generated, snapshots between t0 and tf)
+0 50 100 200  								% bvalues 
+1 												% prob_numdelta
+2500 2500 2500					% prob_allsmalldel	
+5000 10000 20000					% prob_allbigdel	
+1 1 1       								% PGSE = 1, OGSEsin = 2, OGSEcos = 3
+0 0 0      									% number of period of OGSE
+0.000001 0.000001 									% ODE rtol,atol for BT
+0.001 0.001 									% ODE rtol,atol for deff
 0												% constant q experiement  
 'SRC\TETGEN\tetGen\win64\tetgen'							% tetgen_cmd

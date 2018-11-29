@@ -8,7 +8,7 @@ Roty = @(theta) [cos(theta),0,sin(theta);0,1,0;-sin(theta),0,cos(theta)];
 Rotz = @(theta) [cos(theta),-sin(theta),0; sin(theta),cos(theta),0;0,0,1];
 
   
-positions = (rand(ncyl*100000,2)-0.5)*Rmean*sqrt(ncyl)*2;
+positions = (rand(ncyl*100000,2)-0.5)*Rmean*max(10,sqrt(ncyl))*2;
 
 pos_x = positions(:,1);
 pos_y = positions(:,2);
@@ -20,8 +20,8 @@ R2d(1,1) = Rmean;
 icyl = 1;
 for ipos = 1:npos	
 	dist = sqrt((center2d(1:icyl,1)-pos_x(ipos)).^2+(center2d(1:icyl,2)-pos_y(ipos)).^2)-R2d(1:icyl,1);
-	Ruse = min(dist)*0.85;
-	if (Ruse > Rmin)
+	Ruse = min(dist)*0.80;
+	if (Ruse > Rmin & Ruse < Rmax*1.2)
 		icyl = icyl+1;
 		center2d(icyl,1:2) = [pos_x(ipos),pos_y(ipos)];
 		R2d(icyl,1) = min(Rmax,Ruse);
@@ -49,9 +49,9 @@ for icyl = 1:ncyl
 	Rcyl{icyl} = zeros(nslice{icyl}+1,1);
 	tvec = linspace(0,1,nslice{icyl}+1)';
 	
-	Rcyl{icyl} = (1-0.05*(1-sin(tvec*2*pi*10))/2)*R2d(icyl,1);
-
-	%Rcyl{icyl} = ones(size(tvec))*R2d(icyl,1);
+	%Rcyl{icyl} = (1-0.05*(1-sin(tvec*2*pi*10))/2)*R2d(icyl,1);
+    
+	Rcyl{icyl} = ones(size(tvec))*R2d(icyl,1);
 		
 	Hcirc = linspace(0,Hmax,nslice{icyl}+1)';
 	
@@ -62,10 +62,12 @@ for icyl = 1:ncyl
 	end
 	center{icyl}(:,3) = Hcirc;
 
+    center{icyl}(:,1:2) = center{icyl}(:,1:2)+rand(size(center{icyl}(:,1:2)))*0.2*rr;
+    
 	normal{icyl} = zeros(nslice{icyl}+1,3);
 	normal{icyl}(:,3) = 1;
 	for islice = 1:nslice{icyl}+1
-		vec = Rotx((islice-1)/nslice{icyl}*2*pi*0.15)*normal{icyl}(islice,:)';
+		vec = Rotx((islice-1)/nslice{icyl}*2*pi*0.00)*normal{icyl}(islice,:)';
 		normal{icyl}(islice,:) = vec';
 	end
 

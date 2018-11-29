@@ -170,7 +170,7 @@ for icmpt = 1:Ncmpt
     [VOL_orig{icmpt}] ...
         = get_volume_mesh(Pts_cmpt_reorder{icmpt},Ele_cmpt_reorder{icmpt});
     [SA_orig{icmpt},SAu_orig{icmpt}] ...
-        = get_surface_mesh_JRL(Pts_cmpt_reorder{icmpt},Fac);
+        = get_surface_mesh(Pts_cmpt_reorder{icmpt},Fac);
 end
 
 VOL_total_orig = 0;

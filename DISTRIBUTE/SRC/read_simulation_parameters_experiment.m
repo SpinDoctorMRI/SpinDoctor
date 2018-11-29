@@ -1,4 +1,5 @@
-function [gdir,bvalues,qvalues,sdeltavec,bdeltavec,seqvec,npervec,rtol,atol,dt_out,snapshots,const_q,tetgen_cmd] ...
+function [gdir,bvalues,qvalues,sdeltavec,bdeltavec,seqvec,npervec,...
+    rtol_bt,atol_bt,rtol_deff,atol_deff,const_q,tetgen_cmd] ...
     = read_simulation_parameters_experiment(fname_experiment);
 
 global QVAL
@@ -51,12 +52,15 @@ npervec= sscanf(tline,'%f',nd);
 
 tline = fgetl(fid);
 atmp= sscanf(tline,'%f',2);
-rtol= atmp(1);
-atol = atmp(2);
+rtol_bt= atmp(1);
+atol_bt = atmp(2);
+
 tline = fgetl(fid);
-dt_out = sscanf(tline,'%f',1);
-tline = fgetl(fid);
-snapshots= sscanf(tline,'%f',1);
+atmp= sscanf(tline,'%f',2);
+rtol_deff= atmp(1);
+atol_deff = atmp(2);
+
+
 tline = fgetl(fid);
 const_q = sscanf(tline,'%f',1);
 

@@ -13,7 +13,8 @@ fname_experiment = 'InputFiles_Simulation\simulation_parameters_experiment.in';
     create_geom,fname_geom,ncell,Hcyl,Rmean,Rmin,Rmax,Htetgen] ...
     = read_simulation_parameters_domain(fname_domain);
 
-[gdir,bvalues,qvalues,sdeltavec,bdeltavec,seqvec,npervec,rtol,atol,dt_out,snapshots,const_q,tetgen_cmd] ...
+[gdir,bvalues,qvalues,sdeltavec,bdeltavec,seqvec,npervec,...
+    rtol_bt,atol_bt,rtol_deff,atol_deff,const_q,tetgen_cmd] ...
     = read_simulation_parameters_experiment(fname_experiment);
 
 if (include_box == 1)
@@ -31,34 +32,56 @@ if (create_geom == 0)
 else
     fname = [cell_shape_name,num2str(ncell),'_R',num2str(Rmean)];
 end
+
 fname_cells_description = ['InputFiles_Geometry\',fname,'_description.in'];
+
 if (create_geom == 0)
 else
     if (cell_shape == 1)
         create_ellipses_inputfile(ncell,Rmean,Rmax,Rmin,fname_cells_description);
+
     else
         create_cylinders_inputfile(ncell,Rmean,Rmax,Rmin,Hcyl,fname_cells_description);
     end
 end
 
-
 fname_tetgen = ['InputFiles_Tetgen\',fname,'_',box_str];
 
 [fname_tetgen_femesh] = create_cells_femesh(fname_cells_description,fname_tetgen,...
     include_box,box_gap,Rratio_nucleus,cell_shape_name,Htetgen,tetgen_cmd);
-    
-[TOUT,YOUT,MT,Ncmpt,Nboundary,Cell_cmpt,Box_cmpt,Nucleus_cmpt,nexperi,difftime,...
+
+[deff_PDE_formulation_src,deff_PDE_formulation_src_time,ADC_PDE_formulation,Ncmpt,DIFF_cmpts] ...
+    = deff_PDE_formulation(fname_tetgen_femesh,ncell,Rratio_nucleus,...
+    dcoeff_nucleus,dcoeff_cytoplasm,dcoeff_exterior,include_box,...
+    gdir,sdeltavec,bdeltavec,seqvec,npervec,rtol_deff,atol_deff);
+
+[TOUT,YOUT,MT,Ncmpt,Nboundary,Cell_cmpt,Box_cmpt,Nucleus_cmpt,difftime,...
     Pts_cmpt_reorder,Ele_cmpt_reorder,Pts_ind,Pts_boundary_reorder,Fac_boundary_reorder,...
     DIFF_cmpts,IC_cmpts,UG] ...
     = solve_magnetization(fname_tetgen_femesh,ncell,Rratio_nucleus,...
     dcoeff_nucleus,dcoeff_cytoplasm,dcoeff_exterior,...
     ic_nucleus,ic_cytoplasm,ic_exterior,ic_llimit,ic_ulimit,kappa_nc,kappa_ce,include_box,...
-    gdir,qvalues,sdeltavec,bdeltavec,seqvec,npervec,rtol,atol);
+    gdir,qvalues,sdeltavec,bdeltavec,seqvec,npervec,rtol_bt,atol_bt);
+
+
+for icmpt = 1:Ncmpt
+    figure; hold on;
+
+    Fac = [];
+    for iboundary = 1:Nboundary
+        Fac = [Fac,Fac_boundary_reorder{icmpt}{iboundary}];
+    end 
+    h = trisurf(Fac',Pts_cmpt_reorder{icmpt}(1,:),Pts_cmpt_reorder{icmpt}(2,:),Pts_cmpt_reorder{icmpt}(3,:));
+    set(h,'facealpha',0.1);
+    axis equal;
+    view(3);
+end
+title('Finite Element Mesh');
 
 [ADC_allcmpts,ADC_allcmpts_polydeg,ADC_allcmpts_S0,Deff_STA_allcmpts,...
     ADC,ADC_polydeg,ADC_S0,Deff_STA,MF_allcmpts,M0_allcmpts,S0_allcmpts,...
     MF,M0,S0,VOL,SA,SAu,VOL_frac,SoV]...
-    = post_processing(MT,bvalues,Ncmpt,Nboundary,nexperi,sdeltavec,bdeltavec,...
+    = post_processing(MT,bvalues,Ncmpt,Nboundary,sdeltavec,bdeltavec,seqvec,npervec,...
     Pts_cmpt_reorder,Ele_cmpt_reorder,Fac_boundary_reorder,...
     DIFF_cmpts,UG);
 

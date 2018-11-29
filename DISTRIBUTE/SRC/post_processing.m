@@ -1,7 +1,10 @@
 function [ADC_allcmpts,ADC_allcmpts_polydeg,ADC_allcmpts_S0,Deff_STA_allcmpts,...
     ADC,ADC_polydeg,ADC_S0,Deff_STA,MF_allcmpts,M0_allcmpts,S0_allcmpts,...
     MF,M0,S0,VOL,SA,SAu,VOL_frac,SoV]...
-    = post_processing(MT,bvalues,Ncmpt,Nboundary,nexperi,sdeltavec,bdeltavec,Pts_cmpt_reorder,Ele_cmpt_reorder,Fac_boundary_reorder,DIFF_cmpts,UG)
+    = post_processing(MT,bvalues,Ncmpt,Nboundary,sdeltavec,bdeltavec,seqvec,npervec,...
+    Pts_cmpt_reorder,Ele_cmpt_reorder,Fac_boundary_reorder,DIFF_cmpts,UG)
+
+nexperi = length(sdeltavec);
 
 for icmpt = 1:Ncmpt
     Fac = [];
@@ -36,7 +39,8 @@ for iexperi = 1:nexperi
     
     for icmpt = 1:Ncmpt
         [Deff_STA(icmpt,iexperi)] = deff_sta(DIFF_cmpts(icmpt),...
-            VOL(icmpt),SAu(icmpt),sdeltavec(iexperi),bdeltavec(iexperi)); % short time approximation
+            VOL(icmpt),SAu(icmpt),sdeltavec(iexperi),bdeltavec(iexperi),...
+            seqvec(iexperi),npervec(iexperi)); % short time approximation
         
         Deff_STA_allcmpts(iexperi,1) = Deff_STA_allcmpts(iexperi,1) + VOL_frac(icmpt)*Deff_STA(icmpt,iexperi);
     end
