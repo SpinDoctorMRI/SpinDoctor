@@ -1,4 +1,5 @@
-function [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell] = create_ellipses_geometry(fname_cell,Rratio_nucleus)
+function [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell,center,normal,Rcell] ...
+    = create_ellipses_geometry(fname_cell,Rratio_nucleus)
 
 ndim = 3;
 

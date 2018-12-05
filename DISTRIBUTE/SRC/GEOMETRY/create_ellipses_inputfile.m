@@ -22,12 +22,14 @@ if (nell >= 2)
     npos = size(positions,1);
     
     for ipos = 1:npos
-        dist = sqrt((center3d(1:iell,1)-pos_x(ipos)).^2+(center3d(1:iell,2)-pos_y(ipos)).^2+(center3d(1:iell,3)-pos_z(ipos)).^2)-R3d(1:iell,1);
-        Ruse = min(dist)*0.98;
-        if (Ruse > Rmin)
-            iell = iell+1;
-            center3d(iell,1:3) = [pos_x(ipos),pos_y(ipos),pos_z(ipos)];
-            R3d(iell,1) = min(Rmax,Ruse);
+        if (iell < nell)
+            dist = sqrt((center3d(1:iell,1)-pos_x(ipos)).^2+(center3d(1:iell,2)-pos_y(ipos)).^2+(center3d(1:iell,3)-pos_z(ipos)).^2)-R3d(1:iell,1);
+            Ruse = min(dist)*0.98;
+            if (Ruse >= Rmin & Ruse <= Rmax)
+                iell = iell+1;
+                center3d(iell,1:3) = [pos_x(ipos),pos_y(ipos),pos_z(ipos)];
+                R3d(iell,1) = Ruse;
+            end
         end
     end
     if (iell < nell)
@@ -35,7 +37,19 @@ if (nell >= 2)
         stop
     end
     
+    xmin = min(center3d(1:nell,1)-R3d(1:nell,1));
+    xmax = max(center3d(1:nell,1)+R3d(1:nell,1));
+    ymin = min(center3d(1:nell,2)-R3d(1:nell,1));
+    ymax = max(center3d(1:nell,2)+R3d(1:nell,1));
+    zmin = min(center3d(1:nell,3)-R3d(1:nell,1));
+    zmax = max(center3d(1:nell,3)+R3d(1:nell,1));
     
+    x0 = (xmin+xmax)/2;
+    y0 = (ymin+ymax)/2;
+    z0 = (zmin+zmax)/2;
+    center3d(:,1) = center3d(:,1)-x0;
+    center3d(:,2) = center3d(:,2)-y0;
+    center3d(:,3) = center3d(:,3)-z0;
     
     figure; hold on;
     

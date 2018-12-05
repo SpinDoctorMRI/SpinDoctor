@@ -1,4 +1,5 @@
-function [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell] ...
+function [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell,center,normal,Rcell,nslice_vec,...
+     nodes_ind_bottomring,nodes_ind_topring] ...
     = create_cylinders_geometry(fname_cell,Rratio_nucleus)
 
 ndim = 3;
@@ -69,6 +70,9 @@ for icell = 1:ncell
     if (Rratio_nucleus == 0)        
         cell_closed = 1;
         [facets,nodes,ind_face_a,ind_face_b,facets_labels] = create_cylinders_wall(dr,nslice,Rcell_one,normal_one,center_one,cell_closed);
+        ind_face_a_out = ind_face_a;
+        ind_face_b_out = ind_face_b;
+        
     else
         cell_closed = 1;
         [facets_in,nodes_in,ind_face_a_in,ind_face_b_in,facets_labels_in] ...
@@ -78,7 +82,9 @@ for icell = 1:ncell
         offset = size(nodes_in,1);
         
         face_nlabel = max(facets_labels_in);
-        
+
+       	%unique(facets_labels_in)
+
         cell_closed = 0;
         [facets_out,nodes_out,ind_face_a_out,ind_face_b_out,facets_labels_out] ...
             = create_cylinders_wall(dr,nslice,Rcell_one,normal_one,center_one,cell_closed);
@@ -90,9 +96,12 @@ for icell = 1:ncell
         
         facets_labels_out = facets_labels_out+face_nlabel;      
         
+        %unique(facets_labels_out)
+        face_nlabel = max(facets_labels_out);
+
         [Cmat_top,Pts] = cylinder_connectivity(Na_in,Na_out);
         
-     
+        
         
         Cmat_top_new = Cmat_top;
         for ii = 1:Na_in
@@ -124,12 +133,15 @@ for icell = 1:ncell
         facets = [facets_in,facets_out,Cmat_top_new,Cmat_bottom_new];
         
         facets_labels = [facets_labels_in,facets_labels_out,(face_nlabel+1)*ones(1,size([Cmat_top_new,Cmat_bottom_new],2))];
-        
+         
+        %unique(facets_labels)
     end
 	
+    
 	facets_cell{icell} = facets;
 	nodes_cell{icell} = nodes;
     facets_labels_cell{icell} = facets_labels;
-	%nnodes_cell{icell} = size(nodes,1);
+    nodes_ind_bottomring{icell} = ind_face_a_out;
+    nodes_ind_topring{icell} = ind_face_b_out;
 	
 end

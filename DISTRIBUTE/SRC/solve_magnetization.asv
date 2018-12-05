@@ -33,7 +33,7 @@ nb = size(qvalues,2);
 
 if (1 == 1)
     for icmpt = 1:Ncmpt
-        %disp(['Working on cmpt ', num2str(icmpt)]);
+        disp(['Working on cmpt ', num2str(icmpt)]);
         coordinates = Pts_cmpt_reorder{icmpt};
         elements = Ele_cmpt_reorder{icmpt};
         facets = [];

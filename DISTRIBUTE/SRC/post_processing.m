@@ -1,54 +1,14 @@
-function [ADC_allcmpts,ADC_allcmpts_polydeg,ADC_allcmpts_S0,Deff_STA_allcmpts,...
-    ADC,ADC_polydeg,ADC_S0,Deff_STA,MF_allcmpts,M0_allcmpts,S0_allcmpts,...
-    MF,M0,S0,VOL,SA,SAu,VOL_frac,SoV]...
-    = post_processing(MT,bvalues,Ncmpt,Nboundary,sdeltavec,bdeltavec,seqvec,npervec,...
-    Pts_cmpt_reorder,Ele_cmpt_reorder,Fac_boundary_reorder,DIFF_cmpts,UG)
+function [ADC_allcmpts,ADC_allcmpts_polydeg,ADC_allcmpts_S0,...
+    ADC,ADC_polydeg,ADC_S0,MF_allcmpts,M0_allcmpts,S0_allcmpts,...
+    MF,M0,S0]...
+    = post_processing(MT,bvalues)
 
-nexperi = length(sdeltavec);
-
-for icmpt = 1:Ncmpt
-    Fac = [];
-    for iboundary = 1:Nboundary
-        Fac = [Fac,Fac_boundary_reorder{icmpt}{iboundary}];
-    end
-    [VOL(icmpt)] ...
-        = get_volume_mesh(Pts_cmpt_reorder{icmpt},Ele_cmpt_reorder{icmpt});
-    [SA(icmpt),SAu(icmpt)] ...
-        = get_surface_mesh(Pts_cmpt_reorder{icmpt},Fac,UG);
-end
-
-VOL_allcmpts = 0;
-
-for icmpt = 1:Ncmpt
-    VOL_allcmpts  = VOL_allcmpts + VOL(icmpt);
-end
-
-for icmpt = 1:Ncmpt
-    VOL_frac(icmpt) = VOL(icmpt)/VOL_allcmpts;
-end
-
-for icmpt = 1:Ncmpt
-    SoV(icmpt) = SAu(icmpt)/VOL(icmpt);
-end
-
-%% Deff short time approximation
-Deff_STA = zeros(Ncmpt,nexperi);
-Deff_STA_allcmpts = zeros(nexperi,1);
+nexperi = length(MT);
+nb = length(MT{1});
+Ncmpt = length(MT{1}{1});
 for iexperi = 1:nexperi
-    Deff_STA_allcmpts(iexperi,1) = 0;
-    
-    for icmpt = 1:Ncmpt
-        [Deff_STA(icmpt,iexperi)] = deff_sta(DIFF_cmpts(icmpt),...
-            VOL(icmpt),SAu(icmpt),sdeltavec(iexperi),bdeltavec(iexperi),...
-            seqvec(iexperi),npervec(iexperi)); % short time approximation
-        
-        Deff_STA_allcmpts(iexperi,1) = Deff_STA_allcmpts(iexperi,1) + VOL_frac(icmpt)*Deff_STA(icmpt,iexperi);
-    end
-end
-
-nb = size(bvalues,2);
-for iexperi = 1:nexperi
-    bvec = bvalues(iexperi,:);  nb = length(bvec);
+    bvec = bvalues(iexperi,:);  
+    nb = length(bvec);
     for ib = 1:nb
         for icmpt = 1:Ncmpt
             MF(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(end);

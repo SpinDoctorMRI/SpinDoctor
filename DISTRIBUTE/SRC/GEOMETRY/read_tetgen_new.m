@@ -1,5 +1,5 @@
 function [Pts_cmpt_reorder,Ele_cmpt_reorder,Pts_ind,Pts_boundary_reorder,Fac_boundary_reorder,...
-    Nboundary,Ncmpt] = read_tetgen_new(fname)
+    Nboundary,Ncmpt] = read_tetgen_new(fname,para_deform)
 
 
 
@@ -49,6 +49,12 @@ for icmpt = 1:Ncmpt
     Ele_cmpt{icmpt} = Ele_all(:,jj); 
     Pts_ind{icmpt} = unique(Ele_cmpt{icmpt}(:));
     Pts_cmpt_reorder{icmpt} = Pts_all(:,Pts_ind{icmpt});
+end
+
+if (~isempty(find(para_deform ~= 0)))
+    for icmpt = 1:Ncmpt
+        Pts_cmpt_reorder{icmpt} = deform_domain(Pts_cmpt_reorder{icmpt},para_deform);
+    end
 end
 
 Boundary_attrib = unique(Fac_attrib);

@@ -38,7 +38,7 @@ function [FEMcouple_MAT,ind0,indf] ...
     elseif (ntmp == 2)
       cmpt1 = cmpts_touch(1);
       cmpt2 = cmpts_touch(2);
-      disp(['touch',num2str([iboundary,cmpt1,cmpt2])]);           
+          
       Q1 = FEM_MAT{cmpt1}.Q;
       Q2 = FEM_MAT{cmpt2}.Q;
       Q12 = zeros(size(Q1,1),size(Q2,2));
@@ -54,17 +54,17 @@ function [FEMcouple_MAT,ind0,indf] ...
       end  
       FEMcouple_MAT.Q(ind0(cmpt1):indf(cmpt1),ind0(cmpt2):indf(cmpt2)) = sparse(Q12);
       FEMcouple_MAT.Q(ind0(cmpt2):indf(cmpt2),ind0(cmpt1):indf(cmpt1)) = sparse(Q21);      
+      %disp(['interface boundary: ',num2str(iboundary),', connecting cmpts ',num2str([cmpt1,cmpt2])]);
     elseif (ntmp == 1)
       % zero out the boundary condition on boundary that is not interface between two compartments.
       cmpt1 = cmpts_touch(1);
       N = Npts_bdy(cmpt1,iboundary);
-      %disp(['here here']);
       icmpt = cmpt1;    
       for ii = 1:N
         ind1 = Pts_boundary_reorder{cmpt1}{iboundary}(ii);      
         FEMcouple_MAT.Q(ind0(icmpt):indf(icmpt),ind0(icmpt)-1+ind1) = 0;
-      end        
+      end    
+      %disp(['out boundary: ',num2str(iboundary),', only cmpt ',num2str([cmpt1])]);
     end
   end
-
-  
+    
