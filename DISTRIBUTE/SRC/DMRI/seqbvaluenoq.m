@@ -1,5 +1,6 @@
 function bvaluenoq = seqbvaluenoq
  
+	SEQ_DEFINITIONS
   
   global BDELTA SDELTA SEQ OGSEPER 
   global PGSE OGSEsin OGSEcos

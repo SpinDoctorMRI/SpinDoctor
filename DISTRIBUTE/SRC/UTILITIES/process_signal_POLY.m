@@ -87,8 +87,8 @@ function [fit_poly,ADC01d,KUR1d,KUR01d,S01d,Cfit1d,errfit,ndeg,ADC0_err1d,KUR_er
         Cfit
         KUR1d(ip,1) = nan;
         KUR01d(ip,1) = nan;
-        ADC01d(ip,1) = nan;
-        S01d(ip,1) = nan;
+        ADC01d(ip,1) = ADC0_old;
+        S01d(ip,1) = exp(Cfit(end));
         Cfit1d{ip} = Cfit;
         fit_poly(ip,:) = exp(polyval(Cfit1d{ip},bvalue));
         errfit(ip,1) = sqrt(sum((data1d(ip,ind_b)-fit_poly(ip,ind_b)).^2))/length(ind_b);

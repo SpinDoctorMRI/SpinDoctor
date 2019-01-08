@@ -64,7 +64,7 @@ function [FEMcouple_MAT,ind0,indf] ...
         ind1 = Pts_boundary_reorder{cmpt1}{iboundary}(ii);      
         FEMcouple_MAT.Q(ind0(icmpt):indf(icmpt),ind0(icmpt)-1+ind1) = 0;
       end    
-      %disp(['out boundary: ',num2str(iboundary),', only cmpt ',num2str([cmpt1])]);
+      %disp(['outside boundary: ',num2str(iboundary),', only cmpt ',num2str([cmpt1])]);
     end
   end
     
