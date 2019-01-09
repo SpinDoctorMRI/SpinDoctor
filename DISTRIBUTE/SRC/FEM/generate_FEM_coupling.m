@@ -57,13 +57,13 @@ function [FEMcouple_MAT,ind0,indf] ...
       %disp(['interface boundary: ',num2str(iboundary),', connecting cmpts ',num2str([cmpt1,cmpt2])]);
     elseif (ntmp == 1)
       % zero out the boundary condition on boundary that is not interface between two compartments.
-      cmpt1 = cmpts_touch(1);
-      N = Npts_bdy(cmpt1,iboundary);
-      icmpt = cmpt1;    
-      for ii = 1:N
-        ind1 = Pts_boundary_reorder{cmpt1}{iboundary}(ii);      
-        FEMcouple_MAT.Q(ind0(icmpt):indf(icmpt),ind0(icmpt)-1+ind1) = 0;
-      end    
+      % cmpt1 = cmpts_touch(1);
+      % N = Npts_bdy(cmpt1,iboundary);
+      % icmpt = cmpt1;    
+      % for ii = 1:N
+        % ind1 = Pts_boundary_reorder{cmpt1}{iboundary}(ii);      
+        % FEMcouple_MAT.Q(ind0(icmpt):indf(icmpt),ind0(icmpt)-1+ind1) = 0;
+      % end    
       %disp(['outside boundary: ',num2str(iboundary),', only cmpt ',num2str([cmpt1])]);
     end
   end
