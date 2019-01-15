@@ -1,4 +1,4 @@
-function PLOT_MAGNETIZATION(mymesh,YOUT,Cell_cmpt,Box_cmpt,Nucleus_cmpt)
+function PLOT_MAGNETIZATION(mymesh,YOUT,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index)
 
 xmin=0;
 xmax=0;
@@ -20,10 +20,10 @@ for icmpt = 1:mymesh.Ncmpt
     zmin = min(zmin,zn);
     zmax = max(zmax,zx);
 end
-if (~isempty(Cell_cmpt))
+if (~isempty(OUT_cmpts_index))
 figure; 
 hold on;
-cmptvec = Cell_cmpt;
+cmptvec = OUT_cmpts_index;
 for ict = 1:length(cmptvec)
     icmpt = cmptvec(ict);
     Fac = [];
@@ -36,13 +36,13 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('southoutside');
     view(3);
-    title(['Inner cmpts: ',num2str(Cell_cmpt)]);
+    title(['Inner cmpts: ',num2str(OUT_cmpts_index)]);
 end
 end
-if (~isempty(Nucleus_cmpt))
+if (~isempty(IN_cmpts_index))
 figure; 
 hold on;
-cmptvec = Nucleus_cmpt;
+cmptvec = IN_cmpts_index;
 for ict = 1:length(cmptvec)
     icmpt = cmptvec(ict);
     Fac = [];
@@ -55,13 +55,13 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('southoutside');
     view(3);
-    title(['Outer cmpts: ',num2str([Nucleus_cmpt])]);
+    title(['Outer cmpts: ',num2str([IN_cmpts_index])]);
 end
 end
-if (~isempty(Box_cmpt))
+if (~isempty(ECS_cmpts_index))
 figure; 
 hold on;
-cmptvec = Box_cmpt;
+cmptvec = ECS_cmpts_index;
 for ict = 1:length(cmptvec)
     icmpt = cmptvec(ict);
     Fac = [];
@@ -74,6 +74,6 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('southoutside');
     view(3);
-    title(['Box cmpt: ',num2str([Box_cmpt])]);
+    title(['Box cmpt: ',num2str([ECS_cmpts_index])]);
 end
 end

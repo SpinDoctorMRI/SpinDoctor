@@ -1,4 +1,4 @@
-function PLOT_FEMESH(mymesh,Cell_cmpt,Box_cmpt,Nucleus_cmpt)
+function PLOT_FEMESH(mymesh,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index)
 
 xmin=0;
 xmax=0;
@@ -21,11 +21,11 @@ for icmpt = 1:mymesh.Ncmpt
     zmax = max(zmax,zx);
 end
 
-if (~isempty(Cell_cmpt))
+if (~isempty(OUT_cmpts_index))
 figure; 
 %subplot(1,3,1); 
 hold on;
-cmptvec = Cell_cmpt;
+cmptvec = OUT_cmpts_index;
 for ict = 1:length(cmptvec)
     icmpt = cmptvec(ict);
     Fac = [];
@@ -38,14 +38,14 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
     view(3);
-    title(['FE Mesh Inner cmpts: ',num2str(Cell_cmpt)]);
+    title(['FE Mesh Inner cmpts: ',num2str(OUT_cmpts_index)]);
 end
 end
-if (~isempty(Nucleus_cmpt))
+if (~isempty(IN_cmpts_index))
 figure;
 %subplot(1,3,2); 
 hold on;
-cmptvec = Nucleus_cmpt;
+cmptvec = IN_cmpts_index;
 for ict = 1:length(cmptvec)
     icmpt = cmptvec(ict);
     Fac = [];
@@ -58,14 +58,14 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]);
     view(3);
-    title(['FE Mesh Outer cmpts: ',num2str([Nucleus_cmpt])]);
+    title(['FE Mesh Outer cmpts: ',num2str([IN_cmpts_index])]);
 end
 end
-if (~isempty(Box_cmpt))
+if (~isempty(ECS_cmpts_index))
 figure; 
 %subplot(1,3,3); 
 hold on;
-cmptvec = Box_cmpt;
+cmptvec = ECS_cmpts_index;
 for ict = 1:length(cmptvec)
     icmpt = cmptvec(ict);
     Fac = [];
@@ -78,6 +78,6 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
     view(3);
-    title(['FE Mesh ECS cmpt: ',num2str([Box_cmpt])]);
+    title(['FE Mesh ECS cmpt: ',num2str([ECS_cmpts_index])]);
 end
 end

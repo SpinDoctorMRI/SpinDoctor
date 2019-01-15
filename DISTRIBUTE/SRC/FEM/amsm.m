@@ -1,4 +1,5 @@
 function amb = amsm (ama,smx)
+% Copyright (c) 2013, Talal Rahman, Jan Valdman
 % ama: ama(1:nx,1:ny,1:nz)
 % smx: smx(1:ny,1:nk)
 % amb: amb(1:nx,1:nk,1:nz)

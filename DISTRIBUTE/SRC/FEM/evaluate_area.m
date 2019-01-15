@@ -1,4 +1,5 @@
 function elements2area = evaluate_area(elements,coordinates)
+% Copyright (c) 2018, Jan Valdman
 
 v1=coordinates(elements(:,2),:)-coordinates(elements(:,1),:);
 v2=coordinates(elements(:,3),:)-coordinates(elements(:,1),:);

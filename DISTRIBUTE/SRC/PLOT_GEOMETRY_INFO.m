@@ -1,23 +1,23 @@
-function PLOT_GEOMETRY_INFO(boundary_mat,Cell_cmpt,Nucleus_cmpt,Box_cmpt,...
-	VOL,SA,SAu)
+function PLOT_GEOMETRY_INFO(cmpts_bdys_mat,OUT_cmpts_index,IN_cmpts_index,ECS_cmpts_index,...
+	VOL_cmpts,SA_cmpts,SAu_cmpts)
 	
-Ncmpt = length(VOL);
-Nboundary = size(boundary_mat,2);
+Ncmpt = length(VOL_cmpts);
+Nboundary = size(cmpts_bdys_mat,2);
 
 figure; 
 hold all;
-boundary_mat_plot=zeros(size(boundary_mat));
-boundary_mat_plot(Cell_cmpt,:)=boundary_mat(Cell_cmpt,:);
-spy(boundary_mat_plot,'ko',10);
+cmpts_bdys_mat_plot=zeros(size(cmpts_bdys_mat));
+cmpts_bdys_mat_plot(OUT_cmpts_index,:)=cmpts_bdys_mat(OUT_cmpts_index,:);
+spy(cmpts_bdys_mat_plot,'ko',10);
 
 
-boundary_mat_plot(:,:)=0;
-boundary_mat_plot(Box_cmpt,:)=boundary_mat(Box_cmpt,:);
-spy(boundary_mat_plot,'ks',10);
+cmpts_bdys_mat_plot(:,:)=0;
+cmpts_bdys_mat_plot(ECS_cmpts_index,:)=cmpts_bdys_mat(ECS_cmpts_index,:);
+spy(cmpts_bdys_mat_plot,'ks',10);
 
-boundary_mat_plot(:,:)=0;
-boundary_mat_plot(Nucleus_cmpt,:)=boundary_mat(Nucleus_cmpt,:);
-spy(boundary_mat_plot,'kd',10); 
+cmpts_bdys_mat_plot(:,:)=0;
+cmpts_bdys_mat_plot(IN_cmpts_index,:)=cmpts_bdys_mat(IN_cmpts_index,:);
+spy(cmpts_bdys_mat_plot,'kd',10); 
 
 
 xlabel('iboundary'); ylabel('icmpt');
@@ -28,17 +28,17 @@ grid on;
 
 figure; 
 hold on;
-bar(1:Ncmpt,VOL,'b');
-bar(Ncmpt+1,sum(VOL),'r');
-title('VOL');
+bar(1:Ncmpt,VOL_cmpts,'b');
+bar(Ncmpt+1,sum(VOL_cmpts),'r');
+title('VOL\_cmpts');
 set(gca,'Xtick',[1:Ncmpt+1]);
 xlabel('icmpt (last: all cmpts) ');
 grid on;
 
 figure; 
 hold on;
-bar(1:Ncmpt,SA,'b');
-bar(Ncmpt+1,sum(SA),'r');
+bar(1:Ncmpt,SA_cmpts,'b');
+bar(Ncmpt+1,sum(SA_cmpts),'r');
 title('Surface Area');
 set(gca,'Xtick',[1:Ncmpt+1]);
 xlabel('icmpt (last: all cmpts)');
@@ -46,9 +46,9 @@ grid on;
 
 figure; 
 hold on;
-bar(1:Ncmpt,SAu./VOL','b');
-bar(Ncmpt+1,sum(SAu)./sum(VOL),'r');
-title('SAu/VOL');
+bar(1:Ncmpt,SAu_cmpts./VOL_cmpts','b');
+bar(Ncmpt+1,sum(SAu_cmpts)./sum(VOL_cmpts),'r');
+title('SAu\_cmpts/VOL\_cmpts');
 set(gca,'Xtick',[1:Ncmpt+1]);
 xlabel('icmpt (last: all cmpts)');
 grid on;

@@ -1,4 +1,5 @@
 function avb = amsv (ama,svx)
+% Copyright (c) 2013, Talal Rahman, Jan Valdman
 % ama: ama(1:nx,1:ny,1:nz)
 % svx: svx(1:ny,1)
 % avb: avb(1:nx,1,1:nz)

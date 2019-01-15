@@ -1,4 +1,6 @@
 function [amb,dem] = aminv (ama)
+% Copyright (c) 2013, Talal Rahman, Jan Valdman
+
 % ama: ama(1:nx,1:nx,1:nz)
 % amb: amb(1:nx,1:nx,1:nz)
 

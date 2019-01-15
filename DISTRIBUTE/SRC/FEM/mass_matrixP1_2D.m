@@ -1,4 +1,6 @@
 function M=mass_matrixP1_2D(elements,areas,coeffs)
+% Copyright (c) 2013, Talal Rahman, Jan Valdman
+
 %coeffs can be only P0 (elementwise constant) function 
 %represented by a collumn vector with size(elements,1) entries
 %if coeffs is not provided then coeffs=1 is assumed globally

@@ -1,4 +1,6 @@
 function [dphi,detj,jac] = phider (coord,point,etype)
+% Copyright (c) 2013, Talal Rahman, Jan Valdman
+
 % PHIDER Returns the gradients of the basis functions
 %        with respect to the local coordinates (x,y,...).
 %

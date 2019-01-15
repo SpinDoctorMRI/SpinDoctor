@@ -1,4 +1,6 @@
 function [dshape] = shapeder (point,etype)
+% Copyright (c) 2013, Talal Rahman, Jan Valdman
+
 % SHAPEDER Returns the gradients of the shape functions with
 %          respect to the reference coordinates (xi,eta,...).
 %
