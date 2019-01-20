@@ -1,4 +1,5 @@
-function [params_domain_geom,params_domain_pde,params_domain_femesh] = read_simul_domain_params(fname_domain)
+function [params_domain_geom,params_domain_pde,params_domain_femesh] ...
+    = read_params_simul_domain(fname_domain)
 
 ndim = 3;
 fid=fopen(fname_domain);
@@ -10,12 +11,14 @@ if (params_domain_geom.Rratio_IN < 0 | params_domain_geom.Rratio_IN > 0.99)
     params_domain_geom.Rratio_IN = 0;
 end
 
+
+
 tline = fgetl(fid);
 params_domain_geom.include_ECS = sscanf(tline,'%f',1);
 
 tline = fgetl(fid);
-params_domain_geom.ECS_gap = sscanf(tline,'%f',1);
-  
+params_domain_geom.ECS_gap = sscanf(tline,'%f',1); 
+
 tline = fgetl(fid);
 params_domain_pde.dcoeff_IN = sscanf(tline,'%f',1);
 

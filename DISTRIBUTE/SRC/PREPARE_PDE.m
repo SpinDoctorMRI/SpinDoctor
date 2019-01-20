@@ -14,7 +14,7 @@ if (include_ECS ~= 0)
     Ncmpt = Ncmpt + 1;
 end
 
-if (Rratio_IN <= 0)
+if (Rratio_IN <= 0 | Rratio_IN >= 1)
     if (cell_shape == 2)
         % for a cylinder, the side is one boundary, the top and bottom another boundary
         Nboundary = 2*ncell;
@@ -60,16 +60,19 @@ DIFF_cmpts(1,ECS_cmpts_index) = params_domain_pde.dcoeff_ECS;
 kappa_bdys(1,Box_boundary) = 0;
 IC_cmpts(1,ECS_cmpts_index) = params_domain_pde.ic_ECS;
 
-
 if (cell_shape == 2)
-    IN_cmpts_index = 1:ncell;
-    IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;
-    DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
-    if (Rratio_IN <= 0)
-        IN_ECS_boundary = 1:2:2*ncell;
-        kappa_bdys(1,IN_ECS_boundary) = params_domain_pde.kappa_IN_ECS;
-        OUT_cmpts_index = [];        
+
+    if (Rratio_IN <= 0 | Rratio_IN >= 1)
+        OUT_cmpts_index = 1:ncell;
+        IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
+        DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
+        OUT_ECS_boundary = 1:2:2*ncell;
+        kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
+        IN_cmpts_index = [];        
     else
+        IN_cmpts_index = 1:ncell;
+        IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;
+        DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
         OUT_cmpts_index = ncell+1:2*ncell;
         DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;        
@@ -82,7 +85,7 @@ elseif (cell_shape == 1)
     OUT_cmpts_index = 1:ncell;
     IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
     DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
-    if (Rratio_IN <= 0)        
+    if (Rratio_IN <= 0 | Rratio_IN >= 1)        
         OUT_ECS_boundary = [1:ncell];
         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
         IN_cmpts_index = [];        

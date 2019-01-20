@@ -49,14 +49,14 @@ if (~isempty(mymesh))
             [Sig_free,ADC_free_allcmpts] = ADCFREE(experi_btpde.bvalues,DIFF_cmpts,VOL_cmpts,IC_cmpts);
             PLOT_SIGNAL(experi_btpde.bvalues,MF_allcmpts,Sig_free,ADC_allcmpts_S0,ADC_allcmpts)
             PLOT_ADC(ADC_cmpts,ADC_allcmpts,DIFF_cmpts,'BTPDE');
-            PLOT_TIMING(BTPDE_elapsed_time);
+            PLOT_TIMING(BTPDE_elapsed_time,mymesh);
         end
         %HADC
         if (~isempty(experi_hadc))
             [ADC_HADC_cmpts,ADC_HADC_allcmpts,HADC_elapsed_time] ...
                 = HADC(experi_hadc,mymesh,DIFF_cmpts,IC_cmpts);
             PLOT_ADC(ADC_HADC_cmpts,ADC_HADC_allcmpts,DIFF_cmpts,'HADC');
-            PLOT_TIMING(HADC_elapsed_time);
+            PLOT_TIMING(HADC_elapsed_time,mymesh);
         end
         [ADC_STA_cmpts,ADC_STA_allcmpts] = STA(experi_common,DIFF_cmpts,VOL_cmpts,SAu_cmpts,IC_cmpts);	
 		PLOT_ADC(ADC_STA_cmpts,ADC_STA_allcmpts,DIFF_cmpts,'STA');

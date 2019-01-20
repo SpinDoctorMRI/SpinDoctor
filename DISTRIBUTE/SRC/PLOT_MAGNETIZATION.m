@@ -36,7 +36,7 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('southoutside');
     view(3);
-    title(['Inner cmpts: ',num2str(OUT_cmpts_index)]);
+    title(['Magnetization Inner cmpts: ',num2str(OUT_cmpts_index)]);
 end
 end
 if (~isempty(IN_cmpts_index))
@@ -55,7 +55,7 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('southoutside');
     view(3);
-    title(['Outer cmpts: ',num2str([IN_cmpts_index])]);
+    title(['Magnetization Outer cmpts: ',num2str([IN_cmpts_index])]);
 end
 end
 if (~isempty(ECS_cmpts_index))
@@ -74,6 +74,6 @@ for ict = 1:length(cmptvec)
     axis equal;
     axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('southoutside');
     view(3);
-    title(['Box cmpt: ',num2str([ECS_cmpts_index])]);
+    title(['Magnetization ECS cmpt: ',num2str([ECS_cmpts_index])]);
 end
 end

@@ -12,7 +12,7 @@ for iexperi = 1:nexperi
     set(gca,'ylim',[0,max(DIFF_cmpts)]);
     set(gca,'Ytick',linspace(0,max(DIFF_cmpts),6));
 	xlabel('icmpt (last: all cmpts)');
-	ylabel('ADC_cmpts');
+	ylabel('ADC\_cmpts');
     
     grid on;
 end
