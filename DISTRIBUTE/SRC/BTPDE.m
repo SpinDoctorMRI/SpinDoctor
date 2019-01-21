@@ -192,7 +192,7 @@ for iexperi = 1:nexperi
         end
         S0_allcmpts(iexperi) = MF_allcmpts(iexperi,ib0(1));
     else
-        S0(1:Ncmpt,iexperi) = nan;
+        S0(1:mymesh.Ncmpt,iexperi) = nan;
         S0_allcmpts(iexperi) = nan;
     end
 end
