@@ -14,6 +14,6 @@ figure; hold on;
 ADC_Ellipsoid = trisurf(C_sph,ADC_alldir(:,1),ADC_alldir(:,2),ADC_alldir(:,3),ADC_interp); view(3); colorbar; axis equal;
 ADC_Ellipsoid.EdgeColor = 'none';
 xlabel('x'); ylabel('y'); zlabel('z');
-title(['ADC in ',num2str(ngdir),' direction']);
+title(['ADC in ',num2str(ngdir),' directions']);
 plot3(ADC_allcmpts_alldir.*points(:,1),ADC_allcmpts_alldir.*points(:,2),ADC_allcmpts_alldir.*points(:,3),'k.',...
 'markersize',30);
