@@ -1,4 +1,4 @@
-function coeff = BTfreqterm_notime_nob(region,state)
+function coeff = BTDeffNeumann_notime(region,state)
 
   global UG
 
