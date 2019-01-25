@@ -4,7 +4,7 @@ function [DIFF_cmpts,kappa_bdys,IC_cmpts,OUT_cmpts_index,ECS_cmpts_index,IN_cmpt
 Rratio_IN = params_domain_geom.Rratio_IN;
 include_ECS = params_domain_geom.include_ECS;
 
-if (Rratio_IN <= 0 | Rratio_IN >= 1)
+if (Rratio_IN <= 0 || Rratio_IN >= 1)
     Ncmpt = ncell;
 else
     Ncmpt = 2*ncell;
@@ -14,7 +14,7 @@ if (include_ECS ~= 0)
     Ncmpt = Ncmpt + 1;
 end
 
-if (Rratio_IN <= 0 | Rratio_IN >= 1)
+if (Rratio_IN <= 0 || Rratio_IN >= 1)
     if (cell_shape == 2)
         % for a cylinder, the side is one boundary, the top and bottom another boundary
         Nboundary = 2*ncell;
@@ -62,13 +62,15 @@ IC_cmpts(1,ECS_cmpts_index) = params_domain_pde.ic_ECS;
 
 if (cell_shape == 2)
 
-    if (Rratio_IN <= 0 | Rratio_IN >= 1)
+    if (Rratio_IN <= 0 || Rratio_IN >= 1)
         OUT_cmpts_index = 1:ncell;
         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
         DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
         OUT_ECS_boundary = 1:2:2*ncell;
-        kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
-        IN_cmpts_index = [];        
+		if (include_ECS ~= 0)
+            kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
+		end 
+		IN_cmpts_index = [];        
     else
         IN_cmpts_index = 1:ncell;
         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;
@@ -79,15 +81,19 @@ if (cell_shape == 2)
         IN_OUT_boundary = [1:4:4*ncell];
         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
         OUT_ECS_boundary = [3:4:4*ncell];
-        kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;        
+        if (include_ECS ~= 0)
+            kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;    
+        end
     end
 elseif (cell_shape == 1)
     OUT_cmpts_index = 1:ncell;
     IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
     DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
-    if (Rratio_IN <= 0 | Rratio_IN >= 1)        
+    if (Rratio_IN <= 0 || Rratio_IN >= 1)        
         OUT_ECS_boundary = [1:ncell];
-        kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
+        if (include_ECS ~= 0)
+            kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
+        end
         IN_cmpts_index = [];        
     else        
         IN_cmpts_index = ncell+1:2*ncell;
@@ -96,7 +102,9 @@ elseif (cell_shape == 1)
         IN_OUT_boundary = 2:2:2*ncell;
         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
         OUT_ECS_boundary = 1:2:2*ncell;
-        kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;        
+        if (include_ECS ~= 0)
+            kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;  
+        end
     end
 end
 
