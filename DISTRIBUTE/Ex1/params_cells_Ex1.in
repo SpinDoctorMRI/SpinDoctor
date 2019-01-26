@@ -1,0 +1,10 @@
+1										% 1 = ellipsoids; 2 = cylinders;
+'current_geometry'						% file name to store cell description
+1										% ncell
+10										% Rmin
+10										% Rmax
+0.1										% Min distance between cells (times mean(Rmin,Rmax))
+0.2										% Max distance between cells (times the mean(Rmin,Rmax))
+0.00 0.00								% deform the domain, [a_bend,a_twist]
+40										% Hcyl (of cylinders)
+  
