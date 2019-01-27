@@ -18,12 +18,12 @@ SpinDoctor provides built-in options of including
 3) an extra-cellular space (ECS) enclosed either 
 a) in a box or b) in a tight wrapping around the cells; 
 4) deformation of canonical cells by bending and twisting.  
-5) permeable membranes for the BT-PDE (the H-$ADC$ assumes negligible permeabilty).
+5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeabilty).
 Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo.    
 
 Authors: Jing-Rebecca, Van-Dang Nguyen, Try Nguyen Tran.
 
-Copyright (C) <2019>
+Copyright (C) 2019
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
