@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of read_params_simul_domain</title>
+  <meta name="keywords" content="read_params_simul_domain">
+  <meta name="description" content="read simulation domain parameters">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; read_params_simul_domain.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>read_params_simul_domain
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>read simulation domain parameters</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [params_domain_geom,params_domain_pde,params_domain_femesh]= read_params_simul_domain(fname_domain) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> read simulation domain parameters
+ 
+ Input:
+         fname_domain
+         
+ Output:
+     1. params_domain_geom is a structure with 3 elements:
+         Rratio_IN
+         include_ECS
+         ECS_gap
+         
+     2. params_domain_pde is a structure with 8 elements:
+         dcoeff_IN
+         dcoeff_OUT
+         dcoeff_ECS
+         ic_IN
+         ic_OUT
+         ic_ECS
+         kappa_IN_OUT
+         kappa_OUT_ECS
+         
+     3. params_domain_femesh is a structure with 2 elements:
+         Htetgen
+         tetgen_cmd</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [params_domain_geom,params_domain_pde,params_domain_femesh] </a><span class="keyword">...</span>
+0002     = read_params_simul_domain(fname_domain)
+0003 
+0004 
+0005 <span class="comment">% read simulation domain parameters</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Input:</span>
+0008 <span class="comment">%         fname_domain</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Output:</span>
+0011 <span class="comment">%     1. params_domain_geom is a structure with 3 elements:</span>
+0012 <span class="comment">%         Rratio_IN</span>
+0013 <span class="comment">%         include_ECS</span>
+0014 <span class="comment">%         ECS_gap</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%     2. params_domain_pde is a structure with 8 elements:</span>
+0017 <span class="comment">%         dcoeff_IN</span>
+0018 <span class="comment">%         dcoeff_OUT</span>
+0019 <span class="comment">%         dcoeff_ECS</span>
+0020 <span class="comment">%         ic_IN</span>
+0021 <span class="comment">%         ic_OUT</span>
+0022 <span class="comment">%         ic_ECS</span>
+0023 <span class="comment">%         kappa_IN_OUT</span>
+0024 <span class="comment">%         kappa_OUT_ECS</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">%     3. params_domain_femesh is a structure with 2 elements:</span>
+0027 <span class="comment">%         Htetgen</span>
+0028 <span class="comment">%         tetgen_cmd</span>
+0029 
+0030 ndim = 3;
+0031 fid=fopen(fname_domain);
+0032 
+0033 tline = fgetl(fid);
+0034 params_domain_geom.Rratio_IN = sscanf(tline,<span class="string">'%f'</span>,1);
+0035   
+0036 <span class="keyword">if</span> (params_domain_geom.Rratio_IN &lt; 0 | params_domain_geom.Rratio_IN &gt; 0.99)
+0037     params_domain_geom.Rratio_IN = 0;
+0038 <span class="keyword">end</span>
+0039 
+0040 tline = fgetl(fid);
+0041 params_domain_geom.include_ECS = sscanf(tline,<span class="string">'%f'</span>,1);
+0042 
+0043 tline = fgetl(fid);
+0044 params_domain_geom.ECS_gap = sscanf(tline,<span class="string">'%f'</span>,1); 
+0045 
+0046 tline = fgetl(fid);
+0047 params_domain_pde.dcoeff_IN = sscanf(tline,<span class="string">'%f'</span>,1);
+0048 
+0049 tline = fgetl(fid);
+0050 params_domain_pde.dcoeff_OUT = sscanf(tline,<span class="string">'%f'</span>,1);
+0051 
+0052 tline = fgetl(fid);
+0053 params_domain_pde.dcoeff_ECS = sscanf(tline,<span class="string">'%f'</span>,1);
+0054 
+0055 <span class="comment">% initial conditions</span>
+0056 tline = fgetl(fid);
+0057 params_domain_pde.ic_IN = sscanf(tline,<span class="string">'%f'</span>,1);
+0058 
+0059 tline = fgetl(fid);
+0060 params_domain_pde.ic_OUT = sscanf(tline,<span class="string">'%f'</span>,1);
+0061 
+0062 tline = fgetl(fid);
+0063 params_domain_pde.ic_ECS = sscanf(tline,<span class="string">'%f'</span>,1);
+0064 
+0065 tline = fgetl(fid);
+0066 params_domain_pde.kappa_IN_OUT = sscanf(tline,<span class="string">'%f'</span>,1);
+0067 tline = fgetl(fid);
+0068 params_domain_pde.kappa_OUT_ECS = sscanf(tline,<span class="string">'%f'</span>,1);
+0069 
+0070 tline = fgetl(fid);
+0071 params_domain_femesh.Htetgen = sscanf(tline,<span class="string">'%f'</span>,1);
+0072 
+0073 
+0074 tline = fgetl(fid);
+0075 [strpos] = regexp(tline,&quot;<span class="string">'&quot;);</span>
+0076 params_domain_femesh.tetgen_cmd = tline(strpos(1)+1:strpos(2)-1);
+0077 fclose(fid);</pre></div>
+<hr><address>Generated on Mon 28-Jan-2019 00:07:40 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

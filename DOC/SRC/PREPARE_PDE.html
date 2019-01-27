@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PREPARE_PDE</title>
+  <meta name="keywords" content="PREPARE_PDE">
+  <meta name="description" content="create initial data for solving PDE">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; PREPARE_PDE.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PREPARE_PDE
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>create initial data for solving PDE</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [DIFF_cmpts,kappa_bdys,IC_cmpts,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,Ncmpt,Nboundary]= PREPARE_PDE(ncell,cell_shape,params_domain_geom,params_domain_pde) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> create initial data for solving PDE
+ 
+ Input:
+     1. ncell
+     2. cell_shape
+     3. params_domain_geom is a structure with 3 elements:
+         Rratio_IN
+         include_ECS
+         ECS_gap    
+     4. params_domain_pde is a structure with 8 elements:
+         dcoeff_IN
+         dcoeff_OUT
+         dcoeff_ECS
+         ic_IN
+         ic_OUT
+         ic_ECS
+         kappa_IN_OUT
+         kappa_OUT_ECS
+ 
+ Output:
+     1. DIFF_cmpts
+     2. kappa_bdys
+     3. IC_cmpts
+     4. OUT_cmpts_index
+     5. ECS_cmpts_index
+     6. IN_cmpts_index
+     7. Ncmpt
+     8. Nboundary</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [DIFF_cmpts,kappa_bdys,IC_cmpts,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,Ncmpt,Nboundary] </a><span class="keyword">...</span>
+0002     = PREPARE_PDE(ncell,cell_shape,params_domain_geom,params_domain_pde)
+0003 
+0004 <span class="comment">% create initial data for solving PDE</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Input:</span>
+0007 <span class="comment">%     1. ncell</span>
+0008 <span class="comment">%     2. cell_shape</span>
+0009 <span class="comment">%     3. params_domain_geom is a structure with 3 elements:</span>
+0010 <span class="comment">%         Rratio_IN</span>
+0011 <span class="comment">%         include_ECS</span>
+0012 <span class="comment">%         ECS_gap</span>
+0013 <span class="comment">%     4. params_domain_pde is a structure with 8 elements:</span>
+0014 <span class="comment">%         dcoeff_IN</span>
+0015 <span class="comment">%         dcoeff_OUT</span>
+0016 <span class="comment">%         dcoeff_ECS</span>
+0017 <span class="comment">%         ic_IN</span>
+0018 <span class="comment">%         ic_OUT</span>
+0019 <span class="comment">%         ic_ECS</span>
+0020 <span class="comment">%         kappa_IN_OUT</span>
+0021 <span class="comment">%         kappa_OUT_ECS</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% Output:</span>
+0024 <span class="comment">%     1. DIFF_cmpts</span>
+0025 <span class="comment">%     2. kappa_bdys</span>
+0026 <span class="comment">%     3. IC_cmpts</span>
+0027 <span class="comment">%     4. OUT_cmpts_index</span>
+0028 <span class="comment">%     5. ECS_cmpts_index</span>
+0029 <span class="comment">%     6. IN_cmpts_index</span>
+0030 <span class="comment">%     7. Ncmpt</span>
+0031 <span class="comment">%     8. Nboundary</span>
+0032 
+0033 Rratio_IN = params_domain_geom.Rratio_IN;
+0034 include_ECS = params_domain_geom.include_ECS;
+0035 
+0036 <span class="keyword">if</span> (Rratio_IN &lt;= 0 || Rratio_IN &gt;= 1)
+0037     Ncmpt = ncell;
+0038 <span class="keyword">else</span>
+0039     Ncmpt = 2*ncell;
+0040 <span class="keyword">end</span>
+0041 
+0042 <span class="keyword">if</span> (include_ECS ~= 0)
+0043     Ncmpt = Ncmpt + 1;
+0044 <span class="keyword">end</span>
+0045 
+0046 <span class="keyword">if</span> (Rratio_IN &lt;= 0 || Rratio_IN &gt;= 1)
+0047     <span class="keyword">if</span> (cell_shape == 2)
+0048         <span class="comment">% for a cylinder, the side is one boundary, the top and bottom another boundary</span>
+0049         Nboundary = 2*ncell;
+0050     <span class="keyword">elseif</span> (cell_shape == 1)
+0051         <span class="comment">% for a sphere, there is one boundary</span>
+0052         Nboundary = ncell;
+0053     <span class="keyword">else</span>
+0054         disp(<span class="string">'wrong'</span>);
+0055         stop
+0056     <span class="keyword">end</span>
+0057 <span class="keyword">else</span>
+0058     <span class="keyword">if</span> (cell_shape == 2)
+0059         <span class="comment">% for a cylinder, there is the axon side wall, the axon top and bottom,</span>
+0060         <span class="comment">% the myelin side wall, the myelin top and bottom.</span>
+0061         Nboundary = 4*ncell;
+0062     <span class="keyword">elseif</span> (cell_shape == 1)
+0063         <span class="comment">% for a sphere, there is the outer sphere and the inner sphere</span>
+0064         Nboundary = 2*ncell;
+0065     <span class="keyword">else</span>
+0066         disp(<span class="string">'wrong'</span>);
+0067         stop
+0068     <span class="keyword">end</span>
+0069 <span class="keyword">end</span>
+0070 <span class="keyword">if</span> (include_ECS ~= 0)
+0071     Nboundary = Nboundary+1;
+0072 <span class="keyword">end</span>
+0073 
+0074 DIFF_cmpts = zeros(1,Ncmpt);
+0075 kappa_bdys = zeros(1,Nboundary);
+0076 
+0077 <span class="keyword">if</span> (include_ECS ~= 0)
+0078     <span class="comment">% the ECS is the last cmpt</span>
+0079     <span class="comment">% the ECS outer boundary is the last boundary</span>
+0080     ECS_cmpts_index = Ncmpt;
+0081     Box_boundary = Nboundary;
+0082 <span class="keyword">else</span>
+0083     ECS_cmpts_index = [];
+0084     Box_boundary = [];
+0085 <span class="keyword">end</span>
+0086 
+0087 DIFF_cmpts(1,ECS_cmpts_index) = params_domain_pde.dcoeff_ECS;
+0088 <span class="comment">% the outer boundary of ECS is always impermeable</span>
+0089 kappa_bdys(1,Box_boundary) = 0;
+0090 IC_cmpts(1,ECS_cmpts_index) = params_domain_pde.ic_ECS;
+0091 
+0092 <span class="keyword">if</span> (cell_shape == 2)
+0093 
+0094     <span class="keyword">if</span> (Rratio_IN &lt;= 0 || Rratio_IN &gt;= 1)
+0095         OUT_cmpts_index = 1:ncell;
+0096         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
+0097         DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
+0098         OUT_ECS_boundary = 1:2:2*ncell;
+0099         <span class="keyword">if</span> (include_ECS ~= 0)
+0100             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
+0101         <span class="keyword">end</span> 
+0102         IN_cmpts_index = [];        
+0103     <span class="keyword">else</span>
+0104         IN_cmpts_index = 1:ncell;
+0105         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;
+0106         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
+0107         OUT_cmpts_index = ncell+1:2*ncell;
+0108         DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
+0109         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;        
+0110         IN_OUT_boundary = [1:4:4*ncell];
+0111         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
+0112         OUT_ECS_boundary = [3:4:4*ncell];
+0113         <span class="keyword">if</span> (include_ECS ~= 0)
+0114             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;    
+0115         <span class="keyword">end</span>
+0116     <span class="keyword">end</span>
+0117 <span class="keyword">elseif</span> (cell_shape == 1)
+0118     OUT_cmpts_index = 1:ncell;
+0119     IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
+0120     DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
+0121     <span class="keyword">if</span> (Rratio_IN &lt;= 0 || Rratio_IN &gt;= 1)        
+0122         OUT_ECS_boundary = [1:ncell];
+0123         <span class="keyword">if</span> (include_ECS ~= 0)
+0124             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
+0125         <span class="keyword">end</span>
+0126         IN_cmpts_index = [];        
+0127     <span class="keyword">else</span>        
+0128         IN_cmpts_index = ncell+1:2*ncell;
+0129         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
+0130         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;        
+0131         IN_OUT_boundary = 2:2:2*ncell;
+0132         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
+0133         OUT_ECS_boundary = 1:2:2*ncell;
+0134         <span class="keyword">if</span> (include_ECS ~= 0)
+0135             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;  
+0136         <span class="keyword">end</span>
+0137     <span class="keyword">end</span>
+0138 <span class="keyword">end</span>
+0139 
+0140 <span class="comment">% if (Rratio_IN &lt;= 0)</span>
+0141 <span class="comment">%     if (cell_shape == 2)</span>
+0142 <span class="comment">%         % this is the axon</span>
+0143 <span class="comment">%         IN_ECS_boundary = 1:2:2*ncell;</span>
+0144 <span class="comment">%         kappa_bdys(1,IN_ECS_boundary) = params_domain_pde.kappa_IN_ECS;</span>
+0145 <span class="comment">%         OUT_cmpts_index = [];</span>
+0146 <span class="comment">%     elseif (cell_shape == 1)</span>
+0147 <span class="comment">%         OUT_ECS_boundary = [1:ncell];</span>
+0148 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
+0149 <span class="comment">%         IN_cmpts_index = [];</span>
+0150 <span class="comment">%     else</span>
+0151 <span class="comment">%         disp('wrong');</span>
+0152 <span class="comment">%         stop</span>
+0153 <span class="comment">%     end</span>
+0154 <span class="comment">% else</span>
+0155 <span class="comment">%     if (cell_shape == 2)</span>
+0156 <span class="comment">%         OUT_cmpt_index = ncell+1:2*ncell;</span>
+0157 <span class="comment">%         DIFF_cmpts(1,OUT_cmpt_index) = params_domain_pde.dcoeff_OUT;</span>
+0158 <span class="comment">%         IC_cmpts(1,OUT_cmpt_index) = params_domain_pde.ic_OUT;</span>
+0159 <span class="comment">%</span>
+0160 <span class="comment">%         IN_OUT_boundary = [1:4:4*ncell];</span>
+0161 <span class="comment">%         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;</span>
+0162 <span class="comment">%         OUT_ECS_boundary = [3:4:4*ncell];</span>
+0163 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
+0164 <span class="comment">%</span>
+0165 <span class="comment">%</span>
+0166 <span class="comment">%     elseif (cell_shape == 1)</span>
+0167 <span class="comment">%         IN_cmpts_index = ncell+1:2*ncell;</span>
+0168 <span class="comment">%         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;</span>
+0169 <span class="comment">%         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;</span>
+0170 <span class="comment">%</span>
+0171 <span class="comment">%         IN_OUT_boundary = 2:2:2*ncell;</span>
+0172 <span class="comment">%         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;</span>
+0173 <span class="comment">%         OUT_ECS_boundary = 1:2:2*ncell;</span>
+0174 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
+0175 <span class="comment">%     else</span>
+0176 <span class="comment">%         disp('wrong');</span>
+0177 <span class="comment">%         stop</span>
+0178 <span class="comment">%     end</span>
+0179 <span class="comment">% end</span></pre></div>
+<hr><address>Generated on Mon 28-Jan-2019 00:07:40 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of STA</title>
+  <meta name="keywords" content="STA">
+  <meta name="description" content="compute the ADC in the short diffusion time regime">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; STA.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>STA
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>compute the ADC in the short diffusion time regime</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ADC_STA_cmpts,ADC_STA_allcmpts] = STA(experiment,DIFF_cmpts,VOL_cmpts,SAu_cmpts,IC_cmpts) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> compute the ADC in the short diffusion time regime
+ 
+ Input:
+     1. experiment is a structure with 8 elements:
+         ngdir_total 
+         gdir        
+         sdeltavec   
+         bdeltavec   
+         seqvec      
+         npervec    
+         rtol       
+         atol        
+     2. DIFF_cmpts
+     3. VOL_cmpts
+     4. SAu_cmpts
+     5. IC_cmpts
+ 
+ Output: 
+     1. ADC_STA_cmpts
+     2. ADC_STA_allcmpts</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ADC_STA_cmpts,ADC_STA_allcmpts] = STA(experiment,DIFF_cmpts,</a><span class="keyword">...</span>
+0002     VOL_cmpts,SAu_cmpts,IC_cmpts)
+0003 
+0004 <span class="comment">% compute the ADC in the short diffusion time regime</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Input:</span>
+0007 <span class="comment">%     1. experiment is a structure with 8 elements:</span>
+0008 <span class="comment">%         ngdir_total</span>
+0009 <span class="comment">%         gdir</span>
+0010 <span class="comment">%         sdeltavec</span>
+0011 <span class="comment">%         bdeltavec</span>
+0012 <span class="comment">%         seqvec</span>
+0013 <span class="comment">%         npervec</span>
+0014 <span class="comment">%         rtol</span>
+0015 <span class="comment">%         atol</span>
+0016 <span class="comment">%     2. DIFF_cmpts</span>
+0017 <span class="comment">%     3. VOL_cmpts</span>
+0018 <span class="comment">%     4. SAu_cmpts</span>
+0019 <span class="comment">%     5. IC_cmpts</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% Output:</span>
+0022 <span class="comment">%     1. ADC_STA_cmpts</span>
+0023 <span class="comment">%     2. ADC_STA_allcmpts</span>
+0024 
+0025 sdeltavec = experiment.sdeltavec;
+0026 bdeltavec = experiment.bdeltavec;
+0027 seqvec = experiment.seqvec;
+0028 npervec = experiment.npervec;
+0029 nexperi = length(sdeltavec);
+0030 Ncmpt = length(DIFF_cmpts);
+0031 
+0032 VOL_allcmpts = 0;
+0033 
+0034 <span class="keyword">for</span> icmpt = 1:Ncmpt
+0035     VOL_allcmpts  = VOL_allcmpts + VOL_cmpts(icmpt);
+0036 <span class="keyword">end</span>
+0037 
+0038 <span class="keyword">for</span> icmpt = 1:Ncmpt
+0039     VF_cmpts(icmpt) = VOL_cmpts(icmpt)/VOL_allcmpts;
+0040 <span class="keyword">end</span>
+0041 
+0042 ADC_STA_cmpts = zeros(Ncmpt,nexperi);
+0043 
+0044 <span class="keyword">for</span> iexperi = 1:nexperi
+0045     <span class="keyword">for</span> icmpt = 1:Ncmpt
+0046         [ADC_STA_cmpts(icmpt,iexperi)] = deff_sta(DIFF_cmpts(icmpt),<span class="keyword">...</span>
+0047             VOL_cmpts(icmpt),SAu_cmpts(icmpt),sdeltavec(iexperi),bdeltavec(iexperi),<span class="keyword">...</span>
+0048             seqvec(iexperi),npervec(iexperi));
+0049     <span class="keyword">end</span>
+0050 <span class="keyword">end</span>
+0051 ADC_STA_allcmpts = nan*ones(nexperi,1);
+0052 <span class="keyword">for</span> iexperi = 1:nexperi
+0053     ADC_STA_allcmpts(iexperi,1) = sum((IC_cmpts.*VF_cmpts)'.*ADC_STA_cmpts(:,iexperi))./sum((IC_cmpts.*VF_cmpts)');
+0054 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 28-Jan-2019 00:07:40 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
