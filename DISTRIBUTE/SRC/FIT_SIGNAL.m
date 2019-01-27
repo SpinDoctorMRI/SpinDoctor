@@ -1,5 +1,17 @@
 function [ADC_cmpts,ADC_allcmpts,ADC_allcmpts_S0] = FIT_SIGNAL(MF_cmpts,MF_allcmpts,bvalues)
 
+% fit the ADC from the dMRI signal
+% 
+% Input:
+%     1. MF_cmpts
+%     2. MF_allcmpts
+%     3. bvalues
+%     
+% Output:
+%     1. ADC_cmpts
+%     2. ADC_allcmpts
+%     3. ADC_allcmpts_S0
+
 nexperi = size(MF_cmpts,2);
 nb = size(MF_cmpts,3);
 Ncmpt = size(MF_cmpts,1);
@@ -43,7 +55,6 @@ for iexperi = 1:nexperi
         bmax = bvec(end);        
         for icmpt = 1:Ncmpt
             data1d = real(squeeze(MF_cmpts(icmpt,iexperi,:)))';
-            
             [fit_poly,ADC01d,KUR1d,KUR01d,S01d,Cfit1d,errfit,ndeg,ADC0_err1d,KUR_err1d] ...
                 = process_signal_POLY(data1d,bvec,bmin,bmax);
             ADC_cmpts(icmpt,iexperi) = ADC01d;
@@ -58,9 +69,3 @@ for iexperi = 1:nexperi
         ADC_allcmpts_S0(iexperi,1) = S01d;
     end
 end
-
-
-
-
-
-

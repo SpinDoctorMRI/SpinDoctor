@@ -1,6 +1,30 @@
 function [VOL_cmpts,SA_cmpts,SAu_cmpts,VOL_allcmpts,VF_cmpts,SoV_cmpts] ...
     = GET_VOL_SA(mymesh,gdir)
 
+% compute surface to volume ratio
+% 
+% Input:
+%     1. mymesh is a structure with 10 elements:
+%         Nnode
+%         Nele
+%         Nface
+%         Pts_cmpt_reorder
+%         Ele_cmpt_reorder
+%         Pts_ind
+%         Pts_boundary_reorder
+%         Fac_boundary_reorder
+%         Nboundary
+%         Ncmpt
+%     2. gdir
+%     
+% Output: 
+%     1. VOL_cmpts
+%     2. SA_cmpts
+%     3. SAu_cmpts
+%     4. VOL_allcmpts
+%     5. VF_cmpts
+%     6. SoV_cmpts
+
 UG = gdir';
 UG = UG/norm(UG);
 

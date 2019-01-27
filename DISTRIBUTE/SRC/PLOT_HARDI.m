@@ -1,5 +1,14 @@
 function PLOT_HARDI(points,ADC_allcmpts_alldir)
 
+% plot ngdir original directions in which the HADC was simulated and 900 interpolated directions
+% 
+% Input: 
+%     1. points (ngdir directions)
+%     2. ADC_allcmpts_alldir
+%     
+% Output:
+%     1 figure with title of "ADC in ngdir directions"
+
 ngdir = size(points,1);
 
 [sph_pts,C_sph] = spheresurface_regularpoints(1,900);   

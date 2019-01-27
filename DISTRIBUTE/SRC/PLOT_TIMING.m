@@ -1,5 +1,24 @@
 function PLOT_TIMING(elapsed_time,mymesh)
 
+% plot elapsed time
+% 
+% Input:
+%     1. elapsed_time
+%     2. mymesh is a structure with 10 elements:
+%         Nnode
+%         Nele
+%         Nface
+%         Pts_cmpt_reorder
+%         Ele_cmpt_reorder
+%         Pts_ind
+%         Pts_boundary_reorder
+%         Fac_boundary_reorder
+%         Nboundary
+%         Ncmpt
+% 
+% Output:
+%     1 figure of computational times of nexperi experiments 
+
 nexperi = size(elapsed_time,2);
 nb = size(elapsed_time,1);
 figure;

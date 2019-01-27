@@ -1,5 +1,14 @@
 function PLOT_CELLS(cell_shape,fname_cells)
 
+% plot cells of canonical configuration
+% 
+% Input:
+%     1. cell_shape
+%     2. fname_cells
+%
+% Output: 
+%     1 figure with title of "Cells of canonical configuration"
+
 if (cell_shape == 2)
     [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell,center,normal,Rcell,nslice_vec,nodes_ind_bottomring,nodes_ind_topring] ...
         = create_cylinders_geometry(fname_cells,0);    
@@ -24,6 +33,7 @@ for icell = 1:ncell
 	offset = offset+nnodes;
 end
 
-figure; h=trisurf(facets',nodes(:,1),nodes(:,2),nodes(:,3)); 
+figure; 
+h = trisurf(facets',nodes(:,1),nodes(:,2),nodes(:,3)); 
 set(h,'facealpha',1); view(3); axis equal;
 title('Cells of canonical configuration');

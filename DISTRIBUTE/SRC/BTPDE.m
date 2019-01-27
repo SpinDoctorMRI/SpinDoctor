@@ -1,14 +1,50 @@
 function [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,elapsed_time] ...
     = BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)
 
+% solve Bloch-Torrey equation
+% 
+% Input:
+%     1. experiment is a structure with 10 elements:
+%         ngdir_total 
+%         gdir        
+%         sdeltavec   
+%         bdeltavec   
+%         seqvec       
+%         npervec     
+%         rtol        
+%         atol        
+%         qvalues     
+%         bvalues        
+%     2. mymesh is a structure with 10 elements:
+%         Nnode
+%         Nele
+%         Nface
+%         Pts_cmpt_reorder
+%         Ele_cmpt_reorder
+%         Pts_ind
+%         Pts_boundary_reorder
+%         Fac_boundary_reorder
+%         Nboundary
+%         Ncmpt
+%     3. DIFF_cmpts
+%     4. kappa_bdys
+%     5. IC_cmpts
+%
+% Output:
+%     1. TOUT
+%     2. YOUT
+%     3. MF_cmpts
+%     4. MF_allcmpts
+%     5. difftime
+%     6. elapsed_time
+
 global FEM_M FEM_K FEM_A FEM_Q FEM_G
 global QVAL UG 
 global BDELTA SDELTA SEQ OGSEPER 
   
-  bvalues = experiment.bvalues;
-  qvalues = experiment.qvalues;
-  
-  gdir = experiment.gdir;
+bvalues = experiment.bvalues;
+qvalues = experiment.qvalues;
+gdir = experiment.gdir;
 sdeltavec = experiment.sdeltavec;
 bdeltavec = experiment.bdeltavec;
 seqvec = experiment.seqvec;
@@ -61,9 +97,9 @@ elapsed_time=zeros(nb, nexperi);
 				coeffs_flux_matrix(neumann_nodes)=kappa_bdys(iboundary); %*mvalues
 				if ~isempty(neumann)
 					FEM_MAT{icmpt}.Q = FEM_MAT{icmpt}.Q + flux_matrixP1_3D(neumann,coordinates',coeffs_flux_matrix);
-				end;
-			end;
-        end;
+                end
+            end
+        end
 		
         [FEM_MAT{icmpt}.K,volumes]=stiffness_matrixP1_3D(elements',coordinates',DIFF_cmpts(icmpt));
         FEM_MAT{icmpt}.M=mass_matrixP1_3D(elements',volumes);
@@ -96,7 +132,6 @@ end
 
 %% solve ODE
 for iexperi = 1:nexperi
-    
     SDELTA = sdeltavec(iexperi);
     BDELTA = bdeltavec(iexperi);
     TE = SDELTA+BDELTA;
@@ -107,7 +142,7 @@ for iexperi = 1:nexperi
     disp(['    Experiment ',num2str(iexperi)]);
     %disp([SDELTA,BDELTA,npervec(iexperi)]);
     
-    TLIST = [0,SDELTA+BDELTA];
+    TLIST = [0,TE];
     for ib = 1:nb
         b_start_time = clock;
         % global variable setting QVAL for ODE time stepping
@@ -117,15 +152,12 @@ for iexperi = 1:nexperi
         
         difftime(iexperi) = seqdifftime;
         
-        %% Solving for case of coupling between compartments.
-        
+        %% Solving for case of coupling between compartments.      
         if (DO_COUPLING == yes)
-            
             FEM_M = FEMcouple_MAT.M;
             FEM_K = FEMcouple_MAT.K;
             FEM_A = FEMcouple_MAT.A; %*seqprofile(state.time)*QVAL;
             FEM_Q = FEMcouple_MAT.Q;
-            
             FEM_G = sparse(zeros(size(FEM_M,1),1));
             
             options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...

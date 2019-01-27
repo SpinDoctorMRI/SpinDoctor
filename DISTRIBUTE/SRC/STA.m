@@ -1,24 +1,26 @@
 function [ADC_STA_cmpts,ADC_STA_allcmpts] = STA(experiment,DIFF_cmpts,...
     VOL_cmpts,SAu_cmpts,IC_cmpts)
-%
-%
-%   function [ADC_STA_cmpts,ADC_STA_allcmpts] = STA(experiment,DIFF_cmpts,VOL_cmpts,SAu_cmpts,IC_cmpts)
-%
-%   Input:
-%   1. experiment is a structure with the following elements:
-%             gdir: 
-%        sdeltavec: 
-%        bdeltavec: 
-%           seqvec: 
-%          npervec: 
-%   2. DIFF_cmpts
-%   3. VOL_cmpts
-%   4. SAu_cmpts
-%   5. IC_cmpts
-%
+
+% compute the ADC in the short diffusion time regime
+% 
+% Input:
+%     1. experiment is a structure with 8 elements:
+%         ngdir_total 
+%         gdir        
+%         sdeltavec   
+%         bdeltavec   
+%         seqvec      
+%         npervec    
+%         rtol       
+%         atol        
+%     2. DIFF_cmpts
+%     3. VOL_cmpts
+%     4. SAu_cmpts
+%     5. IC_cmpts
+% 
 % Output: 
-%   1. ADC_STA_cmpts
-%   2. ADC_STA_allcmpts
+%     1. ADC_STA_cmpts
+%     2. ADC_STA_allcmpts
 
 sdeltavec = experiment.sdeltavec;
 bdeltavec = experiment.bdeltavec;

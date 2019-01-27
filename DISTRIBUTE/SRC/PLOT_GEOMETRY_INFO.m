@@ -1,6 +1,23 @@
 function PLOT_GEOMETRY_INFO(cmpts_bdys_mat,OUT_cmpts_index,IN_cmpts_index,ECS_cmpts_index,...
 	VOL_cmpts,SA_cmpts,SAu_cmpts)
-	
+
+% plot information of the geometry
+% 
+% Input:
+%     1. cmpts_bdys_mat
+%     2. OUT_cmpts_index
+%     3. IN_cmpts_index
+%     4. ECS_cmpts_index
+%     5. VOL_cmpts
+%     6. SA_cmpts
+%     7. SAu_cmpts
+%     
+% Output:
+%     1. 1 figure with title of "Connections boundary-compartment"
+%     2. 1 figure with title of "VOL_cmpts"
+%     3. 1 figure with title of "Surface Area"
+%     4. 1 figure with title of "SAu_cmpts/VOL_cmpts"	
+
 Ncmpt = length(VOL_cmpts);
 Nboundary = size(cmpts_bdys_mat,2);
 

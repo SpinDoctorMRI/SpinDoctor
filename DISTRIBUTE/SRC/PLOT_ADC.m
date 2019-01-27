@@ -1,5 +1,16 @@
 function PLOT_ADC(ADC_cmpts,ADC_allcmpts,DIFF_cmpts,title_str)
 
+% plot ADC
+% 
+% Input:
+%     1. ADC_cmpts
+%     2. ADC_allcmpts
+%     3. DIFF_cmpts
+%     4. title_str (BTPDE/HADC/STA)
+%     
+% Output:
+%     1 figure for ADC of nexperi experiments of (BTPDE/HADC/STA)
+
 nexperi = length(ADC_allcmpts);
 Ncmpt = length(DIFF_cmpts);
 
@@ -13,7 +24,6 @@ for iexperi = 1:nexperi
     set(gca,'Ytick',linspace(0,max(DIFF_cmpts),6));
 	xlabel('icmpt (last: all cmpts)');
 	ylabel('ADC\_cmpts');
-    
     grid on;
 end
 

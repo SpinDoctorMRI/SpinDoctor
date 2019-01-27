@@ -1,5 +1,17 @@
 function [Sig_free,ADC_free_allcmpts] = ADCFREE(bvalues,DIFF_cmpts,VOL_cmpts,IC_cmpts)
 
+% compute the free diffusion coefficients and the free signal
+% 
+% Input:
+%     1. bvalues
+%     2. DIFF_cmpts
+%     3. VOL_cmpts
+%     4. IC_cmpts
+% 
+% Output:
+%     1. Sig_free
+%     2. ADC_free_allcmpts
+    
 nexperi = length(bvalues);
 Ncmpt = length(DIFF_cmpts);
 

@@ -1,9 +1,18 @@
 function PLOT_SURFACE_TRIANGULATION(cell_shape,fname_cells,params_domain_geom)
 
-	include_ECS = params_domain_geom.include_ECS;
-	ECS_gap = params_domain_geom.ECS_gap;
-	Rratio_IN = params_domain_geom.Rratio_IN;
-	ndim = 3;
+% plot surface triangulation
+% 
+% Input:
+%     1. cell_shape
+%     2. fname_cells
+%     3. params_domain_geom
+% 
+% Output: 1 figure with title of "Surface triangulation of canonical configuration"
+
+include_ECS = params_domain_geom.include_ECS;
+ECS_gap = params_domain_geom.ECS_gap;
+Rratio_IN = params_domain_geom.Rratio_IN;
+ndim = 3;
 
 if (cell_shape == 2)
     [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell,center,normal,Rcell,nslice_vec,nodes_ind_bottomring,nodes_ind_topring] ...
@@ -28,8 +37,6 @@ for icell = 1:ncell
 	nodes = [nodes;nodes_cell{icell}];
 	offset = offset+nnodes;
 end
-
-
 
 nodes_allcell = nodes;
 nnodes_allcell = size(nodes_allcell,1);

@@ -1,4 +1,22 @@
-function [geom,fname_geom] = read_cells_params(fname_geometry)
+function [geom,fname_geom] = read_params_cells(fname_geometry)
+
+% read cells parameters
+% 
+% Input:
+%     fname_geometry
+%             
+% Output:
+%     1. geom is a structure with 8 elements:
+%         cell_shape
+%         ncell
+%         Rmin
+%         Rmax
+%         dmin
+%         dmax
+%         para_deform
+%         Hcyl
+%         
+%     2. fname_geom
 
 fid=fopen(fname_geometry);
 

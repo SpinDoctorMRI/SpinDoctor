@@ -1,5 +1,17 @@
 function PLOT_SIGNAL(bvalues,MF_allcmpts,Sig_free,ADC_allcmpts_S0,ADC_allcmpts)
 
+% plot signal from solving the Bloch-Torrey equation
+% 
+% Input:
+%     1. bvalues
+%     2. MF_allcmpts
+%     3. Sig_free
+%     4. ADC_allcmpts_S0
+%     5. ADC_allcmpts
+%     
+% Output:
+%     1 figure for the signal
+
 markervec_cell = cell(6,1);
 markervec_cell{1} = 'o';
 markervec_cell{2} = 'x';
@@ -11,7 +23,6 @@ markervec_cell{6} = '*';
 nexperi = size(bvalues,1);
 
 figure;
-
 hold on
 iplot = 0;
 for iexperi = 1:nexperi   

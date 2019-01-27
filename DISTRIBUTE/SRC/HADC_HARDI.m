@@ -1,6 +1,37 @@
 function [points,ADC_HADC_cmpts_alldir,ADC_HADC_allcmpts_alldir] ...
     = HADC_HARDI(experi_hadc,mymesh,DIFF_cmpts,IC_cmpts)
 
+% compute the ADC from HADC model for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.
+% 
+% Input:
+%     1. experiment_hadc is a structure with 8 elements:
+%         ngdir_total 
+%         gdir       
+%         sdeltavec   
+%         bdeltavec    
+%         seqvec       
+%         npervec     
+%         rtol        
+%         atol               
+%     2. mymesh is a structure with 10 elements:
+%         Nnode
+%         Nele
+%         Nface
+%         Pts_cmpt_reorder
+%         Ele_cmpt_reorder
+%         Pts_ind
+%         Pts_boundary_reorder
+%         Fac_boundary_reorder
+%         Nboundary
+%         Ncmpt
+%     3. DIFF_cmpts
+%     4. IC_cmpts
+% 
+% Output:
+%     1. points (ngdir directions)
+%     2. ADC_HADC_cmpts_alldir
+%     3. ADC_HADC_allcmpts_alldir
+
 Ncmpt = length(DIFF_cmpts);
 [points,C,v] = spheresurface_regularpoints(1,experi_hadc.ngdir_total);
 ngdir_total = size(points,1);

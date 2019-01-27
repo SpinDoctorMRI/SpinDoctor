@@ -1,6 +1,35 @@
 function [DIFF_cmpts,kappa_bdys,IC_cmpts,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,Ncmpt,Nboundary] ...
     = PREPARE_PDE(ncell,cell_shape,params_domain_geom,params_domain_pde)
 
+% create initial data for solving PDE
+% 
+% Input:
+%     1. ncell
+%     2. cell_shape
+%     3. params_domain_geom is a structure with 3 elements:
+%         Rratio_IN
+%         include_ECS
+%         ECS_gap    
+%     4. params_domain_pde is a structure with 8 elements:
+%         dcoeff_IN
+%         dcoeff_OUT
+%         dcoeff_ECS
+%         ic_IN
+%         ic_OUT
+%         ic_ECS
+%         kappa_IN_OUT
+%         kappa_OUT_ECS
+% 
+% Output:
+%     1. DIFF_cmpts
+%     2. kappa_bdys
+%     3. IC_cmpts
+%     4. OUT_cmpts_index
+%     5. ECS_cmpts_index
+%     6. IN_cmpts_index
+%     7. Ncmpt
+%     8. Nboundary
+
 Rratio_IN = params_domain_geom.Rratio_IN;
 include_ECS = params_domain_geom.include_ECS;
 

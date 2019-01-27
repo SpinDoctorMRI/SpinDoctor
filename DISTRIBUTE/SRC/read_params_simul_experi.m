@@ -1,6 +1,43 @@
 function [experiment,experiment_hadc,experiment_btpde] ...
-    = read_simul_experi_params(fname_experiment);
-	
+    = read_params_simul_experi(fname_experiment)
+
+% read experiment parameters
+% 
+% Input:
+%         fname_experiment
+%             
+% Output:
+% 
+%     1. experiment is a structure with 6 elements:
+%         ngdir_total 
+%         gdir        
+%         sdeltavec   
+%         bdeltavec    
+%         seqvec       
+%         npervec      
+%         
+%     2. experiment_hadc is a structure with 8 elements:
+%         ngdir_total 
+%         gdir         
+%         sdeltavec    
+%         bdeltavec    
+%         seqvec       
+%         npervec     
+%         rtol        
+%         atol        
+% 
+%     3. experiment_btpde is a structure with 10 elements:
+%         ngdir_total 
+%         gdir         
+%         sdeltavec    
+%         bdeltavec    
+%         seqvec       
+%         npervec     
+%         rtol        
+%         atol        
+%         qvalues     
+%         bvalues     
+
 SEQ_DEFINITIONS
 global QVAL
 global BVAL
@@ -54,7 +91,7 @@ if (do_btpde ~= 0)
 	experiment_btpde.rtol = atmp(1);
 	experiment_btpde.atol = atmp(2);
 	tline = fgetl(fid);
-	nb= sscanf(tline,'%f',1);
+	nb = sscanf(tline,'%f',1);
 
 	tline = fgetl(fid);
 	use_blimits= sscanf(tline,'%f',1);
@@ -116,9 +153,7 @@ if (do_btpde ~= 0)
 				end
 			end
 		end
-	end
-
-
+    end
 end
 
  

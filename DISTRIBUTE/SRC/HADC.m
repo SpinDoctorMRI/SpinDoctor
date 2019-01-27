@@ -1,7 +1,36 @@
 function [ADC_DE,ADC_DE_allcmpts,elapsed_time] ...
     = HADC(experiment,mymesh,DIFF_cmpts,IC_cmpts)
-	
-	% diffusion equation (zero IC) to get the time-dependent diffusion coefficient
+
+% diffusion equation (zero IC) to get the time-dependent diffusion coefficient
+% 
+% Input:
+%     1. experiment is a structure with 8 elements:
+%         ngdir_total 
+%         gdir        
+%         sdeltavec   
+%         bdeltavec   
+%         seqvec      
+%         npervec    
+%         rtol       
+%         atol            
+%     2. mymesh is a structure with 10 elements:
+%         Nnode
+%         Nele
+%         Nface
+%         Pts_cmpt_reorder
+%         Ele_cmpt_reorder
+%         Pts_ind
+%         Pts_boundary_reorder
+%         Fac_boundary_reorder
+%         Nboundary
+%         Ncmpt 
+%     3. DIFF_cmpts
+%     4. IC_cmpts
+% 
+% Output:
+%     1. ADC_DE
+%     2. ADC_DE_allcmpts
+%     3. elapsed_time
 
 gdir = experiment.gdir;
 sdeltavec = experiment.sdeltavec;
@@ -16,7 +45,6 @@ global QVAL UG
 global BDELTA SDELTA SEQ OGSEPER
 
 disp(['H-ADC Model: solving DE']);
-
 
 UG = gdir';
 UG = UG/norm(UG);
@@ -58,7 +86,6 @@ for icmpt = 1:mymesh.Ncmpt
 
         for iboundary = 1:mymesh.Nboundary
             neumann = mymesh.Fac_boundary_reorder{icmpt}{iboundary}';
-            
             if sum(size(neumann))>0
                 [FacA,FacC,FacN] = get_surfacenormal_mesh(mymesh.Pts_cmpt_reorder{icmpt},mymesh.Ele_cmpt_reorder{icmpt},neumann');
                 mycoeff = (FacN(1,:)*UG(1) + FacN(2,:)*UG(2)+FacN(3,:)*UG(3));

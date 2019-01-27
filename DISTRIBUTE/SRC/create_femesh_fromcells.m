@@ -1,15 +1,52 @@
 function [fname_tetgen_femesh] = ...
    create_femesh_fromcells(params_cells,fname_cells,params_domain_geom,params_domain_femesh,fname_tetgen)
 
+% create FE mesh from cells
+% 
+% Input:
+%     1. params_cells is a structure with
+%         a. 7 elements for spheres (cell_shape = 1):
+%             cell_shape
+%             ncell
+%             Rmin
+%             Rmax
+%             dmin
+%             dmax
+%             para_deform 
+%         b. 8 elements for cylinders (cell_shape = 2):
+%             cell_shape
+%             ncell
+%             Rmin
+%             Rmax
+%             dmin
+%             dmax
+%             para_deform
+%             Hcyl  
+%
+%     2. fname_cells
+%
+%     3. params_domain_geom is a structure with 3 elements:
+%         Rratio_IN
+%         include_ECS
+%         ECS_gap
+%
+%     4. params_domain_femesh is a structure with 2 elements:
+%         Htetgen
+%         tetgen_cmd
+%
+%     5. fname_tetgen
+% 
+% Output: 
+%     fname_tetgen_femesh
 
-	cell_shape = params_cells.cell_shape;
-	hreq = params_domain_femesh.Htetgen;
-	tetgen_cmd = params_domain_femesh.tetgen_cmd;
-	include_ECS = params_domain_geom.include_ECS;
-	ECS_gap = params_domain_geom.ECS_gap;
-	Rratio_IN = params_domain_geom.Rratio_IN;
-	
-	ndim = 3;
+cell_shape = params_cells.cell_shape;
+hreq = params_domain_femesh.Htetgen;
+tetgen_cmd = params_domain_femesh.tetgen_cmd;
+include_ECS = params_domain_geom.include_ECS;
+ECS_gap = params_domain_geom.ECS_gap;
+Rratio_IN = params_domain_geom.Rratio_IN;
+
+ndim = 3;
 
 if (cell_shape == 2)
     [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell,center,normal,Rcell,nslice_vec,nodes_ind_bottomring,nodes_ind_topring] ...
@@ -36,7 +73,6 @@ for icell = 1:ncell
 end
 
 
-
 nodes_allcell = nodes;
 nnodes_allcell = size(nodes_allcell,1);
 
@@ -47,7 +83,6 @@ pt_in_allcell = pt_in_cell;
 bd_attrib_allcell = boundary_attribute;
 
 if (include_ECS == 2 & cell_shape == 2)
-   
     theta = linspace(0,2*pi,21);
     thetavec = theta(1:end-1);
     xvec=cos(thetavec);
@@ -209,12 +244,9 @@ elseif (include_ECS == 2 & cell_shape == 1)
             +(X3-center{icell}(1,3)).^2)-Rvec(icell));
         distmat = min(distmat,dd);
     end
-    
-
-    
+ 
     [facets_box,nodes_box] = isosurface(X1,X2,X3,distmat,xgap);
-    
-    
+
     ii = find(distmat<=xgap*0.9 & distmat>=xgap*0.1);
     if (~isempty(ii))
         pt_in_box = [X1(ii(1)),X2(ii(1)),X3(ii(1))];
@@ -345,8 +377,6 @@ if (nregions >= 1)
 end
 fclose(fid);
 
-
-
 if (hreq > 0) 
     tetgen_options = ['-pqA','a',num2str(hreq)];
 else
@@ -358,9 +388,3 @@ system([tetgen_cmd,' ',tetgen_options,' ',filename]);
 disp(['*****End Tetgen']);
 
 fname_tetgen_femesh = [fname_tetgen,'.1'];
-
-
-
-
-
-

@@ -1,6 +1,40 @@
 function [points,ADC_BT_cmpts_alldir,ADC_BT_allcmpts_alldir] ...
     = BTPDE_HARDI(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)
 
+% compute the ADC from Bloch-Torrey equation for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.
+% 
+% Input:
+%     1. experiment_btpde is a structure with 10 elements:
+%         ngdir_total 
+%         gdir        
+%         sdeltavec   
+%         bdeltavec   
+%         seqvec       
+%         npervec     
+%         rtol        
+%         atol        
+%         qvalues     
+%         bvalues        
+%     2. mymesh is a structure with 10 elements:
+%         Nnode
+%         Nele
+%         Nface
+%         Pts_cmpt_reorder
+%         Ele_cmpt_reorder
+%         Pts_ind
+%         Pts_boundary_reorder
+%         Fac_boundary_reorder
+%         Nboundary
+%         Ncmpt
+%     3. DIFF_cmpts
+%     4. kappa_bdys
+%     5. IC_cmpts
+% 
+% Output:
+%     1. points (ngdir directions)
+%     2. ADC_BT_cmpts_alldir
+%     3. ADC_BT_allcmpts_alldir
+
 Ncmpt = length(DIFF_cmpts);
 [points,C,v] = spheresurface_regularpoints(1,experi_btpde.ngdir_total);
 ngdir_total = size(points,1);
