@@ -67,6 +67,7 @@ else
         stop
     end
 end
+
 if (include_ECS ~= 0)
     Nboundary = Nboundary+1;
 end
@@ -90,7 +91,6 @@ kappa_bdys(1,Box_boundary) = 0;
 IC_cmpts(1,ECS_cmpts_index) = params_domain_pde.ic_ECS;
 
 if (cell_shape == 2)
-
     if (Rratio_IN <= 0 || Rratio_IN >= 1)
         OUT_cmpts_index = 1:ncell;
         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
@@ -114,6 +114,7 @@ if (cell_shape == 2)
             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;    
         end
     end
+    
 elseif (cell_shape == 1)
     OUT_cmpts_index = 1:ncell;
     IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;

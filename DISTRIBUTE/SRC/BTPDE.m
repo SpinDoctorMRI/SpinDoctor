@@ -49,64 +49,50 @@ sdeltavec = experiment.sdeltavec;
 bdeltavec = experiment.bdeltavec;
 seqvec = experiment.seqvec;
 npervec = experiment.npervec;
-rtol = experiment.rtol;
-atol = experiment.atol;
-
+ODEsolve_rtol = experiment.rtol;
+ODEsolve_atol = experiment.atol;
 yes = 1;  no = 0;
-ODEsolve_atol = atol;
-ODEsolve_rtol = rtol;
-
 
 disp(['Magnetization: Solving Bloch-Torrey PDE']);
 
 UG = gdir';
 UG = UG/norm(UG);
 
-if(mymesh.Ncmpt ==1 | abs(max(kappa_bdys)) <= 1e-16)
+if (mymesh.Ncmpt == 1 | abs(max(kappa_bdys)) <= 1e-16)
     DO_COUPLING = no;
 else
     DO_COUPLING = yes;
 end
 
-
 nexperi = length(sdeltavec);
-
 %disp(['Simulating ',num2str(nexperi),' experiments']);
-
 nb = size(qvalues,2);
+elapsed_time = zeros(nb, nexperi);
 
-elapsed_time=zeros(nb, nexperi);
-
-
-    for icmpt = 1:mymesh.Ncmpt
-        %disp(['Working on cmpt ', num2str(icmpt)]);
-        coordinates = mymesh.Pts_cmpt_reorder{icmpt};
-        elements = mymesh.Ele_cmpt_reorder{icmpt};
-        facets = [];
-        GX = -sqrt(-1)*UG*coordinates;
-        FEM_MAT{icmpt}.Q = sparse(length(coordinates),length(coordinates));
-        for iboundary = 1:mymesh.Nboundary
-			if (kappa_bdys(iboundary) ~= 0)
-				neumann = mymesh.Fac_boundary_reorder{icmpt}{iboundary}';
-				neumann_nodes=unique(neumann);
-				
-				%zvalues = mymesh.Pts_cmpt_reorder{1}(3,neumann_nodes);
-				
-				%mvalues = sqrt((20-abs(zvalues)));
-				coeffs_flux_matrix=zeros(max(neumann_nodes),1);
-				coeffs_flux_matrix(neumann_nodes)=kappa_bdys(iboundary); %*mvalues
-				if ~isempty(neumann)
-					FEM_MAT{icmpt}.Q = FEM_MAT{icmpt}.Q + flux_matrixP1_3D(neumann,coordinates',coeffs_flux_matrix);
-                end
+for icmpt = 1:mymesh.Ncmpt
+    %disp(['Working on cmpt ', num2str(icmpt)]);
+    coordinates = mymesh.Pts_cmpt_reorder{icmpt};
+    elements = mymesh.Ele_cmpt_reorder{icmpt};
+    facets = [];
+    GX = -sqrt(-1)*UG*coordinates;
+    FEM_MAT{icmpt}.Q = sparse(length(coordinates),length(coordinates));
+    for iboundary = 1:mymesh.Nboundary
+        if (kappa_bdys(iboundary) ~= 0)
+            neumann = mymesh.Fac_boundary_reorder{icmpt}{iboundary}';
+            neumann_nodes = unique(neumann);
+            %zvalues = mymesh.Pts_cmpt_reorder{1}(3,neumann_nodes);
+            %mvalues = sqrt((20-abs(zvalues)));
+            coeffs_flux_matrix = zeros(max(neumann_nodes),1);
+            coeffs_flux_matrix(neumann_nodes) = kappa_bdys(iboundary); %*mvalues
+            if ~isempty(neumann)
+                FEM_MAT{icmpt}.Q = FEM_MAT{icmpt}.Q + flux_matrixP1_3D(neumann,coordinates',coeffs_flux_matrix);
             end
         end
-		
-        [FEM_MAT{icmpt}.K,volumes]=stiffness_matrixP1_3D(elements',coordinates',DIFF_cmpts(icmpt));
-        FEM_MAT{icmpt}.M=mass_matrixP1_3D(elements',volumes);
-        FEM_MAT{icmpt}.A=mass_matrixP1_3D(elements',volumes,GX');
     end
-
-for icmpt=1:mymesh.Ncmpt
+    [FEM_MAT{icmpt}.K,volumes] = stiffness_matrixP1_3D(elements',coordinates',DIFF_cmpts(icmpt));
+    FEM_MAT{icmpt}.M = mass_matrixP1_3D(elements',volumes);
+    FEM_MAT{icmpt}.A = mass_matrixP1_3D(elements',volumes,GX');
+    
     % calculate the IC
     IC_Pts{icmpt} = IC_cmpts(icmpt)*ones(size(mymesh.Pts_cmpt_reorder{icmpt},2),1);
 end
@@ -119,11 +105,10 @@ if (DO_COUPLING == yes)
     %stop
     toc
     % IC for coupled case
-    IC_couple=zeros(size(FEMcouple_MAT.M,1),1);
-    for icmpt=1:mymesh.Ncmpt
+    IC_couple = zeros(size(FEMcouple_MAT.M,1),1);
+    for icmpt = 1:mymesh.Ncmpt
         IC_couple(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),1) = IC_Pts{icmpt};
     end
-    
 else
     FEMcouple_MAT = [];
     FEMcouple_ind0 = [];
@@ -146,10 +131,8 @@ for iexperi = 1:nexperi
     for ib = 1:nb
         b_start_time = clock;
         % global variable setting QVAL for ODE time stepping
-        QVAL = qvalues(iexperi,ib);        
-        
-		disp(['      qvalue ',num2str(QVAL,'%.1e')]);
-        
+        QVAL = qvalues(iexperi,ib);               
+		disp(['      qvalue ',num2str(QVAL,'%.1e')]);        
         difftime(iexperi) = seqdifftime;
         
         %% Solving for case of coupling between compartments.      
@@ -163,7 +146,7 @@ for iexperi = 1:nexperi
             options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
                 'Jacobian',@odejac_bt_includeb);            
             disp('***Coupled: start ode solve ode23t'); tic
-            sol= ode23t(@odefun_bt_includeb,TLIST,IC_couple,options);
+            sol = ode23t(@odefun_bt_includeb,TLIST,IC_couple,options);
             disp('***Coupled: end ode solve ode23t'); toc
             for icmpt = 1:mymesh.Ncmpt
                 YOUT{iexperi}{ib}{icmpt} = sol.y(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),:);
@@ -178,10 +161,10 @@ for iexperi = 1:nexperi
                 FEM_A = FEM_MAT{icmpt}.A;
                 FEM_Q = FEM_MAT{icmpt}.Q;
                 FEM_G = sparse(zeros(size(FEM_M,1),1));
+                
                 options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
                     'Jacobian',@odejac_bt_includeb);
                 %disp('***Uncoupled: start ode solver ode23t'); tic
-                
                 ICC = IC_Pts{icmpt};
                 if (max(abs(ICC))<=1e-16)
                     sol.y = zeros(size(ICC,1),size(TLIST,2));
