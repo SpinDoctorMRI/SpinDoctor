@@ -128,185 +128,168 @@ This function is called by:
 0049 bdeltavec = experiment.bdeltavec;
 0050 seqvec = experiment.seqvec;
 0051 npervec = experiment.npervec;
-0052 rtol = experiment.rtol;
-0053 atol = experiment.atol;
-0054 
-0055 yes = 1;  no = 0;
-0056 ODEsolve_atol = atol;
-0057 ODEsolve_rtol = rtol;
-0058 
-0059 
-0060 disp([<span class="string">'Magnetization: Solving Bloch-Torrey PDE'</span>]);
-0061 
-0062 UG = gdir';
-0063 UG = UG/norm(UG);
-0064 
-0065 <span class="keyword">if</span>(mymesh.Ncmpt ==1 | abs(max(kappa_bdys)) &lt;= 1e-16)
-0066     DO_COUPLING = no;
-0067 <span class="keyword">else</span>
-0068     DO_COUPLING = yes;
-0069 <span class="keyword">end</span>
-0070 
+0052 ODEsolve_rtol = experiment.rtol;
+0053 ODEsolve_atol = experiment.atol;
+0054 yes = 1;  no = 0;
+0055 
+0056 disp([<span class="string">'Magnetization: Solving Bloch-Torrey PDE'</span>]);
+0057 
+0058 UG = gdir';
+0059 UG = UG/norm(UG);
+0060 
+0061 <span class="keyword">if</span> (mymesh.Ncmpt == 1 | abs(max(kappa_bdys)) &lt;= 1e-16)
+0062     DO_COUPLING = no;
+0063 <span class="keyword">else</span>
+0064     DO_COUPLING = yes;
+0065 <span class="keyword">end</span>
+0066 
+0067 nexperi = length(sdeltavec);
+0068 <span class="comment">%disp(['Simulating ',num2str(nexperi),' experiments']);</span>
+0069 nb = size(qvalues,2);
+0070 elapsed_time = zeros(nb, nexperi);
 0071 
-0072 nexperi = length(sdeltavec);
-0073 
-0074 <span class="comment">%disp(['Simulating ',num2str(nexperi),' experiments']);</span>
-0075 
-0076 nb = size(qvalues,2);
-0077 
-0078 elapsed_time=zeros(nb, nexperi);
-0079 
-0080 
-0081     <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0082         <span class="comment">%disp(['Working on cmpt ', num2str(icmpt)]);</span>
-0083         coordinates = mymesh.Pts_cmpt_reorder{icmpt};
-0084         elements = mymesh.Ele_cmpt_reorder{icmpt};
-0085         facets = [];
-0086         GX = -sqrt(-1)*UG*coordinates;
-0087         FEM_MAT{icmpt}.Q = sparse(length(coordinates),length(coordinates));
-0088         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
-0089             <span class="keyword">if</span> (kappa_bdys(iboundary) ~= 0)
-0090                 neumann = mymesh.Fac_boundary_reorder{icmpt}{iboundary}';
-0091                 neumann_nodes=unique(neumann);
-0092                 
-0093                 <span class="comment">%zvalues = mymesh.Pts_cmpt_reorder{1}(3,neumann_nodes);</span>
-0094                 
-0095                 <span class="comment">%mvalues = sqrt((20-abs(zvalues)));</span>
-0096                 coeffs_flux_matrix=zeros(max(neumann_nodes),1);
-0097                 coeffs_flux_matrix(neumann_nodes)=kappa_bdys(iboundary); <span class="comment">%*mvalues</span>
-0098                 <span class="keyword">if</span> ~isempty(neumann)
-0099                     FEM_MAT{icmpt}.Q = FEM_MAT{icmpt}.Q + flux_matrixP1_3D(neumann,coordinates',coeffs_flux_matrix);
-0100                 <span class="keyword">end</span>
-0101             <span class="keyword">end</span>
-0102         <span class="keyword">end</span>
-0103         
-0104         [FEM_MAT{icmpt}.K,volumes]=stiffness_matrixP1_3D(elements',coordinates',DIFF_cmpts(icmpt));
-0105         FEM_MAT{icmpt}.M=mass_matrixP1_3D(elements',volumes);
-0106         FEM_MAT{icmpt}.A=mass_matrixP1_3D(elements',volumes,GX');
-0107     <span class="keyword">end</span>
-0108 
-0109 <span class="keyword">for</span> icmpt=1:mymesh.Ncmpt
-0110     <span class="comment">% calculate the IC</span>
-0111     IC_Pts{icmpt} = IC_cmpts(icmpt)*ones(size(mymesh.Pts_cmpt_reorder{icmpt},2),1);
-0112 <span class="keyword">end</span>
-0113 
-0114 <span class="keyword">if</span> (DO_COUPLING == yes)
-0115     tic
-0116     [FEMcouple_MAT,FEMcouple_ind0,FEMcouple_indf] <span class="keyword">...</span>
-0117         = generate_FEM_coupling(FEM_MAT,mymesh.Ncmpt,mymesh.Nboundary,<span class="keyword">...</span>
-0118         mymesh.Pts_cmpt_reorder,mymesh.Ele_cmpt_reorder,mymesh.Pts_ind,mymesh.Pts_boundary_reorder,mymesh.Fac_boundary_reorder);
-0119     <span class="comment">%stop</span>
-0120     toc
-0121     <span class="comment">% IC for coupled case</span>
-0122     IC_couple=zeros(size(FEMcouple_MAT.M,1),1);
-0123     <span class="keyword">for</span> icmpt=1:mymesh.Ncmpt
-0124         IC_couple(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),1) = IC_Pts{icmpt};
-0125     <span class="keyword">end</span>
+0072 <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0073     <span class="comment">%disp(['Working on cmpt ', num2str(icmpt)]);</span>
+0074     coordinates = mymesh.Pts_cmpt_reorder{icmpt};
+0075     elements = mymesh.Ele_cmpt_reorder{icmpt};
+0076     facets = [];
+0077     GX = -sqrt(-1)*UG*coordinates;
+0078     FEM_MAT{icmpt}.Q = sparse(length(coordinates),length(coordinates));
+0079     <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0080         <span class="keyword">if</span> (kappa_bdys(iboundary) ~= 0)
+0081             neumann = mymesh.Fac_boundary_reorder{icmpt}{iboundary}';
+0082             neumann_nodes = unique(neumann);
+0083             <span class="comment">%zvalues = mymesh.Pts_cmpt_reorder{1}(3,neumann_nodes);</span>
+0084             <span class="comment">%mvalues = sqrt((20-abs(zvalues)));</span>
+0085             coeffs_flux_matrix = zeros(max(neumann_nodes),1);
+0086             coeffs_flux_matrix(neumann_nodes) = kappa_bdys(iboundary); <span class="comment">%*mvalues</span>
+0087             <span class="keyword">if</span> ~isempty(neumann)
+0088                 FEM_MAT{icmpt}.Q = FEM_MAT{icmpt}.Q + flux_matrixP1_3D(neumann,coordinates',coeffs_flux_matrix);
+0089             <span class="keyword">end</span>
+0090         <span class="keyword">end</span>
+0091     <span class="keyword">end</span>
+0092     [FEM_MAT{icmpt}.K,volumes] = stiffness_matrixP1_3D(elements',coordinates',DIFF_cmpts(icmpt));
+0093     FEM_MAT{icmpt}.M = mass_matrixP1_3D(elements',volumes);
+0094     FEM_MAT{icmpt}.A = mass_matrixP1_3D(elements',volumes,GX');
+0095     
+0096     <span class="comment">% calculate the IC</span>
+0097     IC_Pts{icmpt} = IC_cmpts(icmpt)*ones(size(mymesh.Pts_cmpt_reorder{icmpt},2),1);
+0098 <span class="keyword">end</span>
+0099 
+0100 <span class="keyword">if</span> (DO_COUPLING == yes)
+0101     tic
+0102     [FEMcouple_MAT,FEMcouple_ind0,FEMcouple_indf] <span class="keyword">...</span>
+0103         = generate_FEM_coupling(FEM_MAT,mymesh.Ncmpt,mymesh.Nboundary,<span class="keyword">...</span>
+0104         mymesh.Pts_cmpt_reorder,mymesh.Ele_cmpt_reorder,mymesh.Pts_ind,mymesh.Pts_boundary_reorder,mymesh.Fac_boundary_reorder);
+0105     <span class="comment">%stop</span>
+0106     toc
+0107     <span class="comment">% IC for coupled case</span>
+0108     IC_couple = zeros(size(FEMcouple_MAT.M,1),1);
+0109     <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0110         IC_couple(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),1) = IC_Pts{icmpt};
+0111     <span class="keyword">end</span>
+0112 <span class="keyword">else</span>
+0113     FEMcouple_MAT = [];
+0114     FEMcouple_ind0 = [];
+0115     FEMcouple_indf = [];    
+0116 <span class="keyword">end</span>
+0117 
+0118 <span class="comment">%% solve ODE</span>
+0119 <span class="keyword">for</span> iexperi = 1:nexperi
+0120     SDELTA = sdeltavec(iexperi);
+0121     BDELTA = bdeltavec(iexperi);
+0122     TE = SDELTA+BDELTA;
+0123     SEQ = seqvec(iexperi);<span class="comment">% for choosing case PGSE, OGSEcos or OGSEsin</span>
+0124     omega = 2*pi*npervec(iexperi)/SDELTA;
+0125     OGSEPER = 1./omega*2*pi;<span class="comment">%% set up number for OGSE</span>
 0126     
-0127 <span class="keyword">else</span>
-0128     FEMcouple_MAT = [];
-0129     FEMcouple_ind0 = [];
-0130     FEMcouple_indf = [];    
-0131 <span class="keyword">end</span>
-0132 
-0133 <span class="comment">%% solve ODE</span>
-0134 <span class="keyword">for</span> iexperi = 1:nexperi
-0135     SDELTA = sdeltavec(iexperi);
-0136     BDELTA = bdeltavec(iexperi);
-0137     TE = SDELTA+BDELTA;
-0138     SEQ = seqvec(iexperi);<span class="comment">% for choosing case PGSE, OGSEcos or OGSEsin</span>
-0139     omega = 2*pi*npervec(iexperi)/SDELTA;
-0140     OGSEPER = 1./omega*2*pi;<span class="comment">%% set up number for OGSE</span>
-0141     
-0142     disp([<span class="string">'    Experiment '</span>,num2str(iexperi)]);
-0143     <span class="comment">%disp([SDELTA,BDELTA,npervec(iexperi)]);</span>
-0144     
-0145     TLIST = [0,TE];
-0146     <span class="keyword">for</span> ib = 1:nb
-0147         b_start_time = clock;
-0148         <span class="comment">% global variable setting QVAL for ODE time stepping</span>
-0149         QVAL = qvalues(iexperi,ib);        
-0150         
-0151         disp([<span class="string">'      qvalue '</span>,num2str(QVAL,<span class="string">'%.1e'</span>)]);
-0152         
-0153         difftime(iexperi) = seqdifftime;
-0154         
-0155         <span class="comment">%% Solving for case of coupling between compartments.</span>
-0156         <span class="keyword">if</span> (DO_COUPLING == yes)
-0157             FEM_M = FEMcouple_MAT.M;
-0158             FEM_K = FEMcouple_MAT.K;
-0159             FEM_A = FEMcouple_MAT.A; <span class="comment">%*seqprofile(state.time)*QVAL;</span>
-0160             FEM_Q = FEMcouple_MAT.Q;
-0161             FEM_G = sparse(zeros(size(FEM_M,1),1));
-0162             
-0163             options = odeset(<span class="string">'Mass'</span>,FEM_M,<span class="string">'AbsTol'</span>,ODEsolve_atol,<span class="string">'RelTol'</span>,ODEsolve_rtol,<span class="string">'Vectorized'</span>,<span class="string">'on'</span>,<span class="string">'Stats'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
-0164                 <span class="string">'Jacobian'</span>,@odejac_bt_includeb);            
-0165             disp(<span class="string">'***Coupled: start ode solve ode23t'</span>); tic
-0166             sol= ode23t(@odefun_bt_includeb,TLIST,IC_couple,options);
-0167             disp(<span class="string">'***Coupled: end ode solve ode23t'</span>); toc
-0168             <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0169                 YOUT{iexperi}{ib}{icmpt} = sol.y(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),:);
-0170                 TOUT{iexperi}{ib}{icmpt} = sol.x;
-0171                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-0172             <span class="keyword">end</span>
-0173         <span class="keyword">else</span>
-0174             <span class="comment">%% Solving for case of no coupling between compartments.</span>
-0175             <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0176                 FEM_M = FEM_MAT{icmpt}.M;
-0177                 FEM_K = FEM_MAT{icmpt}.K;
-0178                 FEM_A = FEM_MAT{icmpt}.A;
-0179                 FEM_Q = FEM_MAT{icmpt}.Q;
-0180                 FEM_G = sparse(zeros(size(FEM_M,1),1));
-0181                 options = odeset(<span class="string">'Mass'</span>,FEM_M,<span class="string">'AbsTol'</span>,ODEsolve_atol,<span class="string">'RelTol'</span>,ODEsolve_rtol,<span class="string">'Vectorized'</span>,<span class="string">'on'</span>,<span class="string">'Stats'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
-0182                     <span class="string">'Jacobian'</span>,@odejac_bt_includeb);
-0183                 <span class="comment">%disp('***Uncoupled: start ode solver ode23t'); tic</span>
-0184                 
-0185                 ICC = IC_Pts{icmpt};
-0186                 <span class="keyword">if</span> (max(abs(ICC))&lt;=1e-16)
-0187                     sol.y = zeros(size(ICC,1),size(TLIST,2));
-0188                     sol.x = TLIST;
-0189                 <span class="keyword">else</span>
-0190                     sol = ode23t(@odefun_bt_includeb,TLIST,ICC,options);
-0191                 <span class="keyword">end</span>
-0192                 <span class="comment">%disp('***Uncoupled: end ode solver ode23t'); toc</span>
-0193                 YOUT{iexperi}{ib}{icmpt} = sol.y;
-0194                 TOUT{iexperi}{ib}{icmpt} = sol.x;
-0195                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-0196             <span class="keyword">end</span>            
-0197         <span class="keyword">end</span>
-0198         elapsed_time(ib, iexperi)=etime(clock, b_start_time);
-0199     <span class="keyword">end</span>
-0200 <span class="keyword">end</span>
-0201 
-0202 <span class="keyword">for</span> iexperi = 1:nexperi
-0203     bvec = bvalues(iexperi,:);  
-0204     nb = length(bvec);
-0205     <span class="keyword">for</span> ib = 1:nb
-0206         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0207             MF_cmpts(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(end);
-0208             M0(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(1);
-0209         <span class="keyword">end</span>
-0210         MF_allcmpts(iexperi,ib) = 0;
-0211         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0212             MF_allcmpts(iexperi,ib) = MF_allcmpts(iexperi,ib) + MF_cmpts(icmpt,iexperi,ib);
-0213         <span class="keyword">end</span>
-0214         M0_allcmpts(iexperi,ib) = 0;
-0215         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0216             M0_allcmpts(iexperi,ib) = M0_allcmpts(iexperi,ib) + M0(icmpt,iexperi,ib);
-0217         <span class="keyword">end</span>
-0218     <span class="keyword">end</span>   
-0219     ib0 = find(abs(bvec)&lt;=1e-16);
-0220     ibn0 = find(abs(bvec)&gt;1e-16);
-0221     <span class="keyword">if</span> (length(ib0) &gt;= 1)
-0222         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0223             S0(icmpt,iexperi) = MF_cmpts(icmpt,iexperi,ib0(1));
-0224         <span class="keyword">end</span>
-0225         S0_allcmpts(iexperi) = MF_allcmpts(iexperi,ib0(1));
-0226     <span class="keyword">else</span>
-0227         S0(1:mymesh.Ncmpt,iexperi) = nan;
-0228         S0_allcmpts(iexperi) = nan;
-0229     <span class="keyword">end</span>
-0230 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 28-Jan-2019 00:07:40 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0127     disp([<span class="string">'    Experiment '</span>,num2str(iexperi)]);
+0128     <span class="comment">%disp([SDELTA,BDELTA,npervec(iexperi)]);</span>
+0129     
+0130     TLIST = [0,TE];
+0131     <span class="keyword">for</span> ib = 1:nb
+0132         b_start_time = clock;
+0133         <span class="comment">% global variable setting QVAL for ODE time stepping</span>
+0134         QVAL = qvalues(iexperi,ib);               
+0135         disp([<span class="string">'      qvalue '</span>,num2str(QVAL,<span class="string">'%.1e'</span>)]);        
+0136         difftime(iexperi) = seqdifftime;
+0137         
+0138         <span class="comment">%% Solving for case of coupling between compartments.</span>
+0139         <span class="keyword">if</span> (DO_COUPLING == yes)
+0140             FEM_M = FEMcouple_MAT.M;
+0141             FEM_K = FEMcouple_MAT.K;
+0142             FEM_A = FEMcouple_MAT.A; <span class="comment">%*seqprofile(state.time)*QVAL;</span>
+0143             FEM_Q = FEMcouple_MAT.Q;
+0144             FEM_G = sparse(zeros(size(FEM_M,1),1));
+0145             
+0146             options = odeset(<span class="string">'Mass'</span>,FEM_M,<span class="string">'AbsTol'</span>,ODEsolve_atol,<span class="string">'RelTol'</span>,ODEsolve_rtol,<span class="string">'Vectorized'</span>,<span class="string">'on'</span>,<span class="string">'Stats'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+0147                 <span class="string">'Jacobian'</span>,@odejac_bt_includeb);            
+0148             disp(<span class="string">'***Coupled: start ode solve ode23t'</span>); tic
+0149             sol = ode23t(@odefun_bt_includeb,TLIST,IC_couple,options);
+0150             disp(<span class="string">'***Coupled: end ode solve ode23t'</span>); toc
+0151             <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0152                 YOUT{iexperi}{ib}{icmpt} = sol.y(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),:);
+0153                 TOUT{iexperi}{ib}{icmpt} = sol.x;
+0154                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
+0155             <span class="keyword">end</span>
+0156         <span class="keyword">else</span>
+0157             <span class="comment">%% Solving for case of no coupling between compartments.</span>
+0158             <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0159                 FEM_M = FEM_MAT{icmpt}.M;
+0160                 FEM_K = FEM_MAT{icmpt}.K;
+0161                 FEM_A = FEM_MAT{icmpt}.A;
+0162                 FEM_Q = FEM_MAT{icmpt}.Q;
+0163                 FEM_G = sparse(zeros(size(FEM_M,1),1));
+0164                 
+0165                 options = odeset(<span class="string">'Mass'</span>,FEM_M,<span class="string">'AbsTol'</span>,ODEsolve_atol,<span class="string">'RelTol'</span>,ODEsolve_rtol,<span class="string">'Vectorized'</span>,<span class="string">'on'</span>,<span class="string">'Stats'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+0166                     <span class="string">'Jacobian'</span>,@odejac_bt_includeb);
+0167                 <span class="comment">%disp('***Uncoupled: start ode solver ode23t'); tic</span>
+0168                 ICC = IC_Pts{icmpt};
+0169                 <span class="keyword">if</span> (max(abs(ICC))&lt;=1e-16)
+0170                     sol.y = zeros(size(ICC,1),size(TLIST,2));
+0171                     sol.x = TLIST;
+0172                 <span class="keyword">else</span>
+0173                     sol = ode23t(@odefun_bt_includeb,TLIST,ICC,options);
+0174                 <span class="keyword">end</span>
+0175                 <span class="comment">%disp('***Uncoupled: end ode solver ode23t'); toc</span>
+0176                 YOUT{iexperi}{ib}{icmpt} = sol.y;
+0177                 TOUT{iexperi}{ib}{icmpt} = sol.x;
+0178                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
+0179             <span class="keyword">end</span>            
+0180         <span class="keyword">end</span>
+0181         elapsed_time(ib, iexperi)=etime(clock, b_start_time);
+0182     <span class="keyword">end</span>
+0183 <span class="keyword">end</span>
+0184 
+0185 <span class="keyword">for</span> iexperi = 1:nexperi
+0186     bvec = bvalues(iexperi,:);  
+0187     nb = length(bvec);
+0188     <span class="keyword">for</span> ib = 1:nb
+0189         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0190             MF_cmpts(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(end);
+0191             M0(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(1);
+0192         <span class="keyword">end</span>
+0193         MF_allcmpts(iexperi,ib) = 0;
+0194         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0195             MF_allcmpts(iexperi,ib) = MF_allcmpts(iexperi,ib) + MF_cmpts(icmpt,iexperi,ib);
+0196         <span class="keyword">end</span>
+0197         M0_allcmpts(iexperi,ib) = 0;
+0198         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0199             M0_allcmpts(iexperi,ib) = M0_allcmpts(iexperi,ib) + M0(icmpt,iexperi,ib);
+0200         <span class="keyword">end</span>
+0201     <span class="keyword">end</span>   
+0202     ib0 = find(abs(bvec)&lt;=1e-16);
+0203     ibn0 = find(abs(bvec)&gt;1e-16);
+0204     <span class="keyword">if</span> (length(ib0) &gt;= 1)
+0205         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0206             S0(icmpt,iexperi) = MF_cmpts(icmpt,iexperi,ib0(1));
+0207         <span class="keyword">end</span>
+0208         S0_allcmpts(iexperi) = MF_allcmpts(iexperi,ib0(1));
+0209     <span class="keyword">else</span>
+0210         S0(1:mymesh.Ncmpt,iexperi) = nan;
+0211         S0_allcmpts(iexperi) = nan;
+0212     <span class="keyword">end</span>
+0213 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 28-Jan-2019 12:43:57 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

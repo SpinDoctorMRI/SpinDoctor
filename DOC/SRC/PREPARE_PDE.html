@@ -138,30 +138,30 @@ This function is called by:
 0067         stop
 0068     <span class="keyword">end</span>
 0069 <span class="keyword">end</span>
-0070 <span class="keyword">if</span> (include_ECS ~= 0)
-0071     Nboundary = Nboundary+1;
-0072 <span class="keyword">end</span>
-0073 
-0074 DIFF_cmpts = zeros(1,Ncmpt);
-0075 kappa_bdys = zeros(1,Nboundary);
-0076 
-0077 <span class="keyword">if</span> (include_ECS ~= 0)
-0078     <span class="comment">% the ECS is the last cmpt</span>
-0079     <span class="comment">% the ECS outer boundary is the last boundary</span>
-0080     ECS_cmpts_index = Ncmpt;
-0081     Box_boundary = Nboundary;
-0082 <span class="keyword">else</span>
-0083     ECS_cmpts_index = [];
-0084     Box_boundary = [];
-0085 <span class="keyword">end</span>
-0086 
-0087 DIFF_cmpts(1,ECS_cmpts_index) = params_domain_pde.dcoeff_ECS;
-0088 <span class="comment">% the outer boundary of ECS is always impermeable</span>
-0089 kappa_bdys(1,Box_boundary) = 0;
-0090 IC_cmpts(1,ECS_cmpts_index) = params_domain_pde.ic_ECS;
-0091 
-0092 <span class="keyword">if</span> (cell_shape == 2)
-0093 
+0070 
+0071 <span class="keyword">if</span> (include_ECS ~= 0)
+0072     Nboundary = Nboundary+1;
+0073 <span class="keyword">end</span>
+0074 
+0075 DIFF_cmpts = zeros(1,Ncmpt);
+0076 kappa_bdys = zeros(1,Nboundary);
+0077 
+0078 <span class="keyword">if</span> (include_ECS ~= 0)
+0079     <span class="comment">% the ECS is the last cmpt</span>
+0080     <span class="comment">% the ECS outer boundary is the last boundary</span>
+0081     ECS_cmpts_index = Ncmpt;
+0082     Box_boundary = Nboundary;
+0083 <span class="keyword">else</span>
+0084     ECS_cmpts_index = [];
+0085     Box_boundary = [];
+0086 <span class="keyword">end</span>
+0087 
+0088 DIFF_cmpts(1,ECS_cmpts_index) = params_domain_pde.dcoeff_ECS;
+0089 <span class="comment">% the outer boundary of ECS is always impermeable</span>
+0090 kappa_bdys(1,Box_boundary) = 0;
+0091 IC_cmpts(1,ECS_cmpts_index) = params_domain_pde.ic_ECS;
+0092 
+0093 <span class="keyword">if</span> (cell_shape == 2)
 0094     <span class="keyword">if</span> (Rratio_IN &lt;= 0 || Rratio_IN &gt;= 1)
 0095         OUT_cmpts_index = 1:ncell;
 0096         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
@@ -185,69 +185,70 @@ This function is called by:
 0114             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;    
 0115         <span class="keyword">end</span>
 0116     <span class="keyword">end</span>
-0117 <span class="keyword">elseif</span> (cell_shape == 1)
-0118     OUT_cmpts_index = 1:ncell;
-0119     IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
-0120     DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
-0121     <span class="keyword">if</span> (Rratio_IN &lt;= 0 || Rratio_IN &gt;= 1)        
-0122         OUT_ECS_boundary = [1:ncell];
-0123         <span class="keyword">if</span> (include_ECS ~= 0)
-0124             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
-0125         <span class="keyword">end</span>
-0126         IN_cmpts_index = [];        
-0127     <span class="keyword">else</span>        
-0128         IN_cmpts_index = ncell+1:2*ncell;
-0129         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
-0130         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;        
-0131         IN_OUT_boundary = 2:2:2*ncell;
-0132         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
-0133         OUT_ECS_boundary = 1:2:2*ncell;
-0134         <span class="keyword">if</span> (include_ECS ~= 0)
-0135             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;  
-0136         <span class="keyword">end</span>
-0137     <span class="keyword">end</span>
-0138 <span class="keyword">end</span>
-0139 
-0140 <span class="comment">% if (Rratio_IN &lt;= 0)</span>
-0141 <span class="comment">%     if (cell_shape == 2)</span>
-0142 <span class="comment">%         % this is the axon</span>
-0143 <span class="comment">%         IN_ECS_boundary = 1:2:2*ncell;</span>
-0144 <span class="comment">%         kappa_bdys(1,IN_ECS_boundary) = params_domain_pde.kappa_IN_ECS;</span>
-0145 <span class="comment">%         OUT_cmpts_index = [];</span>
-0146 <span class="comment">%     elseif (cell_shape == 1)</span>
-0147 <span class="comment">%         OUT_ECS_boundary = [1:ncell];</span>
-0148 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
-0149 <span class="comment">%         IN_cmpts_index = [];</span>
-0150 <span class="comment">%     else</span>
-0151 <span class="comment">%         disp('wrong');</span>
-0152 <span class="comment">%         stop</span>
-0153 <span class="comment">%     end</span>
-0154 <span class="comment">% else</span>
-0155 <span class="comment">%     if (cell_shape == 2)</span>
-0156 <span class="comment">%         OUT_cmpt_index = ncell+1:2*ncell;</span>
-0157 <span class="comment">%         DIFF_cmpts(1,OUT_cmpt_index) = params_domain_pde.dcoeff_OUT;</span>
-0158 <span class="comment">%         IC_cmpts(1,OUT_cmpt_index) = params_domain_pde.ic_OUT;</span>
-0159 <span class="comment">%</span>
-0160 <span class="comment">%         IN_OUT_boundary = [1:4:4*ncell];</span>
-0161 <span class="comment">%         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;</span>
-0162 <span class="comment">%         OUT_ECS_boundary = [3:4:4*ncell];</span>
-0163 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
-0164 <span class="comment">%</span>
+0117     
+0118 <span class="keyword">elseif</span> (cell_shape == 1)
+0119     OUT_cmpts_index = 1:ncell;
+0120     IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
+0121     DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
+0122     <span class="keyword">if</span> (Rratio_IN &lt;= 0 || Rratio_IN &gt;= 1)        
+0123         OUT_ECS_boundary = [1:ncell];
+0124         <span class="keyword">if</span> (include_ECS ~= 0)
+0125             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
+0126         <span class="keyword">end</span>
+0127         IN_cmpts_index = [];        
+0128     <span class="keyword">else</span>        
+0129         IN_cmpts_index = ncell+1:2*ncell;
+0130         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
+0131         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;        
+0132         IN_OUT_boundary = 2:2:2*ncell;
+0133         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
+0134         OUT_ECS_boundary = 1:2:2*ncell;
+0135         <span class="keyword">if</span> (include_ECS ~= 0)
+0136             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;  
+0137         <span class="keyword">end</span>
+0138     <span class="keyword">end</span>
+0139 <span class="keyword">end</span>
+0140 
+0141 <span class="comment">% if (Rratio_IN &lt;= 0)</span>
+0142 <span class="comment">%     if (cell_shape == 2)</span>
+0143 <span class="comment">%         % this is the axon</span>
+0144 <span class="comment">%         IN_ECS_boundary = 1:2:2*ncell;</span>
+0145 <span class="comment">%         kappa_bdys(1,IN_ECS_boundary) = params_domain_pde.kappa_IN_ECS;</span>
+0146 <span class="comment">%         OUT_cmpts_index = [];</span>
+0147 <span class="comment">%     elseif (cell_shape == 1)</span>
+0148 <span class="comment">%         OUT_ECS_boundary = [1:ncell];</span>
+0149 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
+0150 <span class="comment">%         IN_cmpts_index = [];</span>
+0151 <span class="comment">%     else</span>
+0152 <span class="comment">%         disp('wrong');</span>
+0153 <span class="comment">%         stop</span>
+0154 <span class="comment">%     end</span>
+0155 <span class="comment">% else</span>
+0156 <span class="comment">%     if (cell_shape == 2)</span>
+0157 <span class="comment">%         OUT_cmpt_index = ncell+1:2*ncell;</span>
+0158 <span class="comment">%         DIFF_cmpts(1,OUT_cmpt_index) = params_domain_pde.dcoeff_OUT;</span>
+0159 <span class="comment">%         IC_cmpts(1,OUT_cmpt_index) = params_domain_pde.ic_OUT;</span>
+0160 <span class="comment">%</span>
+0161 <span class="comment">%         IN_OUT_boundary = [1:4:4*ncell];</span>
+0162 <span class="comment">%         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;</span>
+0163 <span class="comment">%         OUT_ECS_boundary = [3:4:4*ncell];</span>
+0164 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
 0165 <span class="comment">%</span>
-0166 <span class="comment">%     elseif (cell_shape == 1)</span>
-0167 <span class="comment">%         IN_cmpts_index = ncell+1:2*ncell;</span>
-0168 <span class="comment">%         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;</span>
-0169 <span class="comment">%         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;</span>
-0170 <span class="comment">%</span>
-0171 <span class="comment">%         IN_OUT_boundary = 2:2:2*ncell;</span>
-0172 <span class="comment">%         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;</span>
-0173 <span class="comment">%         OUT_ECS_boundary = 1:2:2*ncell;</span>
-0174 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
-0175 <span class="comment">%     else</span>
-0176 <span class="comment">%         disp('wrong');</span>
-0177 <span class="comment">%         stop</span>
-0178 <span class="comment">%     end</span>
-0179 <span class="comment">% end</span></pre></div>
-<hr><address>Generated on Mon 28-Jan-2019 00:07:40 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0166 <span class="comment">%</span>
+0167 <span class="comment">%     elseif (cell_shape == 1)</span>
+0168 <span class="comment">%         IN_cmpts_index = ncell+1:2*ncell;</span>
+0169 <span class="comment">%         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;</span>
+0170 <span class="comment">%         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;</span>
+0171 <span class="comment">%</span>
+0172 <span class="comment">%         IN_OUT_boundary = 2:2:2*ncell;</span>
+0173 <span class="comment">%         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;</span>
+0174 <span class="comment">%         OUT_ECS_boundary = 1:2:2*ncell;</span>
+0175 <span class="comment">%         kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;</span>
+0176 <span class="comment">%     else</span>
+0177 <span class="comment">%         disp('wrong');</span>
+0178 <span class="comment">%         stop</span>
+0179 <span class="comment">%     end</span>
+0180 <span class="comment">% end</span></pre></div>
+<hr><address>Generated on Mon 28-Jan-2019 12:43:57 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
