@@ -21,7 +21,7 @@ a) in a box or b) in a tight wrapping around the cells;
 5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeabilty).
 Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo.    
 
-Authors: Jing-Rebecca, Van-Dang Nguyen, Try Nguyen Tran.
+Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
 
 Copyright (C) 2019
 
