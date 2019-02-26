@@ -21,13 +21,16 @@ a) in a box or b) in a tight wrapping around the cells;
 5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeabilty).
 Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo. 
 
-The code is in DISTRIBUTE/
-Documentation can be found in DOC/
-
-
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
 
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
+
+The DISTRIBUTE folder contains drivers for examples in the SpinDoctor paper as well as a general purpose driver called driver_spindoctor.m
+
+The functions that the user is likely to call directly from the driver are located at the first level in DISTRIBUTE/SRC.
+Other functions are stored in subfolders of DISTRIBUTE/SRC.
+
+Documentation of the functions can be found in DOC/
 
 Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
 
