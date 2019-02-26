@@ -19,7 +19,10 @@ SpinDoctor provides built-in options of including
 a) in a box or b) in a tight wrapping around the cells; 
 4) deformation of canonical cells by bending and twisting.  
 5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeabilty).
-Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo.    
+Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo. 
+
+Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
+Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
 Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
 
