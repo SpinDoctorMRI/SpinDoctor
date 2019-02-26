@@ -22,6 +22,7 @@ a) in a box or b) in a tight wrapping around the cells;
 Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo. 
 
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
+
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
 Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
