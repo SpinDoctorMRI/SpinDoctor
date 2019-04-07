@@ -38,11 +38,12 @@ function [points,ADC_BT_cmpts_alldir,ADC_BT_allcmpts_alldir] ...
 Ncmpt = length(DIFF_cmpts);
 [points,C,v] = spheresurface_regularpoints(1,experi_btpde.ngdir_total);
 ngdir_total = size(points,1);
+
 ii = find(points(:,3) >= 0);
 % negii
 for j = 1:size(ii,1)
     for k = 1:ngdir_total
-        if (norm(points(j,1:2)-points(k,1:2)) < 1e-10  && points(j,3)+points(k,3) < 1e-10)
+        if (norm(points(j,1:2)+points(k,1:2)) < 1e-10  && points(j,3)+points(k,3) < 1e-10)
             negii(ii(j)) = k;
         end
     end
@@ -57,9 +58,16 @@ for ic = 1:size(C,1)
         jc = jc+1;
     end
 end
-graddir_index = ii;
+% graddir_index = ii;
+
+graddir_index = 1:ngdir_total;
 ndir = length(graddir_index);
 nexperi = length(experi_btpde.sdeltavec);
+
+clear negii;
+for idir = 1:ndir
+    negii{idir} = [];
+end
 
 ADC_BT_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi);
 ADC_BT_allcmpts_alldir = nan*ones(ngdir_total,nexperi);
@@ -69,9 +77,12 @@ for idir = 1:ndir
         = BTPDE(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts);
     [ADC_BT_cmpts,ADC_BT_allcmpts,ADC_BT_allcmpts_S0] = FIT_SIGNAL(MF_cmpts,MF_allcmpts,experi_btpde.bvalues);
     ADC_BT_cmpts_alldir(graddir_index(idir),:,:) = ADC_BT_cmpts;
-    ADC_BT_cmpts_alldir(negii(graddir_index(idir)),:,:) = ADC_BT_cmpts;
     ADC_BT_allcmpts_alldir(graddir_index(idir),:) = ADC_BT_allcmpts(:,1)';
-    ADC_BT_allcmpts_alldir(negii(graddir_index(idir)),:) = ADC_BT_allcmpts(:,1)';
+    
+    if (~isempty(negii{idir}))
+        ADC_BT_cmpts_alldir(negii(graddir_index(idir)),:,:) = ADC_BT_cmpts;
+        ADC_BT_allcmpts_alldir(negii(graddir_index(idir)),:) = ADC_BT_allcmpts(:,1)';
+    end
 end
 ADC_BT_cmpts_alldir(find(ADC_BT_cmpts_alldir==0)) = nan;
 ADC_BT_allcmpts_alldir(find(ADC_BT_allcmpts_alldir==0)) = nan;
