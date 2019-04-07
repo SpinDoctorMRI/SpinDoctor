@@ -31,6 +31,8 @@ Getting started
 3) Other functions are stored in subfolders of DISTRIBUTE/SRC.
 4) Documentation of the top level functions can be found in DOC/
 
+Software requirements: SpinDoctor is only compatible with MATLAB R2017b or later.
+
 Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
 
 Copyright (C) 2019
