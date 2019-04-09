@@ -9,8 +9,8 @@ SpinDoctor can be used
 2) to solve the diffusion equation (DE) of the H-ADC model to obtain the ADC;
 3) a short-time approximation formula for the ADC is also included in the toolbox for comparison with the simulated ADC.
 
-The PDEs are solved by P1 finite elements combined with build-in Matlab routines for solving ordinary differential equations.
-The finite element mesh generation is performed using an external package called Tetgen that is included in the toolbox.
+The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations.
+The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
 
 SpinDoctor provides built-in options of including 
 1) spherical cells with a nucleus; 
@@ -25,13 +25,13 @@ Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
 
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
+Software requirements: SpinDoctor is compatible with MATLAB (version R2017b or later) together with the Partial Differential Equation Toolbox.
+
 Getting started
 1) The DISTRIBUTE folder contains drivers for examples in the SpinDoctor paper as well as a general purpose driver called driver_spindoctor.m
 2) The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
 3) Other functions are stored in subfolders of DISTRIBUTE/SRC.
 4) Documentation of the top level functions can be found in DOC/
-
-Software requirements: SpinDoctor is only compatible with MATLAB R2017b or later.
 
 Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
 
