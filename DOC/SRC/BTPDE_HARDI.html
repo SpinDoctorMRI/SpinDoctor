@@ -114,43 +114,54 @@ This function is called by:
 0038 Ncmpt = length(DIFF_cmpts);
 0039 [points,C,v] = spheresurface_regularpoints(1,experi_btpde.ngdir_total);
 0040 ngdir_total = size(points,1);
-0041 ii = find(points(:,3) &gt;= 0);
-0042 <span class="comment">% negii</span>
-0043 <span class="keyword">for</span> j = 1:size(ii,1)
-0044     <span class="keyword">for</span> k = 1:ngdir_total
-0045         <span class="keyword">if</span> (norm(points(j,1:2)-points(k,1:2)) &lt; 1e-10  &amp;&amp; points(j,3)+points(k,3) &lt; 1e-10)
-0046             negii(ii(j)) = k;
-0047         <span class="keyword">end</span>
-0048     <span class="keyword">end</span>
-0049 <span class="keyword">end</span>
-0050 jc = 0;
-0051 <span class="keyword">for</span> ic = 1:size(C,1)
-0052     jj = find(C(ic,1) == ii);
-0053     kk = find(C(ic,2) == ii);
-0054     ll = find(C(ic,3) == ii);
-0055     <span class="keyword">if</span> (~isempty(jj) &amp; ~isempty(kk) &amp; ~isempty(ll))
-0056         Ckeep(jc+1,1:3) = C(ic,1:3);
-0057         jc = jc+1;
-0058     <span class="keyword">end</span>
-0059 <span class="keyword">end</span>
-0060 graddir_index = ii;
-0061 ndir = length(graddir_index);
-0062 nexperi = length(experi_btpde.sdeltavec);
-0063 
-0064 ADC_BT_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi);
-0065 ADC_BT_allcmpts_alldir = nan*ones(ngdir_total,nexperi);
-0066 <span class="keyword">for</span> idir = 1:ndir
-0067     experi_btpde.gdir = points(graddir_index(idir),:)';
-0068     [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,BTPDE_elapsed_time] <span class="keyword">...</span>
-0069         = <a href="BTPDE.html" class="code" title="function [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,elapsed_time]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)">BTPDE</a>(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts);
-0070     [ADC_BT_cmpts,ADC_BT_allcmpts,ADC_BT_allcmpts_S0] = <a href="FIT_SIGNAL.html" class="code" title="function [ADC_cmpts,ADC_allcmpts,ADC_allcmpts_S0] = FIT_SIGNAL(MF_cmpts,MF_allcmpts,bvalues)">FIT_SIGNAL</a>(MF_cmpts,MF_allcmpts,experi_btpde.bvalues);
-0071     ADC_BT_cmpts_alldir(graddir_index(idir),:,:) = ADC_BT_cmpts;
-0072     ADC_BT_cmpts_alldir(negii(graddir_index(idir)),:,:) = ADC_BT_cmpts;
-0073     ADC_BT_allcmpts_alldir(graddir_index(idir),:) = ADC_BT_allcmpts(:,1)';
-0074     ADC_BT_allcmpts_alldir(negii(graddir_index(idir)),:) = ADC_BT_allcmpts(:,1)';
-0075 <span class="keyword">end</span>
-0076 ADC_BT_cmpts_alldir(find(ADC_BT_cmpts_alldir==0)) = nan;
-0077 ADC_BT_allcmpts_alldir(find(ADC_BT_allcmpts_alldir==0)) = nan;</pre></div>
-<hr><address>Generated on Mon 28-Jan-2019 12:43:57 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0041 
+0042 ii = find(points(:,3) &gt;= 0);
+0043 <span class="comment">% negii</span>
+0044 <span class="keyword">for</span> j = 1:size(ii,1)
+0045     <span class="keyword">for</span> k = 1:ngdir_total
+0046         <span class="keyword">if</span> (norm(points(j,1:2)+points(k,1:2)) &lt; 1e-10  &amp;&amp; points(j,3)+points(k,3) &lt; 1e-10)
+0047             negii(ii(j)) = k;
+0048         <span class="keyword">end</span>
+0049     <span class="keyword">end</span>
+0050 <span class="keyword">end</span>
+0051 jc = 0;
+0052 <span class="keyword">for</span> ic = 1:size(C,1)
+0053     jj = find(C(ic,1) == ii);
+0054     kk = find(C(ic,2) == ii);
+0055     ll = find(C(ic,3) == ii);
+0056     <span class="keyword">if</span> (~isempty(jj) &amp; ~isempty(kk) &amp; ~isempty(ll))
+0057         Ckeep(jc+1,1:3) = C(ic,1:3);
+0058         jc = jc+1;
+0059     <span class="keyword">end</span>
+0060 <span class="keyword">end</span>
+0061 <span class="comment">% graddir_index = ii;</span>
+0062 
+0063 graddir_index = 1:ngdir_total;
+0064 ndir = length(graddir_index);
+0065 nexperi = length(experi_btpde.sdeltavec);
+0066 
+0067 clear negii;
+0068 <span class="keyword">for</span> idir = 1:ndir
+0069     negii{idir} = [];
+0070 <span class="keyword">end</span>
+0071 
+0072 ADC_BT_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi);
+0073 ADC_BT_allcmpts_alldir = nan*ones(ngdir_total,nexperi);
+0074 <span class="keyword">for</span> idir = 1:ndir
+0075     experi_btpde.gdir = points(graddir_index(idir),:)';
+0076     [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,BTPDE_elapsed_time] <span class="keyword">...</span>
+0077         = <a href="BTPDE.html" class="code" title="function [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,elapsed_time]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)">BTPDE</a>(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts);
+0078     [ADC_BT_cmpts,ADC_BT_allcmpts,ADC_BT_allcmpts_S0] = <a href="FIT_SIGNAL.html" class="code" title="function [ADC_cmpts,ADC_allcmpts,ADC_allcmpts_S0] = FIT_SIGNAL(MF_cmpts,MF_allcmpts,bvalues)">FIT_SIGNAL</a>(MF_cmpts,MF_allcmpts,experi_btpde.bvalues);
+0079     ADC_BT_cmpts_alldir(graddir_index(idir),:,:) = ADC_BT_cmpts;
+0080     ADC_BT_allcmpts_alldir(graddir_index(idir),:) = ADC_BT_allcmpts(:,1)';
+0081     
+0082     <span class="keyword">if</span> (~isempty(negii{idir}))
+0083         ADC_BT_cmpts_alldir(negii(graddir_index(idir)),:,:) = ADC_BT_cmpts;
+0084         ADC_BT_allcmpts_alldir(negii(graddir_index(idir)),:) = ADC_BT_allcmpts(:,1)';
+0085     <span class="keyword">end</span>
+0086 <span class="keyword">end</span>
+0087 ADC_BT_cmpts_alldir(find(ADC_BT_cmpts_alldir==0)) = nan;
+0088 ADC_BT_allcmpts_alldir(find(ADC_BT_allcmpts_alldir==0)) = nan;</pre></div>
+<hr><address>Generated on Tue 09-Apr-2019 11:11:51 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

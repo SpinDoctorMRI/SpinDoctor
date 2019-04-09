@@ -108,43 +108,53 @@ This function is called by:
 0035 Ncmpt = length(DIFF_cmpts);
 0036 [points,C,v] = spheresurface_regularpoints(1,experi_hadc.ngdir_total);
 0037 ngdir_total = size(points,1);
-0038 ii = find(points(:,3) &gt;= 0);
-0039 <span class="comment">% negii</span>
-0040 <span class="keyword">for</span> j = 1:size(ii,1)
-0041     <span class="keyword">for</span> k = 1:ngdir_total
-0042         <span class="keyword">if</span> (norm(points(j,1:2)-points(k,1:2)) &lt; 1e-10  &amp;&amp; points(j,3)+points(k,3) &lt; 1e-10)
-0043             negii(ii(j)) = k;
-0044         <span class="keyword">end</span>
-0045     <span class="keyword">end</span>
-0046 <span class="keyword">end</span>
-0047 jc = 0;
-0048 <span class="keyword">for</span> ic = 1:size(C,1)
-0049     jj = find(C(ic,1) == ii);
-0050     kk = find(C(ic,2) == ii);
-0051     ll = find(C(ic,3) == ii);
-0052     <span class="keyword">if</span> (~isempty(jj) &amp; ~isempty(kk) &amp; ~isempty(ll))
-0053         Ckeep(jc+1,1:3) = C(ic,1:3);
-0054         jc = jc+1;
-0055     <span class="keyword">end</span>
-0056 <span class="keyword">end</span>
-0057 graddir_index = ii;
-0058 ndir = length(graddir_index);
-0059 nexperi = length(experi_hadc.sdeltavec);
-0060 
-0061 ADC_HADC_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi);
-0062 ADC_HADC_allcmpts_alldir = nan*ones(ngdir_total,nexperi);
-0063 <span class="keyword">for</span> idir = 1:ndir
-0064     experi_hadc.gdir = points(graddir_index(idir),:)';    
-0065     [ADC_HADC_cmpts,ADC_HADC_allcmpts,HADC_elapsed_time] <span class="keyword">...</span>
-0066         = <a href="HADC.html" class="code" title="function [ADC_DE,ADC_DE_allcmpts,elapsed_time]= HADC(experiment,mymesh,DIFF_cmpts,IC_cmpts)">HADC</a>(experi_hadc,mymesh,DIFF_cmpts,IC_cmpts);
-0067     ADC_HADC_cmpts_alldir(graddir_index(idir),:,:) = ADC_HADC_cmpts;
-0068     ADC_HADC_cmpts_alldir(negii(graddir_index(idir)),:,:) = ADC_HADC_cmpts;
-0069     ADC_HADC_allcmpts_alldir(graddir_index(idir),:) = ADC_HADC_allcmpts(:,1)';
-0070     ADC_HADC_allcmpts_alldir(negii(graddir_index(idir)),:) = ADC_HADC_allcmpts(:,1)';
-0071         
-0072 <span class="keyword">end</span>
-0073 ADC_HADC_cmpts_alldir(find(ADC_HADC_cmpts_alldir==0)) = nan;
-0074 ADC_HADC_allcmpts_alldir(find(ADC_HADC_allcmpts_alldir==0)) = nan;</pre></div>
-<hr><address>Generated on Mon 28-Jan-2019 12:43:57 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0038 
+0039 ii = find(points(:,3) &gt;= 0);
+0040 <span class="comment">% negii</span>
+0041 <span class="keyword">for</span> j = 1:size(ii,1)
+0042     <span class="keyword">for</span> k = 1:ngdir_total
+0043         <span class="keyword">if</span> (norm(points(j,1:2)+points(k,1:2)) &lt; 1e-10  &amp;&amp; points(j,3)+points(k,3) &lt; 1e-10)
+0044             negii(ii(j)) = k;
+0045         <span class="keyword">end</span>
+0046     <span class="keyword">end</span>
+0047 <span class="keyword">end</span>
+0048 jc = 0;
+0049 <span class="keyword">for</span> ic = 1:size(C,1)
+0050     jj = find(C(ic,1) == ii);
+0051     kk = find(C(ic,2) == ii);
+0052     ll = find(C(ic,3) == ii);
+0053     <span class="keyword">if</span> (~isempty(jj) &amp; ~isempty(kk) &amp; ~isempty(ll))
+0054         Ckeep(jc+1,1:3) = C(ic,1:3);
+0055         jc = jc+1;
+0056     <span class="keyword">end</span>
+0057 <span class="keyword">end</span>
+0058 <span class="comment">% graddir_index = ii;</span>
+0059 
+0060 graddir_index = 1:ngdir_total;
+0061 ndir = length(graddir_index);
+0062 nexperi = length(experi_hadc.sdeltavec);
+0063 
+0064 clear negii;
+0065 <span class="keyword">for</span> idir = 1:ndir
+0066     negii{idir} = [];
+0067 <span class="keyword">end</span>
+0068 
+0069 ADC_HADC_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi);
+0070 ADC_HADC_allcmpts_alldir = nan*ones(ngdir_total,nexperi);
+0071 <span class="keyword">for</span> idir = 1:ndir
+0072     experi_hadc.gdir = points(graddir_index(idir),:)';    
+0073     [ADC_HADC_cmpts,ADC_HADC_allcmpts,HADC_elapsed_time] <span class="keyword">...</span>
+0074         = <a href="HADC.html" class="code" title="function [ADC_DE,ADC_DE_allcmpts,elapsed_time]= HADC(experiment,mymesh,DIFF_cmpts,IC_cmpts)">HADC</a>(experi_hadc,mymesh,DIFF_cmpts,IC_cmpts);
+0075     ADC_HADC_cmpts_alldir(graddir_index(idir),:,:) = ADC_HADC_cmpts;
+0076     ADC_HADC_allcmpts_alldir(graddir_index(idir),:) = ADC_HADC_allcmpts(:,1)';
+0077     
+0078     <span class="keyword">if</span> (~isempty(negii{idir}))
+0079         ADC_HADC_cmpts_alldir(negii(graddir_index(idir)),:,:) = ADC_HADC_cmpts;
+0080         ADC_HADC_allcmpts_alldir(negii(graddir_index(idir)),:) = ADC_HADC_allcmpts(:,1)';
+0081     <span class="keyword">end</span>   
+0082 <span class="keyword">end</span>
+0083 ADC_HADC_cmpts_alldir(find(ADC_HADC_cmpts_alldir==0)) = nan;
+0084 ADC_HADC_allcmpts_alldir(find(ADC_HADC_allcmpts_alldir==0)) = nan;</pre></div>
+<hr><address>Generated on Tue 09-Apr-2019 11:11:51 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
