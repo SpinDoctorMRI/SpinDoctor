@@ -4,11 +4,15 @@
 0.002									% diffusion coefficient IN
 0.002									% diffusion coefficient OUT
 0.002									% diffusion coefficient ECS
+1e4									% T2-relaxation IN
+2e4									% T2-relaxation OUT
+1e4									% T2-relaxtion ECS
 1.0			  							% initial density in IN
 1.0			  							% initial density in OUT
 1.0		  								% initial density in ECS
 0e-3		   							% permeability IN_OUT
 0e-3									% permeability OUT_ECS
 -1										% Htetgen
-'SRC\TETGEN\tetGen\win64\tetgen'        % tetgen_cmd
-'SRC/TETGEN/tetGen/mac64/tetgen'				     				     
+'SRC/TETGEN/tetGen/mac64/tetgen'        % tetgen_cmd
+				     				   
+'SRC\TETGEN\tetGen\win64\tetgen'  

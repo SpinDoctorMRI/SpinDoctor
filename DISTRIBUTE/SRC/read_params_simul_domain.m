@@ -17,6 +17,9 @@ function [params_domain_geom,params_domain_pde,params_domain_femesh] ...
 %         dcoeff_IN
 %         dcoeff_OUT
 %         dcoeff_ECS
+%         T2_IN
+%         T2_OUT
+%         T2_ECS
 %         ic_IN
 %         ic_OUT
 %         ic_ECS
@@ -51,6 +54,17 @@ params_domain_pde.dcoeff_OUT = sscanf(tline,'%f',1);
 
 tline = fgetl(fid);
 params_domain_pde.dcoeff_ECS = sscanf(tline,'%f',1);
+
+%%%% T2-relaxation
+tline = fgetl(fid);
+params_domain_pde.T2_IN = sscanf(tline,'%f',1);
+
+tline = fgetl(fid);
+params_domain_pde.T2_OUT = sscanf(tline,'%f',1);
+
+tline = fgetl(fid);
+params_domain_pde.T2_ECS = sscanf(tline,'%f',1);
+%%%%
 
 % initial conditions
 tline = fgetl(fid);

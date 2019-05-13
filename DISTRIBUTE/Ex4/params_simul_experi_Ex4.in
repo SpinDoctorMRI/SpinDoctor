@@ -7,7 +7,7 @@
 0 0 0     										% Experi: number of period of OGSE
 1												% Solve HADC
 1e-4 1e-4 										% ODE rtol,atol for HADC
-0 												% Solve BTPDE 
+1 												% Solve BTPDE 
 1e-5 1e-5										% ODE rtol, atol for BTPDE
 2 												% number of b-values
 0												% 0=specify bvec,1=specify[bmin,bmax],2 = specify[gmin,gmax];

@@ -1,5 +1,5 @@
 function [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,elapsed_time] ...
-    = BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)
+    = BTPDE(experiment,mymesh,DIFF_cmpts,T2_cmpts,kappa_bdys,IC_cmpts)
 
 % solve Bloch-Torrey equation
 % 
@@ -93,6 +93,9 @@ for icmpt = 1:mymesh.Ncmpt
     FEM_MAT{icmpt}.M = mass_matrixP1_3D(elements',volumes);
     FEM_MAT{icmpt}.A = mass_matrixP1_3D(elements',volumes,GX');
     
+    % Add T2 to the BTPDE by Van-Dang Nguyen May 13 2019
+    FEM_MAT{icmpt}.A = FEM_MAT{icmpt}.A - 1/T2_cmpts(icmpt)*FEM_MAT{icmpt}.M;
+
     % calculate the IC
     IC_Pts{icmpt} = IC_cmpts(icmpt)*ones(size(mymesh.Pts_cmpt_reorder{icmpt},2),1);
 end

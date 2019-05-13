@@ -77,7 +77,6 @@ if (include_ECS ~= 0)
 end
 
 DIFF_cmpts = zeros(1,Ncmpt);
-T2_cmpts = zeros(1,Ncmpt);
 kappa_bdys = zeros(1,Nboundary);
 
 if (include_ECS ~= 0)
@@ -91,7 +90,6 @@ else
 end
 
 DIFF_cmpts(1,ECS_cmpts_index) = params_domain_pde.dcoeff_ECS;
-T2_cmpts(1,ECS_cmpts_index) = params_domain_pde.T2_ECS;
 % the outer boundary of ECS is always impermeable
 kappa_bdys(1,Box_boundary) = 0;
 IC_cmpts(1,ECS_cmpts_index) = params_domain_pde.ic_ECS;
@@ -101,7 +99,6 @@ if (cell_shape == 2)
         OUT_cmpts_index = 1:ncell;
         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
         DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
-        T2_cmpts(1,OUT_cmpts_index) = params_domain_pde.T2_OUT;
         OUT_ECS_boundary = 1:2:2*ncell;
 		if (include_ECS ~= 0)
             kappa_bdys(1,OUT_ECS_boundary) = params_domain_pde.kappa_OUT_ECS;
@@ -111,10 +108,8 @@ if (cell_shape == 2)
         IN_cmpts_index = 1:ncell;
         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;
         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
-        T2_cmpts(1,IN_cmpts_index) = params_domain_pde.T2_IN;
         OUT_cmpts_index = ncell+1:2*ncell;
         DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
-        T2_cmpts(1,OUT_cmpts_index) = params_domain_pde.T2_OUT;
         IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;        
         IN_OUT_boundary = [1:4:4*ncell];
         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
@@ -128,7 +123,6 @@ elseif (cell_shape == 1)
     OUT_cmpts_index = 1:ncell;
     IC_cmpts(1,OUT_cmpts_index) = params_domain_pde.ic_OUT;
     DIFF_cmpts(1,OUT_cmpts_index) = params_domain_pde.dcoeff_OUT;
-    T2_cmpts(1,OUT_cmpts_index) = params_domain_pde.T2_OUT;
     if (Rratio_IN <= 0 || Rratio_IN >= 1)        
         OUT_ECS_boundary = [1:ncell];
         if (include_ECS ~= 0)
@@ -138,7 +132,6 @@ elseif (cell_shape == 1)
     else        
         IN_cmpts_index = ncell+1:2*ncell;
         DIFF_cmpts(1,IN_cmpts_index) = params_domain_pde.dcoeff_IN;
-        T2_cmpts(1,IN_cmpts_index) = params_domain_pde.T2_IN;
         IC_cmpts(1,IN_cmpts_index) = params_domain_pde.ic_IN;        
         IN_OUT_boundary = 2:2:2*ncell;
         kappa_bdys(1,IN_OUT_boundary) = params_domain_pde.kappa_IN_OUT;
