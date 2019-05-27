@@ -1,7 +1,9 @@
 function Ft = seqintprofile(time);
   % will be fixed late
   global BDELTA SDELTA SEQ OGSEPER
-  global PGSE OGSEsin OGSEcos
+  global PGSE OGSEsin OGSEcos dPGSE
+  
+  % dPGSE = 4;
   
   Ft = zeros(size(time));
 
@@ -31,8 +33,19 @@ function Ft = seqintprofile(time);
     [ii] = find(time >= BDELTA & time <= BDELTA+SDELTA);
     %ft(ii) = -cos((time(ii)-BDELTA)/OGSEPER*2*pi);  
     Ft(ii) = -sin((time(ii)-BDELTA)/OGSEPER*2*pi)*OGSEPER/(2*pi)+tmp;  
-  else
-    disp('error in seqprofile');
+    
+  elseif (SEQ == dPGSE)  
+    Ft(time >= 0 & time <= SDELTA) = time(time >= 0 & time <= SDELTA);
+    Ft(time < BDELTA & time > SDELTA ) = SDELTA ;
+    Ft(time >= BDELTA & time <= BDELTA+SDELTA) = SDELTA-(time(time >= BDELTA & time <= BDELTA+SDELTA)-BDELTA);    
+    
+    displacement = BDELTA+SDELTA;
+    Ft(time >= 0 + displacement & time <= SDELTA + displacement) = time(time >= 0 + displacement & time <= SDELTA + displacement);
+    Ft(time < BDELTA + displacement & time > SDELTA + displacement ) = SDELTA + displacement;
+    Ft(time >= BDELTA + displacement & time <= BDELTA+SDELTA + displacement) = SDELTA + displacement-(time(time >= BDELTA + displacement & time <= BDELTA+SDELTA + displacement)-(BDELTA + displacement));    
+
+  else   
+    disp(['error in seqprofile, SEQ=',num2str(SEQ)]);
     stop    
   end
 

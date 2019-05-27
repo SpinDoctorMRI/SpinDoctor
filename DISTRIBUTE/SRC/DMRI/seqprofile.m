@@ -1,11 +1,12 @@
 function ft = seqprofile(time);
   
   global BDELTA SDELTA SEQ OGSEPER
-  global PGSE OGSEsin OGSEcos
-  PGSE = 1;
-  OGSEsin = 2;
-  OGSEcos = 3;
-    
+  global PGSE OGSEsin OGSEcos dPGSE
+  % PGSE = 1;
+  % OGSEsin = 2;
+  % OGSEcos = 3;
+  % dPGSE = 4;
+  
   ft = zeros(size(time));
 
   
@@ -13,6 +14,7 @@ function ft = seqprofile(time);
 
     ft(time >= 0 & time <= SDELTA) = 1;
     ft(time >= BDELTA & time <= BDELTA+SDELTA) = -1;
+
   elseif (SEQ == OGSEsin)
       
     [ii] = find(time >= 0 & time <= SDELTA);
@@ -25,7 +27,15 @@ function ft = seqprofile(time);
     [ii] = find(time >= 0 & time <= SDELTA);
     ft(ii) = cos(time(ii)/OGSEPER*2*pi);
     [ii] = find(time >= BDELTA & time <= BDELTA+SDELTA);
-    ft(ii) = -cos((time(ii)-BDELTA)/OGSEPER*2*pi);  
+    ft(ii) = -cos((time(ii)-BDELTA)/OGSEPER*2*pi); 
+    
+    
+  elseif (SEQ == dPGSE) % double PGSE
+    ft(time >= 0 & time <= SDELTA) = 1;
+    ft(time >= BDELTA & time <= BDELTA+SDELTA) = -1;
+    displacement = BDELTA+SDELTA;
+    ft(time >= 0 + displacement & time <= SDELTA + displacement) = 1;
+    ft(time >= BDELTA + displacement & time <= BDELTA+SDELTA + displacement) = -1;  
   else
       
     disp('error in seqprofile');

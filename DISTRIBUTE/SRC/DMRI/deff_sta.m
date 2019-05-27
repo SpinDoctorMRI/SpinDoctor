@@ -1,6 +1,6 @@
 function [DEFF] = deff_sta(D0,VOL,SAu,SDELTA,BDELTA,seq,nper)
 
-global PGSE OGSEsin OGSEcos
+global PGSE OGSEsin OGSEcos dPGSE
 global SEQ OGSEPER 
 
 
