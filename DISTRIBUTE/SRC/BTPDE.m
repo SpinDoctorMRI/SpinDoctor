@@ -40,7 +40,7 @@ function [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,elapsed_time] ...
 
 global FEM_M FEM_K FEM_A FEM_Q FEM_G
 global QVAL UG 
-global BDELTA SDELTA SEQ OGSEPER 
+global BDELTA SDELTA SEQ OGSEPER dPGSE
   
 bvalues = experiment.bvalues;
 qvalues = experiment.qvalues;
@@ -124,6 +124,9 @@ for iexperi = 1:nexperi
     BDELTA = bdeltavec(iexperi);
     TE = SDELTA+BDELTA;
     SEQ = seqvec(iexperi);% for choosing case PGSE, OGSEcos or OGSEsin
+    if (SEQ == dPGSE)
+        TE = 2*(SDELTA+BDELTA);
+    end;
     omega = 2*pi*npervec(iexperi)/SDELTA;
     OGSEPER = 1./omega*2*pi;%% set up number for OGSE
     
