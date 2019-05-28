@@ -3,7 +3,7 @@ function Yout= odefun_bt_includeb(t,Y)
 
   global FEM_K FEM_A FEM_Q FEM_G
   global QVAL
-    
+ 
   
   Yout = -(FEM_K*Y+FEM_A*Y*QVAL*seqprofile(t)+FEM_Q*Y)+FEM_G*seqintprofile(t);    
   

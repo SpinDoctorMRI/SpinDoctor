@@ -35,20 +35,29 @@ function Ft = seqintprofile(time);
     Ft(ii) = -sin((time(ii)-BDELTA)/OGSEPER*2*pi)*OGSEPER/(2*pi)+tmp;  
     
   elseif (SEQ == dPGSE)  
+    global sym_s sym_ft sym_SDELTA sym_BDELTA
+    syms sym_s sym_SDELTA sym_BDELTA
+    ft=subs(sym_ft, {sym_SDELTA, sym_BDELTA}, {SDELTA, BDELTA});
+    Ft2 = double(int(ft, sym_s, 0, time));
+    
     Ft(time >= 0 & time <= SDELTA) = time(time >= 0 & time <= SDELTA);
     Ft(time <= BDELTA & time >= SDELTA ) = SDELTA ;
     Ft(time > BDELTA & time <= BDELTA+SDELTA) = SDELTA-(time(time >= BDELTA & time <= BDELTA+SDELTA)-BDELTA);    
     
     displacement = BDELTA+SDELTA;
-    Ft(time > 0 + displacement & time <= SDELTA + displacement) = time(time >= 0 + displacement & time <= SDELTA + displacement) - displacement;
-    Ft(time <= BDELTA + displacement & time > SDELTA + displacement ) = SDELTA;
-    Ft(time > BDELTA + displacement & time <= BDELTA+SDELTA + displacement) = SDELTA-(time(time >= BDELTA + displacement & time <= BDELTA+SDELTA + displacement)-(BDELTA + displacement));        
-  else  
-    global sym_s sym_ft sym_SDELTA sym_BDELTA
-    syms sym_s sym_SDELTA sym_BDELTA
-    ft=subs(sym_ft, {sym_SDELTA, sym_BDELTA}, {SDELTA, BDELTA});
-    Ft = double(int(ft, sym_s, 0, time));
-    
+    Ft(time > 0 + displacement & time <= SDELTA + displacement) = time(time >= 0 + displacement & time <= SDELTA + displacement);
+    Ft(time <= BDELTA + displacement & time > SDELTA + displacement ) = SDELTA + displacement;
+    Ft(time >= BDELTA + displacement & time <= BDELTA+SDELTA + displacement) = SDELTA + displacement-(time(time >= BDELTA + displacement & time <= BDELTA+SDELTA + displacement)-(BDELTA + displacement));    
+
+    [Ft, Ft2]
+    if abs(Ft2- Ft)>1e-6
+%         [Ft2, Ft, time]
+        stop
+    end;
+%     Ft_def = @(t) seqintprofile(t);
+%     Ft2 = integral(Ft_def, 0, time);
+%     
+  else   
     disp(['error in seqprofile, SEQ=',num2str(SEQ)]);
     stop    
   end

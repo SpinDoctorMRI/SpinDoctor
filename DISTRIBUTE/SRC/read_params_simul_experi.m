@@ -130,7 +130,6 @@ if (do_btpde ~= 0)
 	for iexperi = 1:nexperi
 		SDELTA = experiment_btpde.sdeltavec(iexperi);
 		BDELTA = experiment_btpde.bdeltavec(iexperi);
-		TE = SDELTA+BDELTA;
 		SEQ = experiment_btpde.seqvec(iexperi); % for choosing case PGSE, OGSEcos or OGSEsin
 		omega = 2*pi*experiment_btpde.npervec(iexperi)/SDELTA;
 		OGSEPER = 1./omega*2*pi;%% set up number for OGSE

@@ -26,16 +26,17 @@ function ft = seqprofile(time);
     ft(ii) = -cos((time(ii)-BDELTA)/OGSEPER*2*pi); 
     
     
-  elseif (SEQ == dPGSE) % double PGSE  
-    ft(time >= 0 & time <= SDELTA) = 1;
-    ft(time > BDELTA & time <= BDELTA+SDELTA) = -1;
-    displacement = BDELTA+SDELTA;
-    ft(time > 0 + displacement & time <= SDELTA + displacement) = 1;
-    ft(time > BDELTA + displacement & time <= BDELTA+SDELTA + displacement) = -1;
-  else
+  elseif (SEQ == dPGSE) % double PGSE
+      
     global sym_s sym_ft sym_SDELTA sym_BDELTA
     syms sym_s sym_SDELTA sym_BDELTA
     ft=double(subs(sym_ft, {sym_s, sym_SDELTA, sym_BDELTA}, {time, SDELTA, BDELTA}));
+%     ft(time >= 0 & time <= SDELTA) = 1;
+%     ft(time > BDELTA & time <= BDELTA+SDELTA) = -1;
+%     displacement = BDELTA+SDELTA;
+%     ft(time > 0 + displacement & time <= SDELTA + displacement) = 1;
+%     ft(time > BDELTA + displacement & time <= BDELTA+SDELTA + displacement) = -1;
+  else
     disp('error in seqprofile');
     stop    
   end

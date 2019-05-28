@@ -18,6 +18,11 @@ function bvaluenoq = seqbvaluenoq
   elseif (SEQ == dPGSE)
     bvaluenoq = 2*SDELTA^2*(BDELTA-SDELTA/3);
   else
+%     global sym_s sym_ft sym_SDELTA sym_BDELTA
+%     syms sym_s sym_SDELTA sym_BDELTA t
+%     ft=subs(sym_ft, {sym_SDELTA, sym_BDELTA}, {SDELTA, BDELTA});
+%     F2 = int(ft, sym_s, 0, t)^2;     
+%     bvaluenoq = double(int(F2,t,0,2*(SDELTA+BDELTA)));
     F2 = @(t) seqintprofile(t).^2;
     bvaluenoq = integral(F2,0,SDELTA+BDELTA);   
   end
