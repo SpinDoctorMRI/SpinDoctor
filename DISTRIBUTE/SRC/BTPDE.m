@@ -74,7 +74,7 @@ for icmpt = 1:mymesh.Ncmpt
     coordinates = mymesh.Pts_cmpt_reorder{icmpt};
     elements = mymesh.Ele_cmpt_reorder{icmpt};
     facets = [];
-    GX = -sqrt(-1)*UG*coordinates;
+    GX = sqrt(-1)*UG*coordinates;
     FEM_MAT{icmpt}.Q = sparse(length(coordinates),length(coordinates));
     for iboundary = 1:mymesh.Nboundary
         if (kappa_bdys(iboundary) ~= 0)
@@ -94,7 +94,7 @@ for icmpt = 1:mymesh.Ncmpt
     FEM_MAT{icmpt}.A = mass_matrixP1_3D(elements',volumes,GX');
     
     % Add T2 to the BTPDE by Van-Dang Nguyen May 13 2019
-    FEM_MAT{icmpt}.A = FEM_MAT{icmpt}.A - 1/T2_cmpts(icmpt)*FEM_MAT{icmpt}.M;
+    FEM_MAT{icmpt}.K = FEM_MAT{icmpt}.K + 1/T2_cmpts(icmpt)*FEM_MAT{icmpt}.M;
 
     % calculate the IC
     IC_Pts{icmpt} = IC_cmpts(icmpt)*ones(size(mymesh.Pts_cmpt_reorder{icmpt},2),1);
@@ -134,13 +134,16 @@ for iexperi = 1:nexperi
     %disp([SDELTA,BDELTA,npervec(iexperi)]);
     
     TLIST = [0,TE];
+    
+    USE_MIDPOINT = 1;
+    
     for ib = 1:nb
         b_start_time = clock;
         % global variable setting QVAL for ODE time stepping
         QVAL = qvalues(iexperi,ib);               
 		disp(['      qvalue ',num2str(QVAL,'%.1e')]);        
         difftime(iexperi) = seqdifftime;
-        
+                
         %% Solving for case of coupling between compartments.      
         if (DO_COUPLING == yes)
             FEM_M = FEMcouple_MAT.M;
@@ -148,12 +151,21 @@ for iexperi = 1:nexperi
             FEM_A = FEMcouple_MAT.A; %*seqprofile(state.time)*QVAL;
             FEM_Q = FEMcouple_MAT.Q;
             FEM_G = sparse(zeros(size(FEM_M,1),1));
+                       
+            if (USE_MIDPOINT==1)
+                options.tol = 1e-6;
+                options.dt = 100;
+                disp('***Coupled: start mid-point solver'); tic
+                sol=midpoint_solver(TLIST,IC_couple,options);
+                disp('***Coupled: end mid-point solver'); toc
+            else     
+                options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
+                    'Jacobian',@odejac_bt_includeb);            
+                disp('***Coupled: start ode solve ode23t'); tic
+                sol = ode23t(@odefun_bt_includeb,TLIST,IC_couple,options);
+                disp('***Coupled: end ode solve ode23t'); toc
+            end;
             
-            options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
-                'Jacobian',@odejac_bt_includeb);            
-            disp('***Coupled: start ode solve ode23t'); tic
-            sol = ode23t(@odefun_bt_includeb,TLIST,IC_couple,options);
-            disp('***Coupled: end ode solve ode23t'); toc
             for icmpt = 1:mymesh.Ncmpt
                 YOUT{iexperi}{ib}{icmpt} = sol.y(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),:);
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
@@ -167,22 +179,59 @@ for iexperi = 1:nexperi
                 FEM_A = FEM_MAT{icmpt}.A;
                 FEM_Q = FEM_MAT{icmpt}.Q;
                 FEM_G = sparse(zeros(size(FEM_M,1),1));
-                
-                options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
-                    'Jacobian',@odejac_bt_includeb);
-                %disp('***Uncoupled: start ode solver ode23t'); tic
                 ICC = IC_Pts{icmpt};
+
                 if (max(abs(ICC))<=1e-16)
                     sol.y = zeros(size(ICC,1),size(TLIST,2));
                     sol.x = TLIST;
                 else
-                    sol = ode23t(@odefun_bt_includeb,TLIST,ICC,options);
-                end
-                %disp('***Uncoupled: end ode solver ode23t'); toc
+                    if (USE_MIDPOINT==1)
+                        options.tol = 1e-6;
+                        options.dt = 100;
+                        disp('***Uncoupled: start mid-pint solver'); tic
+                        sol=midpoint_solver(TLIST,ICC,options);
+                        disp('***Uncoupled: end mid-point solver'); toc
+                    else
+                        options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
+                            'Jacobian',@odejac_bt_includeb);
+                        disp('***Uncoupled: start ode solver ode23t'); tic
+                        sol = ode23s(@odefun_bt_includeb,TLIST,ICC,options);                
+                        disp('***Uncoupled: end ode solver ode23t'); toc
+                    end
+                end;
                 YOUT{iexperi}{ib}{icmpt} = sol.y;
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-            end            
+%                 if (1==2) 
+%                     tp = TLIST(1); % previous time
+%                     dt = 100;
+%                     t = tp;
+%                     u = IC_Pts{icmpt}; 
+%                     tol = 1e-6; maxit = 10000;
+%                     u_tarray = [u];
+%                     tarray = [t];
+%                     while t < TLIST(2) + dt
+%                         Al = FEM_M - dt/2*(-FEM_K - QVAL*seqprofile(t) *FEM_A);
+%                         Ar = FEM_M + dt/2*(-FEM_K - QVAL*seqprofile(tp)*FEM_A);
+%                         [u,flag,relres,iter,resvec] = bicgstab(Al,Ar*u, tol, maxit, [], [], u);
+%                         u_tarray = [u_tarray, u];
+%                         tp = t;
+%                         t = t + dt;
+%                         tarray = [tarray, t];
+%                     end;
+%                     YOUT{iexperi}{ib}{icmpt} = u_tarray;
+%                     TOUT{iexperi}{ib}{icmpt} = tarray;
+%                     MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
+%                     
+%                     ICC = IC_Pts{icmpt};
+%                     options.tol = 1e-6;
+%                     sol=midpoint_solver(TLIST,ICC,options);
+%                     e=max(abs(sol.y - u_tarray));
+%                     if e>1e-16
+%                         stop;
+%                     end;
+%                 end;
+            end;            
         end
         elapsed_time(ib, iexperi)=etime(clock, b_start_time);
     end

@@ -1,9 +1,9 @@
 1												% number of gradient directions to simulate
 1.0 1.0 1.0 		     						% (g1,g2,g3)
-4 												% nexperi
+1 												% nexperi
 5000 5000 5000 20000							% Experi: smalldelta	
 5000 10000 20000 20000							% Experi: bigdelta
-4 4 4 4      										% Experi: gradient sequence: PGSE = 1, OGSEsin = 2, OGSEcos = 3, dPGSE = 4
+1 1 1 1      										% Experi: gradient sequence: PGSE = 1, OGSEsin = 2, OGSEcos = 3, dPGSE = 4
 0 0 0 0    										% Experi: number of period of OGSE
 0												% Solve HADC
 1e-4 1e-4 										% ODE rtol,atol for HADC
