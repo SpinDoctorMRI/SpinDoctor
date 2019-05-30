@@ -3,7 +3,7 @@ format short
 
 addpath SRC
 addpath SRC/PDE SRC/DMRI SRC/FEM SRC/GEOM SRC/TETGEN
-addpath Ex4
+addpath Ex4_T2test
 
 fname_params_cells = 'params_cells_Ex4.in';
 fname_params_simul_domain  = 'params_simul_domain_Ex4.in';
@@ -44,7 +44,7 @@ if (~isempty(mymesh))
         if (~isempty(experi_btpde))
             [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,BTPDE_elapsed_time] ...
                 = BTPDE(experi_btpde,mymesh,DIFF_cmpts,T2_cmpts,kappa_bdys,IC_cmpts);
-            PLOT_MAGNETIZATION(mymesh,YOUT,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index);
+            PLOT_MAGNETIZATION(mymesh,YOUT,OUT_cmpts_index,ECS_cmpts_index,IsN_cmpts_index);
             [ADC_cmpts,ADC_allcmpts,ADC_allcmpts_S0] = FIT_SIGNAL(MF_cmpts,MF_allcmpts,experi_btpde.bvalues);       
             [Sig_free,ADC_free_allcmpts] = ADCFREE(experi_btpde.bvalues,DIFF_cmpts,VOL_cmpts,IC_cmpts);
             PLOT_SIGNAL(experi_btpde.bvalues,MF_allcmpts,Sig_free,ADC_allcmpts_S0,ADC_allcmpts)

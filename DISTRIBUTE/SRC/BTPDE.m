@@ -154,7 +154,7 @@ for iexperi = 1:nexperi
                        
             if (USE_MIDPOINT==1)
                 options.tol = 1e-6;
-                options.dt = 100;
+                options.dt = 1000;
                 disp('***Coupled: start mid-point solver'); tic
                 sol=midpoint_solver(TLIST,IC_couple,options);
                 disp('***Coupled: end mid-point solver'); toc
@@ -188,49 +188,20 @@ for iexperi = 1:nexperi
                     if (USE_MIDPOINT==1)
                         options.tol = 1e-6;
                         options.dt = 100;
-                        disp('***Uncoupled: start mid-pint solver'); tic
+                        disp('***Uncoupled: start mid-point solver'); tic
                         sol=midpoint_solver(TLIST,ICC,options);
                         disp('***Uncoupled: end mid-point solver'); toc
                     else
                         options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
                             'Jacobian',@odejac_bt_includeb);
-                        disp('***Uncoupled: start ode solver ode23t'); tic
+                        disp('***Uncoupled: start ode solver ode23s'); tic
                         sol = ode23s(@odefun_bt_includeb,TLIST,ICC,options);                
-                        disp('***Uncoupled: end ode solver ode23t'); toc
+                        disp('***Uncoupled: end ode solver ode23s'); toc
                     end
                 end;
                 YOUT{iexperi}{ib}{icmpt} = sol.y;
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-%                 if (1==2) 
-%                     tp = TLIST(1); % previous time
-%                     dt = 100;
-%                     t = tp;
-%                     u = IC_Pts{icmpt}; 
-%                     tol = 1e-6; maxit = 10000;
-%                     u_tarray = [u];
-%                     tarray = [t];
-%                     while t < TLIST(2) + dt
-%                         Al = FEM_M - dt/2*(-FEM_K - QVAL*seqprofile(t) *FEM_A);
-%                         Ar = FEM_M + dt/2*(-FEM_K - QVAL*seqprofile(tp)*FEM_A);
-%                         [u,flag,relres,iter,resvec] = bicgstab(Al,Ar*u, tol, maxit, [], [], u);
-%                         u_tarray = [u_tarray, u];
-%                         tp = t;
-%                         t = t + dt;
-%                         tarray = [tarray, t];
-%                     end;
-%                     YOUT{iexperi}{ib}{icmpt} = u_tarray;
-%                     TOUT{iexperi}{ib}{icmpt} = tarray;
-%                     MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-%                     
-%                     ICC = IC_Pts{icmpt};
-%                     options.tol = 1e-6;
-%                     sol=midpoint_solver(TLIST,ICC,options);
-%                     e=max(abs(sol.y - u_tarray));
-%                     if e>1e-16
-%                         stop;
-%                     end;
-%                 end;
             end;            
         end
         elapsed_time(ib, iexperi)=etime(clock, b_start_time);

@@ -6,7 +6,6 @@ function Yout= odefun_bt_includeb(t,Y)
  
   
   Yout = -(FEM_K*Y+FEM_A*Y*QVAL*seqprofile(t)+FEM_Q*Y)+FEM_G*seqintprofile(t);    
-  
 
   %[Yout,flag,relres,iter,resvec] = pcg(FEM_M,Yout,1e-6,150,FEM_M_Prec,FEM_M_Prec');
  
