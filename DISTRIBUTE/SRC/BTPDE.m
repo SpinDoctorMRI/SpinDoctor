@@ -154,7 +154,7 @@ for iexperi = 1:nexperi
                        
             if (USE_MIDPOINT==1)
                 options.tol = 1e-6;
-                options.dt = 1000;
+                options.dt = 200;
                 disp('***Coupled: start mid-point solver'); tic
                 sol=midpoint_solver(TLIST,IC_couple,options);
                 disp('***Coupled: end mid-point solver'); toc
@@ -171,6 +171,8 @@ for iexperi = 1:nexperi
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
             end
+            sol.y =[];
+            sol.x =[];
         else
             %% Solving for case of no coupling between compartments.            
             for icmpt = 1:mymesh.Ncmpt
@@ -187,7 +189,7 @@ for iexperi = 1:nexperi
                 else
                     if (USE_MIDPOINT==1)
                         options.tol = 1e-6;
-                        options.dt = 100;
+                        options.dt = 200;
                         disp('***Uncoupled: start mid-point solver'); tic
                         sol=midpoint_solver(TLIST,ICC,options);
                         disp('***Uncoupled: end mid-point solver'); toc
@@ -202,7 +204,9 @@ for iexperi = 1:nexperi
                 YOUT{iexperi}{ib}{icmpt} = sol.y;
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-            end;            
+                sol.y =[];
+                sol.x =[];
+            end;  
         end
         elapsed_time(ib, iexperi)=etime(clock, b_start_time);
     end

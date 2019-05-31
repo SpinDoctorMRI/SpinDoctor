@@ -44,13 +44,6 @@ function Ft = seqintprofile(time);
     Ft(time <= BDELTA + displacement & time > SDELTA + displacement ) = SDELTA;
     Ft(time > BDELTA + displacement & time <= BDELTA+SDELTA + displacement) = SDELTA-(time(time >= BDELTA + displacement & time <= BDELTA+SDELTA + displacement)-(BDELTA + displacement));        
   else  
-    global sym_s sym_ft sym_SDELTA sym_BDELTA
-    syms sym_s sym_SDELTA sym_BDELTA
-    ft=subs(sym_ft, {sym_SDELTA, sym_BDELTA}, {SDELTA, BDELTA});
-    Ft = double(int(ft, sym_s, 0, time));
-    
-    disp(['error in seqprofile, SEQ=',num2str(SEQ)]);
-    stop    
+    ft = @(t) seqprofile(t);
+    Ft = integral(ft,0,time,'AbsTol',1e-6,'RelTol',1e-3);   
   end
-
-  %disp([time,ft]);
