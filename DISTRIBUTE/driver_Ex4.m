@@ -1,12 +1,18 @@
-clear all; 
+close all; clear all; path(pathdef); clc;
 format short
 
 addpath SRC
 addpath SRC/PDE SRC/DMRI SRC/FEM SRC/GEOM SRC/TETGEN
 addpath Ex4
 
+T2_label='T2_Inf_Inf_Inf';
+% T2_label='T2_80e3_80e3_80e3';
+% T2_label='T2_40e3_40e3_40e3';
+% T2_label='T2_20e3_20e3_20e3';
+% T2_label='T2_40e3_20e3_80e3';
+
 fname_params_cells = 'params_cells_Ex4.in';
-fname_params_simul_domain  = 'params_simul_domain_Ex4.in';
+fname_params_simul_domain  = ['params_simul_domain_Ex4_',T2_label,'.in'];
 fname_params_simul_experi = 'params_simul_experi_Ex4.in';
 
 [params_cells,fname_cells] = create_geom(fname_params_cells);
@@ -77,4 +83,8 @@ if (~isempty(mymesh))
     end
 
 end
+YOUT = [];
+TOUT = [];
 close all;
+
+save([T2_label,'_PGSE'])

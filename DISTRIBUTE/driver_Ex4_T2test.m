@@ -1,4 +1,4 @@
-clear all; 
+close all; clear all; path(pathdef); clc;
 format short
 
 addpath SRC
