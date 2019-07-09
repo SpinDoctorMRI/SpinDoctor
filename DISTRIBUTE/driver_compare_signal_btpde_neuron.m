@@ -7,6 +7,7 @@ addpath SRC/PDE SRC/DMRI SRC/FEM SRC/GEOM SRC/TETGEN
 
 imesh = 0;
 
+% Figure 1
 % imesh = imesh+1; meshname_btpde{imesh} = '03b_spindle4aACC';
 % simul_tol{imesh} = [1e-2,1e-4]; simul_h{imesh} = -1; simul_2d{imesh}=1;
 % imesh = imesh+1; meshname_btpde{imesh} = '03b_spindle4aACC_dendrites_1';
@@ -21,6 +22,7 @@ imesh = 0;
 % bdeltavec = [5000,43000,433000];
 % bvaluevec = [1000,4000];
 
+% Figure 2
 imesh = imesh+1; meshname_btpde{imesh} = '03a_spindle2aFI';
 simul_tol{imesh} = [1e-2,1e-4]; simul_h{imesh} = -1;simul_2d{imesh}=1;
 imesh = imesh+1; meshname_btpde{imesh} = '03a_spindle2aFI_dendrites_1';
@@ -34,6 +36,7 @@ ngdirvec = [90,90,90];
 bdeltavec = [5000,43000,433000];
 bvaluevec = [1000,4000];
 
+% Figure 3
 % imesh = imesh+1; meshname_btpde{imesh} = '04b_spindle3aFI_dendrites_1';
 % simul_tol{imesh} = [1e-2,1e-4]; simul_h{imesh} = -1;simul_2d{imesh}=1;
 % imesh = imesh+1; meshname_btpde{imesh} = '03b_spindle7aACC_dendrites_1';
@@ -43,6 +46,7 @@ bvaluevec = [1000,4000];
 % bdeltavec = [5000,43000,433000];
 % bvaluevec = [1000,4000];
 
+% Figure 4
 % imesh = imesh+1; meshname_btpde{imesh} = '25o_pyramidal18aFI';
 % simul_tol{imesh} = [1e-2,1e-4]; simul_h{imesh} = -1;simul_2d{imesh}=0;
 % imesh = imesh+1; meshname_btpde{imesh} = '25o_pyramidal18aFI';
