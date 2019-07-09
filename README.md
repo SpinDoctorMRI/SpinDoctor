@@ -10,7 +10,7 @@ Software requirements: SpinDoctor NeuronModule is compatible with MATLAB (versio
 
 Getting started
 1) The DISTRIBUTE folder contains a general purpose driver called driver_spindoctor_btpde_neuron_clean.m 
-2) Two sets of input files are provided, one for simulations in one gradient directio, and one for HARDI simulations.
+2) Two sets of input files are provided, one for simulations in one gradient direction, and one for HARDI simulations.
 3) The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
 4) Other functions are stored in subfolders of DISTRIBUTE/SRC.
 5) Documentation of the top level functions can be found in DOC/
