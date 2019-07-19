@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PLOT_HARDI_PT</title>
+  <meta name="keywords" content="PLOT_HARDI_PT">
+  <meta name="description" content="plot ngdir original directions in which the ADC or SIG was simulated and 900 interpolated directions">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; PLOT_HARDI_PT.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PLOT_HARDI_PT
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>plot ngdir original directions in which the ADC or SIG was simulated and 900 interpolated directions</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function PLOT_HARDI_PT(points,SIG_allcmpts_alldir,fig_title) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> plot ngdir original directions in which the ADC or SIG was simulated and 900 interpolated directions
+ 
+ Input: 
+     1. points (ngdir directions)
+     2. ADC_allcmpts_alldir
+     
+ Output:
+     1 figure with title of &quot;ADC in ngdir directions&quot;</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PLOT_HARDI_PT(points,SIG_allcmpts_alldir,fig_title)</a>
+0002 
+0003 <span class="comment">% plot ngdir original directions in which the ADC or SIG was simulated and 900 interpolated directions</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Input:</span>
+0006 <span class="comment">%     1. points (ngdir directions)</span>
+0007 <span class="comment">%     2. ADC_allcmpts_alldir</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Output:</span>
+0010 <span class="comment">%     1 figure with title of &quot;ADC in ngdir directions&quot;</span>
+0011 
+0012 ngdir = size(points,1);
+0013 DT = delaunayTriangulation(points);
+0014 [C_sph,v] = convexHull(DT);
+0015 
+0016 SIG_interp = SIG_allcmpts_alldir;
+0017 SIG_alldir = SIG_interp.*points;
+0018         
+0019 figure; hold on;
+0020 
+0021 ADC_Ellipsoid = trisurf(C_sph,SIG_alldir(:,1),SIG_alldir(:,2),<span class="keyword">...</span>
+0022     SIG_alldir(:,3),SIG_interp,<span class="string">'facealpha'</span>,0.9); 
+0023 
+0024 view([2,2,1]); caxis([0,1]); colorbar; 
+0025 axis equal;
+0026 ADC_Ellipsoid.EdgeColor = <span class="string">'none'</span>;
+0027 
+0028 xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
+0029 title([<span class="string">'SIG in '</span>,num2str(ngdir),<span class="string">' directions. '</span>,fig_title]);
+0030 
+0031 plot3(SIG_allcmpts_alldir.*points(:,1),SIG_allcmpts_alldir.*points(:,2),<span class="keyword">...</span>
+0032     SIG_allcmpts_alldir.*points(:,3),<span class="string">'k.'</span>,<span class="string">'markersize'</span>,5);</pre></div>
+<hr><address>Generated on Thu 18-Jul-2019 21:15:51 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
