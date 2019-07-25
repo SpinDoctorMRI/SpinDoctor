@@ -5,6 +5,7 @@ SpinDoctor is a software package that performs numerical simulations of diffusio
 The NeuronModule solves the Bloch-Torrey PDE on neurons.  The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations.  The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
 
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
+
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
 Software requirements: SpinDoctor NeuronModule is compatible with MATLAB (version R2017b or later).
