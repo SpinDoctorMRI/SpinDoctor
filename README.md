@@ -1,39 +1,23 @@
-# SpinDoctor
+# SpinDoctor MatrixFormalismModule
 
-SpinDoctor is a software package that performs numerical simulations for diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
+SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.  
 
-SpinDoctor can be used 
-
-1) to solve the Bloch-Torrey PDE to obtain the dMRI signal 
-(the toolbox provides a way of robustly fitting the dMRI signal to obtain the fitted Apparent Diffusion Coefficient (ADC)); 
-2) to solve the diffusion equation (DE) of the H-ADC model to obtain the ADC;
-3) a short-time approximation formula for the ADC is also included in the toolbox for comparison with the simulated ADC.
-
-The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations.
-The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
-
-SpinDoctor provides built-in options of including 
-1) spherical cells with a nucleus; 
-2) cylindrical cells with a myelin layer; 
-3) an extra-cellular space (ECS) enclosed either 
-a) in a box or b) in a tight wrapping around the cells; 
-4) deformation of canonical cells by bending and twisting.  
-5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeabilty).
-Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo. 
+The MatrixFormalismModule computes a closed form representation of the diffusion MRI signal called Matrix Formalism, that is based on the eigendecomposition of the Laplace operator, defined in the diffusion geometry.  Currently, it computes this representations in neurons subject to impermeable boundary conditions, for the PGSE sequence.  Permeable membranes and general diffusion-encoding sequences are subjects of future work.
 
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
-
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
-Software requirements: SpinDoctor is compatible with MATLAB (version R2017b or later) together with the Partial Differential Equation Toolbox.
+Software requirements: SpinDoctor MatrixFormalismModule is compatible with MATLAB (version R2017b or later).
 
 Getting started
-1) The DISTRIBUTE folder contains drivers for examples in the SpinDoctor paper as well as a general purpose driver called driver_spindoctor.m
-2) The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
-3) Other functions are stored in subfolders of DISTRIBUTE/SRC.
-4) Documentation of the top level functions can be found in DOC/
 
-Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
+    The DISTRIBUTE folder contains a general purpose driver.
+    Two sets of input files are provided, one for simulations in one gradient direction, and one for HARDI simulations.
+    The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
+    Other functions are stored in subfolders of DISTRIBUTE/SRC.
+    Documentation of the top level functions can be found in DOC/
+
+Authors: Jing-Rebecca Li, Try Nguyen Tran, Van-Dang Nguyen. 
 
 Copyright (C) 2019
 
