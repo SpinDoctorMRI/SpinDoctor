@@ -5,6 +5,7 @@ SpinDoctor is a software package that performs numerical simulations of diffusio
 The MatrixFormalismModule computes a closed form representation of the diffusion MRI signal called Matrix Formalism, that is based on the eigendecomposition of the Laplace operator, defined in the diffusion geometry.  Currently, it computes this representations in neurons subject to impermeable boundary conditions, for the PGSE sequence.  Permeable membranes and general diffusion-encoding sequences are subjects of future work.
 
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
+
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
 Software requirements: SpinDoctor MatrixFormalismModule is compatible with MATLAB (version R2017b or later).
