@@ -27,6 +27,10 @@ Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebe
 
 Software requirements: SpinDoctor is compatible with MATLAB (version R2017b or later) together with the Partial Differential Equation Toolbox.
 
+New features
+1) Include T2-relaxation.
+2) Include double-PGSE and allow for arbitrary diffusion pulses.
+
 Getting started
 1) The DISTRIBUTE folder contains drivers for examples in the SpinDoctor paper as well as a general purpose driver called driver_spindoctor.m
 2) The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
