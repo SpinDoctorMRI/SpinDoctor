@@ -1,6 +1,6 @@
 # SpinDoctor
 
-SpinDoctor is a software package that performs numerical simulations for diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
+SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
 
 SpinDoctor can be used 
 
