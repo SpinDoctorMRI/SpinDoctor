@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of SIG_MF_HARDI</title>
+  <meta name="keywords" content="SIG_MF_HARDI">
+  <meta name="description" content="compute the Matrix Formalism signal">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; SIG_MF_HARDI.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>SIG_MF_HARDI
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>compute the Matrix Formalism signal</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [SIG_EIG_cmpts_alldir,SIG_EIG_allcmpts_alldir,ctime_alldir]= SIG_MF_HARDI(experiment,VOL_cmpts,IC_cmpts,EIG_value_cmpts,EIG_proj_cmpts,points_gdir,graddir_index,negii) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> compute the Matrix Formalism signal 
+ for ngdir_total directions uniformly distributed on the sphere.
+ 
+ Input:
+     1. experiment is a structure with 10 elements:
+         ngdir_total 
+         gdir        
+         sdeltavec   
+         bdeltavec   
+         seqvec       
+         npervec     
+         rtol        
+         atol        
+         qvalues     
+         bvalues        
+     2. VOL_cmpts
+     3. IC_cmpts
+     4. EIG_value_cmpts
+     5. EIG_proj_cmpts
+     6. points_gdir
+     7. graddir_index
+     8. negii
+
+ Output:
+     1. SIG_EIG_cmpts_alldir
+     2. SIG_EIG_allcmpts_alldir
+     3. ctime_alldir</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [SIG_EIG_cmpts_alldir,SIG_EIG_allcmpts_alldir,ctime_alldir] </a><span class="keyword">...</span>
+0002     = SIG_MF_HARDI(experiment,VOL_cmpts,<span class="keyword">...</span>
+0003     IC_cmpts,EIG_value_cmpts,EIG_proj_cmpts,<span class="keyword">...</span>
+0004     points_gdir,graddir_index,negii)
+0005 
+0006 <span class="comment">% compute the Matrix Formalism signal</span>
+0007 <span class="comment">% for ngdir_total directions uniformly distributed on the sphere.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Input:</span>
+0010 <span class="comment">%     1. experiment is a structure with 10 elements:</span>
+0011 <span class="comment">%         ngdir_total</span>
+0012 <span class="comment">%         gdir</span>
+0013 <span class="comment">%         sdeltavec</span>
+0014 <span class="comment">%         bdeltavec</span>
+0015 <span class="comment">%         seqvec</span>
+0016 <span class="comment">%         npervec</span>
+0017 <span class="comment">%         rtol</span>
+0018 <span class="comment">%         atol</span>
+0019 <span class="comment">%         qvalues</span>
+0020 <span class="comment">%         bvalues</span>
+0021 <span class="comment">%     2. VOL_cmpts</span>
+0022 <span class="comment">%     3. IC_cmpts</span>
+0023 <span class="comment">%     4. EIG_value_cmpts</span>
+0024 <span class="comment">%     5. EIG_proj_cmpts</span>
+0025 <span class="comment">%     6. points_gdir</span>
+0026 <span class="comment">%     7. graddir_index</span>
+0027 <span class="comment">%     8. negii</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">% Output:</span>
+0030 <span class="comment">%     1. SIG_EIG_cmpts_alldir</span>
+0031 <span class="comment">%     2. SIG_EIG_allcmpts_alldir</span>
+0032 <span class="comment">%     3. ctime_alldir</span>
+0033 
+0034 <span class="keyword">global</span> BDELTA SDELTA SEQ OGSEPER
+0035 
+0036 sdeltavec = experiment.sdeltavec;
+0037 bdeltavec = experiment.bdeltavec;
+0038 seqvec = experiment.seqvec;
+0039 npervec = experiment.npervec;
+0040 
+0041 Ncmpt = length(VOL_cmpts);
+0042 
+0043 VOL_allcmpts = sum(VOL_cmpts);
+0044 VOL_frac = VOL_cmpts/VOL_allcmpts;
+0045 
+0046 nexperi = length(sdeltavec);
+0047 nb = size(experiment.bvalues,2);
+0048 
+0049 ngdir_total = size(points_gdir,1);
+0050 ndir = length(graddir_index);
+0051 
+0052 SIG_EIG_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi,nb);
+0053 
+0054 
+0055 ctime_alldir = nan*ones(Ncmpt,ngdir_total,nexperi,nb);
+0056 
+0057 <span class="keyword">for</span> icmpt = 1:Ncmpt
+0058     L_mat = diag(EIG_value_cmpts{icmpt});
+0059     nexperi = length(sdeltavec);
+0060     <span class="keyword">for</span> iexperi = 1:nexperi
+0061         bvec = experiment.bvalues(iexperi,:);
+0062         nb = length(bvec);
+0063         SDELTA = sdeltavec(iexperi);
+0064         BDELTA = bdeltavec(iexperi);
+0065         TE = SDELTA+BDELTA;
+0066         SEQ = seqvec(iexperi);<span class="comment">% for choosing case PGSE, OGSEcos or OGSEsin</span>
+0067         omega = 2*pi*npervec(iexperi)/SDELTA;
+0068         OGSEPER = 1./omega*2*pi;<span class="comment">%% set up number for OGSE</span>
+0069         bvaluenoq(iexperi) = seqbvaluenoq;
+0070         
+0071         <span class="keyword">for</span> ib = 1:nb
+0072             
+0073             gv = sqrt(bvec(ib)/bvaluenoq(iexperi));
+0074             tic
+0075             <span class="keyword">for</span> idir = 1:ndir
+0076                 
+0077                 b_start_time = clock;
+0078                 
+0079                 gdir = points_gdir(graddir_index(idir),:)';
+0080                 gdir = gdir/norm(gdir);
+0081                 W_mat = squeeze(EIG_proj_cmpts{icmpt}(1,:,:)*gdir(1)<span class="keyword">...</span>
+0082                     +EIG_proj_cmpts{icmpt}(2,:,:)*gdir(2)<span class="keyword">...</span>
+0083                     +EIG_proj_cmpts{icmpt}(3,:,:)*gdir(3));                                
+0084                 V_mat = L_mat+sqrt(-1)*W_mat*gv;                
+0085                 [V,D] = eig(V_mat);                
+0086                 <span class="comment">% V_mat_trans = L_mat-sqrt(-1)*W_mat*gv;</span>
+0087                 invV = inv(V);
+0088                 H1 = V(1,:)*diag(exp(-SDELTA*diag(D)))<span class="keyword">...</span>
+0089                     *invV*diag(exp(-(BDELTA-SDELTA)*EIG_value_cmpts{icmpt}))<span class="keyword">...</span>
+0090                     *(invV'*diag(exp(-SDELTA*diag(D)))'*V(1,:)');              
+0091                 SIG_EIG_cmpts_alldir(graddir_index(idir),icmpt,iexperi,ib)<span class="keyword">...</span>
+0092                     = H1(1,1)*VOL_cmpts(icmpt)*IC_cmpts(icmpt);                
+0093                 <span class="keyword">if</span> (~isempty(negii{idir}))                
+0094                     SIG_EIG_cmpts_alldir(negii{idir},icmpt,iexperi,ib) <span class="keyword">...</span>
+0095                     = SIG_EIG_cmpts_alldir(graddir_index(idir),icmpt,iexperi,ib);
+0096                 <span class="keyword">end</span>
+0097                  
+0098                 ctime_alldir(icmpt,graddir_index(idir),iexperi,ib) = etime(clock, b_start_time);
+0099                 
+0100             <span class="keyword">end</span>
+0101             toc
+0102         <span class="keyword">end</span>
+0103     <span class="keyword">end</span>
+0104 <span class="keyword">end</span>
+0105 
+0106 SIG_EIG_allcmpts_alldir = zeros(ngdir_total,nexperi,nb);
+0107 <span class="keyword">for</span> iexperi = 1:nexperi
+0108     <span class="keyword">for</span> ib = 1:nb
+0109         <span class="keyword">for</span> icmpt = 1:Ncmpt
+0110             SIG_EIG_allcmpts_alldir(:,iexperi,ib) <span class="keyword">...</span>
+0111                 = SIG_EIG_allcmpts_alldir(:,iexperi,ib) <span class="keyword">...</span>
+0112                 + squeeze(SIG_EIG_cmpts_alldir(:,icmpt,iexperi,ib));
+0113         <span class="keyword">end</span>
+0114     <span class="keyword">end</span>
+0115 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 26-Jul-2019 11:26:32 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

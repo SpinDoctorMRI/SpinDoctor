@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of read_params_simul_experi</title>
+  <meta name="keywords" content="read_params_simul_experi">
+  <meta name="description" content="read experiment parameters">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; read_params_simul_experi.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>read_params_simul_experi
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>read experiment parameters</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [experiment,experiment_hadc,experiment_btpde]= read_params_simul_experi(fname_experiment) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> read experiment parameters
+ 
+ Input:
+         fname_experiment
+             
+ Output:
+ 
+     1. experiment is a structure with 6 elements:
+         ngdir_total 
+         gdir        
+         sdeltavec   
+         bdeltavec    
+         seqvec       
+         npervec      
+         
+     2. experiment_hadc is a structure with 8 elements:
+         ngdir_total 
+         gdir         
+         sdeltavec    
+         bdeltavec    
+         seqvec       
+         npervec     
+         rtol        
+         atol        
+ 
+     3. experiment_btpde is a structure with 10 elements:
+         ngdir_total 
+         gdir         
+         sdeltavec    
+         bdeltavec    
+         seqvec       
+         npervec     
+         rtol        
+         atol        
+         qvalues     
+         bvalues</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [experiment,experiment_hadc,experiment_btpde] </a><span class="keyword">...</span>
+0002     = read_params_simul_experi(fname_experiment)
+0003 
+0004 <span class="comment">% read experiment parameters</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Input:</span>
+0007 <span class="comment">%         fname_experiment</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Output:</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%     1. experiment is a structure with 6 elements:</span>
+0012 <span class="comment">%         ngdir_total</span>
+0013 <span class="comment">%         gdir</span>
+0014 <span class="comment">%         sdeltavec</span>
+0015 <span class="comment">%         bdeltavec</span>
+0016 <span class="comment">%         seqvec</span>
+0017 <span class="comment">%         npervec</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%     2. experiment_hadc is a structure with 8 elements:</span>
+0020 <span class="comment">%         ngdir_total</span>
+0021 <span class="comment">%         gdir</span>
+0022 <span class="comment">%         sdeltavec</span>
+0023 <span class="comment">%         bdeltavec</span>
+0024 <span class="comment">%         seqvec</span>
+0025 <span class="comment">%         npervec</span>
+0026 <span class="comment">%         rtol</span>
+0027 <span class="comment">%         atol</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%     3. experiment_btpde is a structure with 10 elements:</span>
+0030 <span class="comment">%         ngdir_total</span>
+0031 <span class="comment">%         gdir</span>
+0032 <span class="comment">%         sdeltavec</span>
+0033 <span class="comment">%         bdeltavec</span>
+0034 <span class="comment">%         seqvec</span>
+0035 <span class="comment">%         npervec</span>
+0036 <span class="comment">%         rtol</span>
+0037 <span class="comment">%         atol</span>
+0038 <span class="comment">%         qvalues</span>
+0039 <span class="comment">%         bvalues</span>
+0040 
+0041 SEQ_DEFINITIONS
+0042 <span class="keyword">global</span> QVAL
+0043 <span class="keyword">global</span> BVAL
+0044 <span class="keyword">global</span> BDELTA SDELTA SEQ OGSEPER 
+0045 
+0046 ndim = 3;
+0047 clear bvec;
+0048 
+0049 fid=fopen(fname_experiment);
+0050 
+0051 tline = fgetl(fid);
+0052 experiment.ngdir_total= sscanf(tline,<span class="string">'%f'</span>,1);
+0053 
+0054 tline = fgetl(fid);
+0055 experiment.gdir= sscanf(tline,<span class="string">'%f'</span>,ndim);
+0056 experiment.gdir = experiment.gdir/norm(experiment.gdir);
+0057 
+0058 tline = fgetl(fid);
+0059 nd= sscanf(tline,<span class="string">'%f'</span>,1);
+0060 
+0061 tline = fgetl(fid);
+0062 experiment.sdeltavec= sscanf(tline,<span class="string">'%f'</span>,nd);
+0063 
+0064 tline = fgetl(fid);
+0065 experiment.bdeltavec= sscanf(tline,<span class="string">'%f'</span>,nd);
+0066 
+0067 tline = fgetl(fid);
+0068 experiment.seqvec= sscanf(tline,<span class="string">'%f'</span>,nd);
+0069 tline = fgetl(fid);
+0070 experiment.npervec= sscanf(tline,<span class="string">'%f'</span>,nd);
+0071 
+0072 tline = fgetl(fid);
+0073 do_hadc = sscanf(tline,<span class="string">'%f'</span>,1);
+0074 tline = fgetl(fid);
+0075 atmp= sscanf(tline,<span class="string">'%f'</span>,2);
+0076 <span class="keyword">if</span> (do_hadc ~= 0)
+0077     experiment_hadc = experiment;
+0078     experiment_hadc.rtol= atmp(1);
+0079     experiment_hadc.atol = atmp(2);
+0080 <span class="keyword">else</span>
+0081     experiment_hadc = [];
+0082 <span class="keyword">end</span>
+0083 
+0084 tline = fgetl(fid);
+0085 do_btpde = sscanf(tline,<span class="string">'%f'</span>,1);
+0086 tline = fgetl(fid);
+0087 atmp= sscanf(tline,<span class="string">'%f'</span>,2);
+0088 
+0089 <span class="keyword">if</span> (do_btpde ~= 0)
+0090     experiment_btpde = experiment;
+0091     experiment_btpde.rtol = atmp(1);
+0092     experiment_btpde.atol = atmp(2);
+0093     tline = fgetl(fid);
+0094     nb = sscanf(tline,<span class="string">'%f'</span>,1);
+0095 
+0096     tline = fgetl(fid);
+0097     use_blimits= sscanf(tline,<span class="string">'%f'</span>,1);
+0098 
+0099     tline = fgetl(fid);
+0100     const_q = sscanf(tline,<span class="string">'%f'</span>,1);
+0101 
+0102     <span class="keyword">if</span> (use_blimits == 0)
+0103         tline = fgetl(fid);
+0104         bvec= sscanf(tline,<span class="string">'%f'</span>,nb);
+0105         qvec = [];
+0106     <span class="keyword">elseif</span> (use_blimits == 1)
+0107         tline = fgetl(fid);
+0108         blimits = sscanf(tline,<span class="string">'%f'</span>,2);
+0109         bvec = linspace(blimits(1),blimits(2),nb);
+0110         qvec = [];
+0111     <span class="keyword">elseif</span> (use_blimits == 2)
+0112         tline = fgetl(fid);
+0113         glimits = sscanf(tline,<span class="string">'%f'</span>,2);
+0114         qvec = linspace(glimits(1),glimits(2),nb);
+0115         bvec = [];
+0116     <span class="keyword">end</span>    
+0117 <span class="keyword">else</span>
+0118     experiment_btpde = [];
+0119 <span class="keyword">end</span>
+0120 
+0121 fclose(fid);
+0122 
+0123 <span class="keyword">if</span> (do_btpde ~= 0)
+0124     nb = max(length(qvec),length(bvec));
+0125     nexperi = length(experiment_btpde.sdeltavec);
+0126 
+0127     experiment_btpde.qvalues = zeros(nexperi,nb);
+0128     experiment_btpde.bvalues = zeros(nexperi,nb);
+0129 
+0130     <span class="keyword">for</span> iexperi = 1:nexperi
+0131         SDELTA = experiment_btpde.sdeltavec(iexperi);
+0132         BDELTA = experiment_btpde.bdeltavec(iexperi);
+0133         TE = SDELTA+BDELTA;
+0134         SEQ = experiment_btpde.seqvec(iexperi); <span class="comment">% for choosing case PGSE, OGSEcos or OGSEsin</span>
+0135         omega = 2*pi*experiment_btpde.npervec(iexperi)/SDELTA;
+0136         OGSEPER = 1./omega*2*pi;<span class="comment">%% set up number for OGSE</span>
+0137         
+0138         <span class="keyword">for</span> ib = 1:nb
+0139             <span class="keyword">if</span> (length(bvec) == 0)
+0140                 experiment_btpde.qvalues(iexperi,ib) = qvec(ib);
+0141                 QVAL = experiment_btpde.qvalues(iexperi,ib);
+0142                 
+0143                 experiment_btpde.bvalues(iexperi,ib) = seqbvaluenoq*experiment_btpde.qvalues(iexperi,ib)^2;
+0144             <span class="keyword">else</span>
+0145                 <span class="keyword">if</span> (iexperi == 1 | const_q ~= 1)
+0146                     experiment_btpde.bvalues(iexperi,ib) = bvec(ib);
+0147                     BVAL = experiment_btpde.bvalues(iexperi,ib);
+0148                     experiment_btpde.qvalues(iexperi,ib)  = sqrt(experiment_btpde.bvalues(iexperi,ib)/seqbvaluenoq); <span class="comment">% water proton gyromagnetic ratio* norm of g</span>
+0149                 <span class="keyword">else</span>
+0150                     experiment_btpde.qvalues(iexperi,ib) = experiment_btpde.qvalues(1,ib);
+0151                     QVAL = experiment_btpde.qvalues(iexperi,ib);
+0152                     experiment_btpde.bvalues(iexperi,ib) = seqbvaluenoq*experiment_btpde.qvalues(iexperi,ib)^2;
+0153                 <span class="keyword">end</span>
+0154             <span class="keyword">end</span>
+0155         <span class="keyword">end</span>
+0156     <span class="keyword">end</span>
+0157 <span class="keyword">end</span>
+0158 
+0159</pre></div>
+<hr><address>Generated on Fri 26-Jul-2019 11:26:32 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

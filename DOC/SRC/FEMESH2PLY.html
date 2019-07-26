@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of FEMESH2PLY</title>
+  <meta name="keywords" content="FEMESH2PLY">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; FEMESH2PLY.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>FEMESH2PLY
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [Pts_new,Fac_new,meshlimits] = FEMESH2PLY(mymesh,fname_tetgen) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Pts_new,Fac_new,meshlimits] = FEMESH2PLY(mymesh,fname_tetgen)</a>
+0002 
+0003 <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0004                  
+0005     Fac = [];
+0006     Pts_index = [];
+0007     <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0008         Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}]; 
+0009         Pts_index = [Pts_index;mymesh.Pts_boundary_reorder{icmpt}{iboundary}]; 
+0010     <span class="keyword">end</span>
+0011     
+0012     Pts_index = unique(Pts_index);
+0013     npt = length(Pts_index)
+0014     
+0015     Pts_new{icmpt} = zeros(3,npt);
+0016     <span class="keyword">for</span> jj = 1:3
+0017         Pts_new{icmpt}(jj,:) = mymesh.Pts_cmpt_reorder{icmpt}(jj,Pts_index);
+0018     <span class="keyword">end</span>
+0019     
+0020     nnodes = size(mymesh.Pts_cmpt_reorder{icmpt},2);    
+0021     nodesindex = zeros(nnodes,1); 
+0022     <span class="keyword">for</span> ipt = 1:npt
+0023         nodesindex(Pts_index(ipt),1) = ipt; 
+0024     <span class="keyword">end</span>
+0025     
+0026     nfac = size(Fac,2);
+0027     Fac_new{icmpt} = zeros(size(Fac));
+0028     
+0029     <span class="keyword">for</span> ifac = 1:nfac
+0030         <span class="keyword">for</span> jj = 1:3
+0031             index_new = nodesindex(Fac(jj,ifac),1);
+0032             Fac_new{icmpt}(jj,ifac) = index_new;
+0033         <span class="keyword">end</span>
+0034     <span class="keyword">end</span>
+0035     
+0036     figure; 
+0037     h = trisurf(Fac_new{icmpt}(1:3,1:nfac)',Pts_new{icmpt}(1,1:npt),Pts_new{icmpt}(2,1:npt),<span class="keyword">...</span>
+0038         Pts_new{icmpt}(3,1:npt),<span class="string">'facealpha'</span>,0.1);
+0039     axis equal;
+0040     xlabel(<span class="string">'x'</span>);
+0041     ylabel(<span class="string">'y'</span>);
+0042     zlabel(<span class="string">'z'</span>);
+0043         
+0044     filename = [fname_tetgen,<span class="string">'_cmpt'</span>,num2str(icmpt),<span class="string">'.ply'</span>]
+0045     fid = fopen(filename,<span class="string">'w'</span>);
+0046     
+0047     ply_header = {<span class="string">'ply'</span>,<span class="keyword">...</span>
+0048         <span class="string">'comment closed surface'</span>,<span class="keyword">...</span>
+0049         <span class="string">'format ascii 1.0'</span>,<span class="keyword">...</span>
+0050         <span class="string">'comment created by SpinDoctor'</span>,<span class="keyword">...</span>
+0051         [<span class="string">'element vertex '</span>,num2str(npt)],<span class="keyword">...</span>
+0052         <span class="string">'property float x'</span>,<span class="keyword">...</span>
+0053         <span class="string">'property float y'</span>,<span class="keyword">...</span>
+0054         <span class="string">'property float z'</span>,<span class="keyword">...</span>
+0055         [<span class="string">'element face '</span>,num2str(nfac)],<span class="keyword">...</span>
+0056         <span class="string">'property list uchar short vertex_indices'</span>,<span class="keyword">...</span>
+0057         <span class="string">'end_header'</span>};
+0058     
+0059     <span class="keyword">if</span> (fid ~= -1)
+0060         <span class="keyword">for</span> iii = 1:11
+0061             fprintf(fid, <span class="string">'%s\n'</span>, ply_header{iii});
+0062         <span class="keyword">end</span>  
+0063     <span class="keyword">end</span>
+0064     
+0065     <span class="keyword">for</span> ipt = 1:npt
+0066         fprintf(fid, <span class="string">'%26.16e %26.16e %26.16e\n'</span>, (1e-6)*Pts_new{icmpt}(1:3,ipt));
+0067         <span class="comment">%fprintf(fid, '%26.16e %26.16e %26.16e\n', Pts_new{icmpt}(1:3,ipt));</span>
+0068     <span class="keyword">end</span>
+0069     
+0070     meshlimits{icmpt} = [min(Pts_new{icmpt}(1,:)),max(Pts_new{icmpt}(1,:)),<span class="keyword">...</span>
+0071         min(Pts_new{icmpt}(2,:)),max(Pts_new{icmpt}(2,:)),<span class="keyword">...</span>
+0072         min(Pts_new{icmpt}(3,:)),max(Pts_new{icmpt}(3,:))];
+0073     
+0074     <span class="keyword">for</span> ii = 1:nfac
+0075         fprintf(fid, <span class="string">'%d '</span>, 3);
+0076         <span class="keyword">for</span> jj = 1:3
+0077             fprintf(fid, <span class="string">'%d '</span>, Fac_new{icmpt}(jj,ii)-1);
+0078         <span class="keyword">end</span>
+0079         fprintf(fid, <span class="string">'\n'</span>);
+0080     <span class="keyword">end</span>
+0081         
+0082     fclose(fid);
+0083 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 26-Jul-2019 11:26:32 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
