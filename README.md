@@ -10,8 +10,6 @@ Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebe
 
 Software requirements: SpinDoctor MatrixFormalismModule is compatible with MATLAB (version R2017b or later).
 
-Note: The MatrixFormalismModule will be ready for release on July 29, 2019.  Please download it after that date.
-
 Getting started
 
     The DISTRIBUTE folder contains a general purpose driver.
