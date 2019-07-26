@@ -25,7 +25,7 @@ Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
 
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
-Software requirements: SpinDoctor is compatible with MATLAB (version R2017b or later) together with the Partial Differential Equation Toolbox.
+Software requirements: SpinDoctor is compatible with MATLAB (version R2017b or later).
 
 Getting started
 1) The DISTRIBUTE folder contains drivers for examples in the SpinDoctor paper as well as a general purpose driver called driver_spindoctor.m
