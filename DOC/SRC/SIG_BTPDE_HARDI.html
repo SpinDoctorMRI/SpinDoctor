@@ -4,7 +4,7 @@
 <head>
   <title>Description of SIG_BTPDE_HARDI</title>
   <meta name="keywords" content="SIG_BTPDE_HARDI">
-  <meta name="description" content="compute the ADC from Bloch-Torrey equation for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.">
+  <meta name="description" content="compute the signals from Bloch-Torrey equation for ngdir directions.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>compute the ADC from Bloch-Torrey equation for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.</strong></div>
+<div class="box"><strong>compute the signals from Bloch-Torrey equation for ngdir directions.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function [SIG_BTPDE_cmpts_alldir,SIG_BTPDE_allcmpts_alldir,ctime_alldir]= SIG_BTPDE_HARDI(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,points_gdir,graddir_index,negii) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> compute the ADC from Bloch-Torrey equation for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.
+<div class="fragment"><pre class="comment"> compute the signals from Bloch-Torrey equation for ngdir directions.
  
  Input:
      1. experiment_btpde is a structure with 10 elements:
@@ -55,17 +55,20 @@
      3. DIFF_cmpts
      4. kappa_bdys
      5. IC_cmpts
+     6. points_gdir
+     7. graddir_index
+     8. negii
  
  Output:
-     1. points (ngdir directions)
-     2. ADC_BT_cmpts_alldir
-     3. ADC_BT_allcmpts_alldir</pre></div>
+     1. SIG_BTPDE_cmpts_alldir
+     2. SIG_BTPDE_allcmpts_alldir
+     3. ctime_alldir</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="BTPDE.html" class="code" title="function [TOUT,YOUT,SIG_cmpts,SIG_allcmpts,difftime,ctime]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)">BTPDE</a>	solve Bloch-Torrey equation</li></ul>
+<li><a href="BTPDE.html" class="code" title="function [SOL,SIG_cmpts,SIG_allcmpts,difftime,ctime]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,OUTPUT_MAGNETIZATION)">BTPDE</a>	solve Bloch-Torrey equation</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -78,7 +81,7 @@ This function is called by:
 0002     = SIG_BTPDE_HARDI(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,<span class="keyword">...</span>
 0003     points_gdir,graddir_index,negii)
 0004 
-0005 <span class="comment">% compute the ADC from Bloch-Torrey equation for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.</span>
+0005 <span class="comment">% compute the signals from Bloch-Torrey equation for ngdir directions.</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Input:</span>
 0008 <span class="comment">%     1. experiment_btpde is a structure with 10 elements:</span>
@@ -106,39 +109,41 @@ This function is called by:
 0030 <span class="comment">%     3. DIFF_cmpts</span>
 0031 <span class="comment">%     4. kappa_bdys</span>
 0032 <span class="comment">%     5. IC_cmpts</span>
-0033 <span class="comment">%</span>
-0034 <span class="comment">% Output:</span>
-0035 <span class="comment">%     1. points (ngdir directions)</span>
-0036 <span class="comment">%     2. ADC_BT_cmpts_alldir</span>
-0037 <span class="comment">%     3. ADC_BT_allcmpts_alldir</span>
-0038 
-0039 Ncmpt = length(DIFF_cmpts);
-0040 
-0041 nexperi = length(experi_btpde.sdeltavec);
-0042 nb = size(experi_btpde.bvalues,2);
+0033 <span class="comment">%     6. points_gdir</span>
+0034 <span class="comment">%     7. graddir_index</span>
+0035 <span class="comment">%     8. negii</span>
+0036 <span class="comment">%</span>
+0037 <span class="comment">% Output:</span>
+0038 <span class="comment">%     1. SIG_BTPDE_cmpts_alldir</span>
+0039 <span class="comment">%     2. SIG_BTPDE_allcmpts_alldir</span>
+0040 <span class="comment">%     3. ctime_alldir</span>
+0041 
+0042 Ncmpt = length(DIFF_cmpts);
 0043 
-0044 ngdir_total = size(points_gdir,1);
-0045 ndir = length(graddir_index);
+0044 nexperi = length(experi_btpde.sdeltavec);
+0045 nb = size(experi_btpde.bvalues,2);
 0046 
-0047 SIG_BTPDE_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi,nb);
-0048 SIG_BTPDE_allcmpts_alldir = nan*ones(ngdir_total,nexperi,nb);
+0047 ngdir_total = size(points_gdir,1);
+0048 ndir = length(graddir_index);
 0049 
-0050 ctime_alldir = nan*ones(ngdir_total,nexperi,nb);
-0051 
-0052 <span class="keyword">for</span> idir = 1:ndir
-0053     experi_btpde.gdir = points_gdir(graddir_index(idir),:)';
-0054     experi_btpde.gdir = experi_btpde.gdir/norm(experi_btpde.gdir);
-0055     
-0056     [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,ctime] <span class="keyword">...</span>
-0057         = <a href="BTPDE.html" class="code" title="function [TOUT,YOUT,SIG_cmpts,SIG_allcmpts,difftime,ctime]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)">BTPDE</a>(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts);      
-0058     ctime_alldir(graddir_index(idir),:,:) = ctime;    
-0059     SIG_BTPDE_cmpts_alldir(graddir_index(idir),:,:,:) = MF_cmpts;
-0060     SIG_BTPDE_allcmpts_alldir(graddir_index(idir),:,:) = MF_allcmpts(:,:);
-0061     <span class="keyword">if</span> (~isempty(negii{idir}))
-0062         SIG_BTPDE_cmpts_alldir(negii{idir},:,:,:) = MF_cmpts;
-0063         SIG_BTPDE_allcmpts_alldir(negii{idir},:,:) = MF_allcmpts(:,:);
-0064     <span class="keyword">end</span>
-0065 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Thu 18-Jul-2019 21:15:51 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0050 SIG_BTPDE_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi,nb);
+0051 SIG_BTPDE_allcmpts_alldir = nan*ones(ngdir_total,nexperi,nb);
+0052 
+0053 ctime_alldir = nan*ones(ngdir_total,nexperi,nb);
+0054 OUTPUT_MAGNETIZATION = false;
+0055 <span class="keyword">for</span> idir = 1:ndir
+0056     experi_btpde.gdir = points_gdir(graddir_index(idir),:)';
+0057     experi_btpde.gdir = experi_btpde.gdir/norm(experi_btpde.gdir);    
+0058     [SIG,SIG_cmpts,SIG_allcmpts,difftime,ctime] <span class="keyword">...</span>
+0059         = <a href="BTPDE.html" class="code" title="function [SOL,SIG_cmpts,SIG_allcmpts,difftime,ctime]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,OUTPUT_MAGNETIZATION)">BTPDE</a>(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,OUTPUT_MAGNETIZATION);      
+0060     ctime_alldir(graddir_index(idir),:,:) = ctime;    
+0061     SIG_BTPDE_cmpts_alldir(graddir_index(idir),:,:,:) = SIG_cmpts;
+0062     SIG_BTPDE_allcmpts_alldir(graddir_index(idir),:,:) = SIG_allcmpts(:,:);
+0063     <span class="keyword">if</span> (~isempty(negii{idir}))
+0064         SIG_BTPDE_cmpts_alldir(negii{idir},:,:,:) = SIG_cmpts;
+0065         SIG_BTPDE_allcmpts_alldir(negii{idir},:,:) = SIG_allcmpts(:,:);
+0066     <span class="keyword">end</span>
+0067 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 29-Oct-2019 00:17:00 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

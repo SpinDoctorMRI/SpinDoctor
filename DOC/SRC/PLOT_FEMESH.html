@@ -125,67 +125,68 @@ This function is called by:
 0059         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
 0060             mymesh.Pts_cmpt_reorder{icmpt}(3,:));
 0061         set(h,<span class="string">'facealpha'</span>,0.7);
-0062         set(h,<span class="string">'LineStyle'</span>,<span class="string">'none'</span>);
-0063         <span class="comment">%set(h,'facecolor','k');</span>
-0064         axis equal;
-0065         axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
-0066         view(3);
-0067         title([<span class="string">'FE Mesh Inner cmpts: '</span>,num2str(OUT_cmpts_index)]);
-0068         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
-0069         grid on;
-0070     <span class="keyword">end</span>
-0071 <span class="keyword">end</span>
-0072 
-0073 <span class="keyword">if</span> (~isempty(IN_cmpts_index))
-0074     figure;
-0075     <span class="comment">%subplot(1,3,2);</span>
-0076     hold on;
-0077     cmptvec = IN_cmpts_index;
-0078     <span class="keyword">for</span> ict = 1:length(cmptvec)
-0079         icmpt = cmptvec(ict);
-0080         Fac = [];
-0081         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
-0082             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
-0083         <span class="keyword">end</span>
-0084         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
-0085             mymesh.Pts_cmpt_reorder{icmpt}(3,:));
-0086         set(h,<span class="string">'facealpha'</span>,0.7);
-0087         <span class="comment">%set(h,'facecolor','k');</span>
-0088         set(h,<span class="string">'LineStyle'</span>,<span class="string">'none'</span>);
-0089         axis equal;
-0090         axis([xmin,xmax,ymin,ymax,zmin,zmax]);
-0091         view(3);
-0092         title([<span class="string">'FE Mesh Outer cmpts: '</span>,num2str([IN_cmpts_index])]);
-0093         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
-0094         grid on;
-0095     <span class="keyword">end</span>
-0096 <span class="keyword">end</span>
-0097 
-0098 <span class="keyword">if</span> (~isempty(ECS_cmpts_index))
-0099     figure; 
-0100     <span class="comment">%subplot(1,3,3);</span>
-0101     hold on;
-0102     cmptvec = ECS_cmpts_index;
-0103     <span class="keyword">for</span> ict = 1:length(cmptvec)
-0104         icmpt = cmptvec(ict);
-0105         Fac = [];
-0106         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
-0107             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
-0108         <span class="keyword">end</span>
-0109         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
-0110             mymesh.Pts_cmpt_reorder{icmpt}(3,:));
-0111         set(h,<span class="string">'facealpha'</span>,0.7);
-0112         <span class="comment">%set(h,'facecolor','k');</span>
-0113         set(h,<span class="string">'LineStyle'</span>,<span class="string">'none'</span>);
-0114         axis equal;
-0115         axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
-0116         view(3);
-0117         title([<span class="string">'FE Mesh ECS cmpt: '</span>,num2str([ECS_cmpts_index])]);
-0118         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
-0119         grid on;
-0120     <span class="keyword">end</span>
-0121 
-0122 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Thu 18-Jul-2019 21:15:51 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0062         set(h,<span class="string">'LineWidth'</span>,0.03);
+0063         set(h,<span class="string">'facecolor'</span>,<span class="string">'w'</span>);
+0064         box off;
+0065         axis equal;
+0066         axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
+0067         view(3);
+0068         title([<span class="string">'FE Mesh Inner cmpts: '</span>,num2str([OUT_cmpts_index])]);
+0069         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
+0070         grid on;
+0071     <span class="keyword">end</span>
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="keyword">if</span> (~isempty(IN_cmpts_index))
+0075     figure;
+0076     <span class="comment">%subplot(1,3,2);</span>
+0077     hold on;
+0078     cmptvec = IN_cmpts_index;
+0079     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0080         icmpt = cmptvec(ict);
+0081         Fac = [];
+0082         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0083             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0084         <span class="keyword">end</span>
+0085         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0086             mymesh.Pts_cmpt_reorder{icmpt}(3,:));
+0087         set(h,<span class="string">'facealpha'</span>,0.7);
+0088         <span class="comment">%set(h,'facecolor','k');</span>
+0089         set(h,<span class="string">'LineStyle'</span>,<span class="string">'none'</span>);
+0090         axis equal;
+0091         axis([xmin,xmax,ymin,ymax,zmin,zmax]);
+0092         view(3);
+0093         title([<span class="string">'FE Mesh Outer cmpts: '</span>,num2str([IN_cmpts_index])]);
+0094         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
+0095         grid on;
+0096     <span class="keyword">end</span>
+0097 <span class="keyword">end</span>
+0098 
+0099 <span class="keyword">if</span> (~isempty(ECS_cmpts_index))
+0100     figure; 
+0101     <span class="comment">%subplot(1,3,3);</span>
+0102     hold on;
+0103     cmptvec = ECS_cmpts_index;
+0104     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0105         icmpt = cmptvec(ict);
+0106         Fac = [];
+0107         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0108             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0109         <span class="keyword">end</span>
+0110         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0111             mymesh.Pts_cmpt_reorder{icmpt}(3,:));
+0112         set(h,<span class="string">'facealpha'</span>,0.7);
+0113         <span class="comment">%set(h,'facecolor','k');</span>
+0114         set(h,<span class="string">'LineStyle'</span>,<span class="string">'none'</span>);
+0115         axis equal;
+0116         axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
+0117         view(3);
+0118         title([<span class="string">'FE Mesh ECS cmpt: '</span>,num2str([ECS_cmpts_index])]);
+0119         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
+0120         grid on;
+0121     <span class="keyword">end</span>
+0122 
+0123 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 29-Oct-2019 00:17:00 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -59,12 +59,13 @@ if (~isempty(OUT_cmpts_index))
         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),...
             mymesh.Pts_cmpt_reorder{icmpt}(3,:));
         set(h,'facealpha',0.7);
-        set(h,'LineStyle','none');
-        %set(h,'facecolor','k');
+        set(h,'LineWidth',0.03);
+        set(h,'facecolor','w');
+        box off;
         axis equal;
         axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
         view(3);
-        title(['FE Mesh Inner cmpts: ',num2str(OUT_cmpts_index)]);
+        title(['FE Mesh Inner cmpts: ',num2str([OUT_cmpts_index])]);
         xlabel('x'); ylabel('y'); zlabel('z');
         grid on;
     end

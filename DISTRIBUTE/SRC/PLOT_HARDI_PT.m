@@ -26,7 +26,7 @@ axis equal;
 ADC_Ellipsoid.EdgeColor = 'none';
 
 xlabel('x'); ylabel('y'); zlabel('z');
-title(['SIG in ',num2str(ngdir),' directions. ',fig_title]);
+title(['SIMUL in ',num2str(ngdir),' directions. ',fig_title]);
 
 plot3(SIG_allcmpts_alldir.*points(:,1),SIG_allcmpts_alldir.*points(:,2),...
     SIG_allcmpts_alldir.*points(:,3),'k.','markersize',5);

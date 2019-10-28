@@ -73,5 +73,16 @@ params_domain_femesh.Htetgen = sscanf(tline,'%f',1);
 
 tline = fgetl(fid);
 [strpos] = regexp(tline,"'");
-params_domain_femesh.tetgen_cmd = tline(strpos(1)+1:strpos(2)-1);
+% params_domain_femesh.tetgen_cmd = tline(strpos(1)+1:strpos(2)-1);
+archstr = computer('arch');
+if strcmp(archstr,'win64')
+    params_domain_femesh.tetgen_cmd = 'SRC\TETGEN\tetGen\win64\tetgen';
+elseif strcmp(archstr,'maci64')
+    params_domain_femesh.tetgen_cmd = 'SRC/TETGEN/tetGen/mac64/tetgen';
+elseif strcmp(archstr,'glnxa64')
+    params_domain_femesh.tetgen_cmd = 'SRC/TETGEN/tetGen/lin64/tetgen';
+else
+    disp(['Your operation system is not supported!'])
+    params_domain_femesh.tetgen_cmd = 'SRC/TETGEN/tetGen/lin64/tetgen';
+end
 fclose(fid); 

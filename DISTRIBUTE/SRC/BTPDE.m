@@ -1,5 +1,5 @@
-function [TOUT,YOUT,SIG_cmpts,SIG_allcmpts,difftime,ctime] ...
-    = BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)
+function [SOL,SIG_cmpts,SIG_allcmpts,difftime,ctime] ...
+    = BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,OUTPUT_MAGNETIZATION)
 
 % solve Bloch-Torrey equation
 % 
@@ -29,14 +29,14 @@ function [TOUT,YOUT,SIG_cmpts,SIG_allcmpts,difftime,ctime] ...
 %     3. DIFF_cmpts
 %     4. kappa_bdys
 %     5. IC_cmpts
+%     6. OUTPUT_MAGNETIZATION
 %
 % Output:
-%     1. TOUT
-%     2. YOUT
-%     3. MF_cmpts
-%     4. MF_allcmpts
-%     5. difftime
-%     6. elapsed_time
+%     1. SOL
+%     2. SIG_cmpts
+%     3. SIG_allcmpts
+%     4. difftime
+%     5. ctime
 
 global FEM_M FEM_K FEM_A FEM_Q FEM_G
 global QVAL UG 
@@ -162,6 +162,13 @@ for iexperi = 1:nexperi
                 YOUT{iexperi}{ib}{icmpt} = sol.y(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),:);
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
+                if (OUTPUT_MAGNETIZATION)
+                    SOL{iexperi}{ib}{icmpt} = YOUT{iexperi}{ib}{icmpt}(:,end);
+                else
+                    SOL{iexperi}{ib}{icmpt} = [];
+                end
+                YOUT{iexperi}{ib}{icmpt} = [];
+                TOUT{iexperi}{ib}{icmpt} = [];
             end
         else
             %% Solving for case of no coupling between compartments.            
@@ -185,12 +192,19 @@ for iexperi = 1:nexperi
                 %disp('***Uncoupled: end ode solver ode23t'); toc
                 YOUT{iexperi}{ib}{icmpt} = sol.y;
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
-                MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
+                MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);  
+                
+                if (OUTPUT_MAGNETIZATION)
+                    SOL{iexperi}{ib}{icmpt} = YOUT{iexperi}{ib}{icmpt}(:,end);
+                else
+                    SOL{iexperi}{ib}{icmpt} = [];
+                end
                 
                 YOUT{iexperi}{ib}{icmpt} = [];
+                TOUT{iexperi}{ib}{icmpt} = [];
             end            
         end
-               
+        
         ctime(iexperi,ib)=etime(clock, b_start_time);
         
         toc 

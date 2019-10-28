@@ -24,7 +24,7 @@
 <div class="box"><strong>solve Bloch-Torrey equation</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [TOUT,YOUT,SIG_cmpts,SIG_allcmpts,difftime,ctime]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts) </strong></div>
+<div class="box"><strong>function [SOL,SIG_cmpts,SIG_allcmpts,difftime,ctime]= BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,OUTPUT_MAGNETIZATION) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> solve Bloch-Torrey equation
@@ -55,14 +55,14 @@
      3. DIFF_cmpts
      4. kappa_bdys
      5. IC_cmpts
+     6. OUTPUT_MAGNETIZATION
 
  Output:
-     1. TOUT
-     2. YOUT
-     3. MF_cmpts
-     4. MF_allcmpts
-     5. difftime
-     6. elapsed_time</pre></div>
+     1. SOL
+     2. SIG_cmpts
+     3. SIG_allcmpts
+     4. difftime
+     5. ctime</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -71,14 +71,14 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SIG_BTPDE_HARDI.html" class="code" title="function [SIG_BTPDE_cmpts_alldir,SIG_BTPDE_allcmpts_alldir,ctime_alldir]= SIG_BTPDE_HARDI(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,points_gdir,graddir_index,negii)">SIG_BTPDE_HARDI</a>	compute the ADC from Bloch-Torrey equation for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.</li></ul>
+<li><a href="SIG_BTPDE_HARDI.html" class="code" title="function [SIG_BTPDE_cmpts_alldir,SIG_BTPDE_allcmpts_alldir,ctime_alldir]= SIG_BTPDE_HARDI(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,points_gdir,graddir_index,negii)">SIG_BTPDE_HARDI</a>	compute the signals from Bloch-Torrey equation for ngdir directions.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [TOUT,YOUT,SIG_cmpts,SIG_allcmpts,difftime,ctime] </a><span class="keyword">...</span>
-0002     = BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts)
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [SOL,SIG_cmpts,SIG_allcmpts,difftime,ctime] </a><span class="keyword">...</span>
+0002     = BTPDE(experiment,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,OUTPUT_MAGNETIZATION)
 0003 
 0004 <span class="comment">% solve Bloch-Torrey equation</span>
 0005 <span class="comment">%</span>
@@ -108,14 +108,14 @@ This function is called by:
 0029 <span class="comment">%     3. DIFF_cmpts</span>
 0030 <span class="comment">%     4. kappa_bdys</span>
 0031 <span class="comment">%     5. IC_cmpts</span>
-0032 <span class="comment">%</span>
-0033 <span class="comment">% Output:</span>
-0034 <span class="comment">%     1. TOUT</span>
-0035 <span class="comment">%     2. YOUT</span>
-0036 <span class="comment">%     3. MF_cmpts</span>
-0037 <span class="comment">%     4. MF_allcmpts</span>
-0038 <span class="comment">%     5. difftime</span>
-0039 <span class="comment">%     6. elapsed_time</span>
+0032 <span class="comment">%     6. OUTPUT_MAGNETIZATION</span>
+0033 <span class="comment">%</span>
+0034 <span class="comment">% Output:</span>
+0035 <span class="comment">%     1. SOL</span>
+0036 <span class="comment">%     2. SIG_cmpts</span>
+0037 <span class="comment">%     3. SIG_allcmpts</span>
+0038 <span class="comment">%     4. difftime</span>
+0039 <span class="comment">%     5. ctime</span>
 0040 
 0041 <span class="keyword">global</span> FEM_M FEM_K FEM_A FEM_Q FEM_G
 0042 <span class="keyword">global</span> QVAL UG 
@@ -241,70 +241,84 @@ This function is called by:
 0162                 YOUT{iexperi}{ib}{icmpt} = sol.y(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),:);
 0163                 TOUT{iexperi}{ib}{icmpt} = sol.x;
 0164                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-0165             <span class="keyword">end</span>
-0166         <span class="keyword">else</span>
-0167             <span class="comment">%% Solving for case of no coupling between compartments.</span>
-0168             <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0169                 FEM_M = FEM_MAT{icmpt}.M;
-0170                 FEM_K = FEM_MAT{icmpt}.K;
-0171                 FEM_A = FEM_MAT{icmpt}.A;
-0172                 FEM_Q = FEM_MAT{icmpt}.Q;
-0173                 FEM_G = sparse(zeros(size(FEM_M,1),1));
-0174                 
-0175                 options = odeset(<span class="string">'Mass'</span>,FEM_M,<span class="string">'AbsTol'</span>,ODEsolve_atol,<span class="string">'RelTol'</span>,ODEsolve_rtol,<span class="string">'Vectorized'</span>,<span class="string">'on'</span>,<span class="string">'Stats'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
-0176                     <span class="string">'Jacobian'</span>,@odejac_bt_includeb);
-0177                 <span class="comment">%disp('***Uncoupled: start ode solver ode23t'); tic</span>
-0178                 ICC = IC_Pts{icmpt};
-0179                 <span class="keyword">if</span> (max(abs(ICC))&lt;=1e-16)
-0180                     sol.y = zeros(size(ICC,1),size(TLIST,2));
-0181                     sol.x = TLIST;
-0182                 <span class="keyword">else</span>
-0183                     sol = ode23t(@odefun_bt_includeb,TLIST,ICC,options);
-0184                 <span class="keyword">end</span>
-0185                 <span class="comment">%disp('***Uncoupled: end ode solver ode23t'); toc</span>
-0186                 YOUT{iexperi}{ib}{icmpt} = sol.y;
-0187                 TOUT{iexperi}{ib}{icmpt} = sol.x;
-0188                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);
-0189                 
-0190                 YOUT{iexperi}{ib}{icmpt} = [];
-0191             <span class="keyword">end</span>            
-0192         <span class="keyword">end</span>
-0193                
-0194         ctime(iexperi,ib)=etime(clock, b_start_time);
-0195         
-0196         toc 
-0197     <span class="keyword">end</span>
-0198 <span class="keyword">end</span>
-0199 
-0200 <span class="keyword">for</span> iexperi = 1:nexperi
-0201     bvec = bvalues(iexperi,:);  
-0202     nb = length(bvec);
-0203     <span class="keyword">for</span> ib = 1:nb
-0204         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0205             SIG_cmpts(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(end);
-0206             M0(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(1);
-0207         <span class="keyword">end</span>
-0208         SIG_allcmpts(iexperi,ib) = 0;
-0209         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0210             SIG_allcmpts(iexperi,ib) = SIG_allcmpts(iexperi,ib) + SIG_cmpts(icmpt,iexperi,ib);
-0211         <span class="keyword">end</span>
-0212         M0_allcmpts(iexperi,ib) = 0;
-0213         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0214             M0_allcmpts(iexperi,ib) = M0_allcmpts(iexperi,ib) + M0(icmpt,iexperi,ib);
-0215         <span class="keyword">end</span>
-0216     <span class="keyword">end</span>   
-0217     ib0 = find(abs(bvec)&lt;=1e-16);
-0218     ibn0 = find(abs(bvec)&gt;1e-16);
-0219     <span class="keyword">if</span> (length(ib0) &gt;= 1)
-0220         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
-0221             S0(icmpt,iexperi) = SIG_cmpts(icmpt,iexperi,ib0(1));
-0222         <span class="keyword">end</span>
-0223         S0_allcmpts(iexperi) = SIG_allcmpts(iexperi,ib0(1));
-0224     <span class="keyword">else</span>
-0225         S0(1:mymesh.Ncmpt,iexperi) = nan;
-0226         S0_allcmpts(iexperi) = nan;
-0227     <span class="keyword">end</span>
-0228 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Thu 18-Jul-2019 21:15:51 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0165                 <span class="keyword">if</span> (OUTPUT_MAGNETIZATION)
+0166                     SOL{iexperi}{ib}{icmpt} = YOUT{iexperi}{ib}{icmpt}(:,end);
+0167                 <span class="keyword">else</span>
+0168                     SOL{iexperi}{ib}{icmpt} = [];
+0169                 <span class="keyword">end</span>
+0170                 YOUT{iexperi}{ib}{icmpt} = [];
+0171                 TOUT{iexperi}{ib}{icmpt} = [];
+0172             <span class="keyword">end</span>
+0173         <span class="keyword">else</span>
+0174             <span class="comment">%% Solving for case of no coupling between compartments.</span>
+0175             <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0176                 FEM_M = FEM_MAT{icmpt}.M;
+0177                 FEM_K = FEM_MAT{icmpt}.K;
+0178                 FEM_A = FEM_MAT{icmpt}.A;
+0179                 FEM_Q = FEM_MAT{icmpt}.Q;
+0180                 FEM_G = sparse(zeros(size(FEM_M,1),1));
+0181                 
+0182                 options = odeset(<span class="string">'Mass'</span>,FEM_M,<span class="string">'AbsTol'</span>,ODEsolve_atol,<span class="string">'RelTol'</span>,ODEsolve_rtol,<span class="string">'Vectorized'</span>,<span class="string">'on'</span>,<span class="string">'Stats'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+0183                     <span class="string">'Jacobian'</span>,@odejac_bt_includeb);
+0184                 <span class="comment">%disp('***Uncoupled: start ode solver ode23t'); tic</span>
+0185                 ICC = IC_Pts{icmpt};
+0186                 <span class="keyword">if</span> (max(abs(ICC))&lt;=1e-16)
+0187                     sol.y = zeros(size(ICC,1),size(TLIST,2));
+0188                     sol.x = TLIST;
+0189                 <span class="keyword">else</span>
+0190                     sol = ode23t(@odefun_bt_includeb,TLIST,ICC,options);
+0191                 <span class="keyword">end</span>
+0192                 <span class="comment">%disp('***Uncoupled: end ode solver ode23t'); toc</span>
+0193                 YOUT{iexperi}{ib}{icmpt} = sol.y;
+0194                 TOUT{iexperi}{ib}{icmpt} = sol.x;
+0195                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);  
+0196                 
+0197                 <span class="keyword">if</span> (OUTPUT_MAGNETIZATION)
+0198                     SOL{iexperi}{ib}{icmpt} = YOUT{iexperi}{ib}{icmpt}(:,end);
+0199                 <span class="keyword">else</span>
+0200                     SOL{iexperi}{ib}{icmpt} = [];
+0201                 <span class="keyword">end</span>
+0202                 
+0203                 YOUT{iexperi}{ib}{icmpt} = [];
+0204                 TOUT{iexperi}{ib}{icmpt} = [];
+0205             <span class="keyword">end</span>            
+0206         <span class="keyword">end</span>
+0207         
+0208         ctime(iexperi,ib)=etime(clock, b_start_time);
+0209         
+0210         toc 
+0211     <span class="keyword">end</span>
+0212 <span class="keyword">end</span>
+0213 
+0214 <span class="keyword">for</span> iexperi = 1:nexperi
+0215     bvec = bvalues(iexperi,:);  
+0216     nb = length(bvec);
+0217     <span class="keyword">for</span> ib = 1:nb
+0218         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0219             SIG_cmpts(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(end);
+0220             M0(icmpt,iexperi,ib) = MT{iexperi}{ib}{icmpt}(1);
+0221         <span class="keyword">end</span>
+0222         SIG_allcmpts(iexperi,ib) = 0;
+0223         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0224             SIG_allcmpts(iexperi,ib) = SIG_allcmpts(iexperi,ib) + SIG_cmpts(icmpt,iexperi,ib);
+0225         <span class="keyword">end</span>
+0226         M0_allcmpts(iexperi,ib) = 0;
+0227         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0228             M0_allcmpts(iexperi,ib) = M0_allcmpts(iexperi,ib) + M0(icmpt,iexperi,ib);
+0229         <span class="keyword">end</span>
+0230     <span class="keyword">end</span>   
+0231     ib0 = find(abs(bvec)&lt;=1e-16);
+0232     ibn0 = find(abs(bvec)&gt;1e-16);
+0233     <span class="keyword">if</span> (length(ib0) &gt;= 1)
+0234         <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0235             S0(icmpt,iexperi) = SIG_cmpts(icmpt,iexperi,ib0(1));
+0236         <span class="keyword">end</span>
+0237         S0_allcmpts(iexperi) = SIG_allcmpts(iexperi,ib0(1));
+0238     <span class="keyword">else</span>
+0239         S0(1:mymesh.Ncmpt,iexperi) = nan;
+0240         S0_allcmpts(iexperi) = nan;
+0241     <span class="keyword">end</span>
+0242 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 29-Oct-2019 00:17:00 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -140,8 +140,19 @@ This function is called by:
 0073 
 0074 tline = fgetl(fid);
 0075 [strpos] = regexp(tline,&quot;<span class="string">'&quot;);</span>
-0076 params_domain_femesh.tetgen_cmd = tline(strpos(1)+1:strpos(2)-1);
-0077 fclose(fid);</pre></div>
-<hr><address>Generated on Thu 18-Jul-2019 21:15:51 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0076 <span class="comment">% params_domain_femesh.tetgen_cmd = tline(strpos(1)+1:strpos(2)-1);</span>
+0077 archstr = computer(<span class="string">'arch'</span>);
+0078 <span class="keyword">if</span> strcmp(archstr,<span class="string">'win64'</span>)
+0079     params_domain_femesh.tetgen_cmd = <span class="string">'SRC\TETGEN\tetGen\win64\tetgen'</span>;
+0080 <span class="keyword">elseif</span> strcmp(archstr,<span class="string">'maci64'</span>)
+0081     params_domain_femesh.tetgen_cmd = <span class="string">'SRC/TETGEN/tetGen/mac64/tetgen'</span>;
+0082 <span class="keyword">elseif</span> strcmp(archstr,<span class="string">'glnxa64'</span>)
+0083     params_domain_femesh.tetgen_cmd = <span class="string">'SRC/TETGEN/tetGen/lin64/tetgen'</span>;
+0084 <span class="keyword">else</span>
+0085     disp([<span class="string">'Your operation system is not supported!'</span>])
+0086     params_domain_femesh.tetgen_cmd = <span class="string">'SRC/TETGEN/tetGen/lin64/tetgen'</span>;
+0087 <span class="keyword">end</span>
+0088 fclose(fid);</pre></div>
+<hr><address>Generated on Tue 29-Oct-2019 00:17:00 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

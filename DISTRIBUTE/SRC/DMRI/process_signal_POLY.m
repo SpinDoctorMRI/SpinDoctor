@@ -73,18 +73,18 @@ function [fit_poly,ADC01d,KUR1d,KUR01d,S01d,Cfit1d,errfit,ndeg,ADC0_err1d,KUR_er
     
     if (found == 0)
       
-      disp(['warning, kur may not be accurate']);
+      disp(['Warning, Kurtosis may not be accurate']);
       if (exist('ADC0'))
-        abs(ADC0-ADC0_old) <= max(0.01*ADC0_old) 
-        (KUR_old <= 0.05 | ((abs(KUR-KUR_old) < abs(0.05*KUR_old)) | abs(KUR-KUR_old) < 0.05))
-                
-        ADC0
-        ADC0_old
-        KUR
-        KUR_old
-        ADC0_err
-        KUR_err
-        Cfit
+%         abs(ADC0-ADC0_old) <= max(0.01*ADC0_old) 
+%         (KUR_old <= 0.05 | ((abs(KUR-KUR_old) < abs(0.05*KUR_old)) | abs(KUR-KUR_old) < 0.05))
+%                 
+%         ADC0
+%         ADC0_old
+%         KUR
+%         KUR_old
+%         ADC0_err
+%         KUR_err
+%         Cfit
         KUR1d(ip,1) = nan;
         KUR01d(ip,1) = nan;
         ADC01d(ip,1) = ADC0_old;

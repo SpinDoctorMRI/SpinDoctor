@@ -2,7 +2,7 @@ function [SIG_BTPDE_cmpts_alldir,SIG_BTPDE_allcmpts_alldir,ctime_alldir] ...
     = SIG_BTPDE_HARDI(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,...
     points_gdir,graddir_index,negii)
 
-% compute the ADC from Bloch-Torrey equation for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.
+% compute the signals from Bloch-Torrey equation for ngdir directions.
 % 
 % Input:
 %     1. experiment_btpde is a structure with 10 elements:
@@ -30,11 +30,14 @@ function [SIG_BTPDE_cmpts_alldir,SIG_BTPDE_allcmpts_alldir,ctime_alldir] ...
 %     3. DIFF_cmpts
 %     4. kappa_bdys
 %     5. IC_cmpts
+%     6. points_gdir
+%     7. graddir_index
+%     8. negii
 % 
 % Output:
-%     1. points (ngdir directions)
-%     2. ADC_BT_cmpts_alldir
-%     3. ADC_BT_allcmpts_alldir
+%     1. SIG_BTPDE_cmpts_alldir
+%     2. SIG_BTPDE_allcmpts_alldir
+%     3. ctime_alldir
 
 Ncmpt = length(DIFF_cmpts);
 
@@ -48,18 +51,17 @@ SIG_BTPDE_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi,nb);
 SIG_BTPDE_allcmpts_alldir = nan*ones(ngdir_total,nexperi,nb);
 
 ctime_alldir = nan*ones(ngdir_total,nexperi,nb);
-
+OUTPUT_MAGNETIZATION = false;
 for idir = 1:ndir
     experi_btpde.gdir = points_gdir(graddir_index(idir),:)';
-    experi_btpde.gdir = experi_btpde.gdir/norm(experi_btpde.gdir);
-    
-    [TOUT,YOUT,MF_cmpts,MF_allcmpts,difftime,ctime] ...
-        = BTPDE(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts);      
+    experi_btpde.gdir = experi_btpde.gdir/norm(experi_btpde.gdir);    
+    [SIG,SIG_cmpts,SIG_allcmpts,difftime,ctime] ...
+        = BTPDE(experi_btpde,mymesh,DIFF_cmpts,kappa_bdys,IC_cmpts,OUTPUT_MAGNETIZATION);      
     ctime_alldir(graddir_index(idir),:,:) = ctime;    
-    SIG_BTPDE_cmpts_alldir(graddir_index(idir),:,:,:) = MF_cmpts;
-    SIG_BTPDE_allcmpts_alldir(graddir_index(idir),:,:) = MF_allcmpts(:,:);
+    SIG_BTPDE_cmpts_alldir(graddir_index(idir),:,:,:) = SIG_cmpts;
+    SIG_BTPDE_allcmpts_alldir(graddir_index(idir),:,:) = SIG_allcmpts(:,:);
     if (~isempty(negii{idir}))
-        SIG_BTPDE_cmpts_alldir(negii{idir},:,:,:) = MF_cmpts;
-        SIG_BTPDE_allcmpts_alldir(negii{idir},:,:) = MF_allcmpts(:,:);
+        SIG_BTPDE_cmpts_alldir(negii{idir},:,:,:) = SIG_cmpts;
+        SIG_BTPDE_allcmpts_alldir(negii{idir},:,:) = SIG_allcmpts(:,:);
     end
 end

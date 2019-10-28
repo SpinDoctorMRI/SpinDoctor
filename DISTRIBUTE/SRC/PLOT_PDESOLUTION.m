@@ -1,4 +1,4 @@
-function PLOT_PDESOLUTION(mymesh,SOL,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,nindex,title_str)
+function PLOT_PDESOLUTION(mymesh,SOL,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,title_str)
 
 xmin=0;
 xmax=0;
@@ -31,11 +31,13 @@ if (~isempty(OUT_cmpts_index))
             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
         end
         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),...
-            mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}(:,nindex)));
+            mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}));
         set(h,'facealpha',0.6);set(h,'EdgeColor','none');
         axis equal;
         axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('eastoutside');
         view(3);
+        xlabel('x'); ylabel('y'); zlabel('z');
+        grid on;
         title([title_str,' Inner cmpts: ',num2str(OUT_cmpts_index)]);
     end
 end
@@ -50,11 +52,13 @@ if (~isempty(IN_cmpts_index))
             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
         end
         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),...
-            mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}(:,nindex)));
+            mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}));
         set(h,'facealpha',0.6);set(h,'EdgeColor','none');
         axis equal;
         axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar('eastoutside');
         view(3);
+        xlabel('x'); ylabel('y'); zlabel('z');
+        grid on;
         title([title_str,' Outer cmpts: ',num2str([IN_cmpts_index])]);
     end
 end
@@ -69,12 +73,14 @@ if (~isempty(ECS_cmpts_index))
             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
         end
         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),...
-            mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}(:,nindex)));
+            mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}));
         set(h,'facealpha',0.6);set(h,'EdgeColor','none');
         axis equal;
         axis([xmin,xmax,ymin,ymax,zmin,zmax]); c = colorbar('eastoutside');
         %set(c,'Position',[0.9251 0.1095 0.0381 0.8167]);
         view(3);
+        xlabel('x'); ylabel('y'); zlabel('z');
+        grid on;
         title([title_str,' ECS cmpt: ',num2str([ECS_cmpts_index])]);
         %xlabel('x');
         %ylabel('y');
