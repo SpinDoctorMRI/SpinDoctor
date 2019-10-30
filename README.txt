@@ -1,9 +1,9 @@
 # SpinDoctor NeuronModule
 
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.  
-The user is advised to read the latest version from \url{https://github.com/jingrebeccali/SpinDoctor} 
+The user is advised to read the latest version from https://github.com/jingrebeccali/SpinDoctor 
 
-The NeuronModule solves the Bloch-Torrey PDE on neurons. The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations.  The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
+The NeuronModule solves the Bloch-Torrey PDE on neurons. The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations. The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
 
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
 
@@ -17,6 +17,7 @@ Getting started
 1) The DISTRIBUTE folder contains a commented general purpose driver called driver_spindoctor_neuronmodule_commented.m. It is highly recommended to read this driver to understand the workflow of SpinDoctor. 
 2) driver_spindoctor_neuronmodule_commented.m does not use saved simulation data, all simulations are run from scratch.
 3) Thirteen driver examples are given in the DISTRIBUTE folder, the simulation details are listed in the table below. These drivers save the simulated data or use previously saved simulation results if they are available.
+4) Six drivers that are used to plot the figures in the paper about SpinDoctor NeuronModule by utilizing the saved data are also given in the repository. The details can be found in the table below.
 4) The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
 5) Other functions are stored in subfolders of DISTRIBUTE/SRC.
 6) Some neuron finite element meshes are stored in DISTRIBUTE/msh_files.
@@ -39,6 +40,12 @@ Getting started
 | driver_hadc_onedir_dendrites.m      	| HADC simulation of 03b_spindle7aACC_dendrites_1 in one gradient direction.               	|
 | driver_hadc_onedir_soma.m           	| HADC simulation of 03b_spindle4aACC_soma in one gradient direction.                      	|
 | driver_hadc_onedir_wholeneuron.m    	| HADC simulation of 25o_pyramidal18aFI in one gradient direction.                         	|
+| driver_figure6.m                    	| Plot the Figure 6 in the paper about SpinDoctor NeuronModule.                            	|
+| driver_figure7_8_9.m                	| Plot the Figure 7, 8 and Figure 9 in the paper about SpinDoctor NeuronModule.            	|
+| driver_figure10.m                   	| Plot the Figure 10 in the paper about SpinDoctor NeuronModule.                           	|
+| driver_figure11.m                   	| Plot the Figure 11 in the paper about SpinDoctor NeuronModule.                           	|
+| driver_figureB14_15_16.m            	| Plot the Figure B14, B15 and Figure B16 in the paper about SpinDoctor NeuronModule.      	|
+| driver_figureB17.m                  	| Plot the Figure B17 in the paper about SpinDoctor NeuronModule.                          	|
 
 Authors: Jing-Rebecca Li, Van-Dang Nguyen, Chengran Fang, Try Nguyen Tran.
 
