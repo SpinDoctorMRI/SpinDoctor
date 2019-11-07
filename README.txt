@@ -11,6 +11,8 @@ Paper about SpinDoctor NeuronModule can be found at http://arxiv.org/abs/1910.07
 
 Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
 
+User guide of SpinDoctor and Neuron Module is located at https://github.com/jingrebeccali/SpinDoctor/blob/NeuronModule/User%20Guide.pdf
+
 Software requirements: SpinDoctor NeuronModule is compatible with MATLAB (version R2017b or later).
 
 Getting started
