@@ -24,11 +24,11 @@ Software requirements
 
 Getting started
 		
-    The DISTRIBUTE folder contains drivers for typical simulations.
-    The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
-    Other functions are stored in subfolders of DISTRIBUTE/SRC.
-    Documentation of the top level functions can be found in DOC/
-    User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/NeuronModule/User%20Guide.pdf)
+1. The DISTRIBUTE folder contains drivers for typical simulations.
+2. The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
+3. Other functions are stored in subfolders of DISTRIBUTE/SRC.
+4. Documentation of the top level functions can be found in DOC/
+5. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/NeuronModule/User%20Guide.pdf)
 
 
 Authors: Jing-Rebecca Li, Try Nguyen Tran, Van-Dang Nguyen. 
