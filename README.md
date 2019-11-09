@@ -29,20 +29,27 @@ Getting started
     The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
     Other functions are stored in subfolders of DISTRIBUTE/SRC.
     Documentation of the top level functions can be found in DOC/
+	
+    1. The DISTRIBUTE folder contains drivers for typical simulations.
+    2. The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
+    3. Other functions are stored in subfolders of DISTRIBUTE/SRC.
+    4. Documentation of the top level functions can be found in DOC/
+    5. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/MatrixFormalismModule/User%20Guide.pdf)
+
 
 Authors: Jing-Rebecca Li, Try Nguyen Tran, Van-Dang Nguyen. 
 
 Copyright (C) 2019
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
