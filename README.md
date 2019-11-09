@@ -23,6 +23,7 @@ Getting started
 7) The input files of the drivers are located at DISTRIBUTE/params_files.
 8) The saved simulation data are saved in DISTRIBUTE/saved_simul.
 9) Documentation of the top level functions can be found in DOC/.
+10) User Guide can be found [here](https://github.com/jingrebeccali/SpinDoctor/blob/NeuronModule/User%20Guide.pdf)
 
 | Driver name                         	| Simulation details                                                                       	|
 |-------------------------------------	|------------------------------------------------------------------------------------------	|
