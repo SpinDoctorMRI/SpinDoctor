@@ -23,13 +23,7 @@ Software requirements
 	This technical issue will be addressed in a future release.*****      
 
 Getting started
-	
-    The DISTRIBUTE folder contains a general purpose driver.
-    Two sets of input files are provided, one for simulations in one gradient direction, and one for HARDI simulations.
-    The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
-    Other functions are stored in subfolders of DISTRIBUTE/SRC.
-    Documentation of the top level functions can be found in DOC/
-	
+		
     1. The DISTRIBUTE folder contains drivers for typical simulations.
     2. The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
     3. Other functions are stored in subfolders of DISTRIBUTE/SRC.
