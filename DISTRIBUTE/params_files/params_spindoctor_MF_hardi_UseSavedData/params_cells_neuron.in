@@ -1,0 +1,10 @@
+3                                           % 1 = ellipsoids, 2 = cylinders, 3 = neuron from msh file
+'msh_files/spindle/SEPARATED_NEURONS/03b_spindle6aACC_dendrites_2'         % file name to store cell description OR file to get neuron msh data
+1                                           % ncell
+1                                           % Rmin
+4                                           % Rmax
+0.2                                         % Min distance between cells (times mean(Rmin,Rmax))
+0.3                                         % Max distance between cells (times the mean(Rmin,Rmax))
+0.0 0.00                                   % deform the domain, [a_bend,a_twist]
+100                                         % Hcyl (if cylinders)
+     
