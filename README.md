@@ -10,15 +10,15 @@ Matrix Formalism Gaussian Approximation signal for realistic neuron (impermeable
 Matrix Formalism for permeable membranes and for general diffusion-encoding sequences are under development 
 and will be released in the future.  
 
-	The stable version of the MatrixFormalismModule will be released on November 11. 
+	The stable version of the MatrixFormalismModule will be released on November 11, 2019. 
 	Do not download the MatrixFormalismModule until then.
 
 Software requirements
  
-	The SpinDoctor toolbox and the Neuron Module have been developed in the MATLAB R2017b 
+	The SpinDoctor Toolbox and the Neuron Module have been developed in the MATLAB R2017b 
 	and require no additional MATLAB toolboxes.  
 	
-	However, the current version of the Matrix Formalism Module requires the MATLAB PDE Toolbox (2017 or later) 
+	*****However, the current version of the Matrix Formalism Module requires the MATLAB PDE Toolbox (2017 or later) 
 	due to certain difficulties of implementing the matrix eigenvalue solution on a restricted eigenvalue interval.  
 	This technical issue will be addressed in a future release.      
 
