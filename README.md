@@ -16,11 +16,11 @@ and will be released in the future.
 Software requirements
  
 	The SpinDoctor Toolbox and the Neuron Module have been developed in the MATLAB R2017b 
-	and require no additional MATLAB toolboxes.  
+	and require no additional MATLAB Toolboxes.  
 	
 	*****However, the current version of the Matrix Formalism Module requires the MATLAB PDE Toolbox (2017 or later) 
 	due to certain difficulties of implementing the matrix eigenvalue solution on a restricted eigenvalue interval.  
-	This technical issue will be addressed in a future release.      
+	This technical issue will be addressed in a future release.*****      
 
 Getting started
 	
