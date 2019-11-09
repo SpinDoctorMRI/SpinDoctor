@@ -21,7 +21,7 @@ a) in a box or b) in a tight wrapping around the cells;
 5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeabilty).
 Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsilating Gradient Spin Echo.
 
-# New Nov 2019: SpinDoctor has two modules called [Neuron Module](https://github.com/jingrebeccali/SpinDoctor/tree/NeuronModule) and [Matrix Formalism Module](https://github.com/jingrebeccali/SpinDoctor/tree/MatrixFormalismModule). Details about these modules can be found in the branches with those names.
+** New Nov 2019: SpinDoctor has two modules called [Neuron Module](https://github.com/jingrebeccali/SpinDoctor/tree/NeuronModule) and [Matrix Formalism Module](https://github.com/jingrebeccali/SpinDoctor/tree/MatrixFormalismModule). Details about these modules can be found in the branches with those names.**
 
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
 
