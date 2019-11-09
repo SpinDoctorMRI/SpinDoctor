@@ -2,16 +2,22 @@
 
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.  
 
-The MatrixFormalismModule computes a closed form representation of the diffusion MRI signal called Matrix Formalism, that is based on the eigendecomposition of the Laplace operator, defined in the diffusion geometry.  Currently, it computes this representations in neurons subject to impermeable boundary conditions, for the PGSE sequence.  Permeable membranes and general diffusion-encoding sequences are subjects of future work.
+The MatrixFormalismModule computes a closed form representation of the diffusion MRI signal called Matrix Formalism, that is based on the eigendecomposition of the Laplace operator, defined in the diffusion geometry.  
+Currently, the Matrix Formalism Module allows the computation of the Matrix Formalism signal and the 
+Matrix Formalism Gaussian Approximation signal for realistic neuron (impermeable membranes) with the PGSE sequence.
+Matrix Formalism for permeable membranes and for general diffusion-encoding sequences are under development 
+and will be released in the future.  
 
 	The stable version of the MatrixFormalismModule will be released on November 11. 
 	Do not download the MatrixFormalismModule until then.
 
 Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
 
-Website of SpinDoctor can be found at http://www.cmap.polytechnique.fr/~jingrebeccali/software.html
+Software requirements: 
+	The SpinDoctor toolbox and the Neuron Module have been developed in the MATLAB R2017b and require no additional MATLAB toolboxes.  However, the current version of the Matrix Formalism Module requires the MATLAB PDE Toolbox (2017 or later) 
+	due to certain difficulties of implementing the matrix eigenvalue solution on a restricted eigenvalue interval.  
+	This technical issue will be addressed in a future release.      
 
-Software requirements: SpinDoctor MatrixFormalismModule is compatible with MATLAB (version R2017b or later).
 
 Getting started
 	
