@@ -32,10 +32,10 @@ Getting started
 
 There are 4 provided drivers
 
-driver_spindoctor_MF_1direction_commented.m     
-driver_spindoctor_MF_hardi_commented.m   
-driver_spindoctor_MF_1direction_UseSavedData.m  
-driver_spindoctor_MF_hardi_UseSavedData.m
+driver_spindoctor_MF_1direction_commented.m   |   1 gradient direction
+driver_spindoctor_MF_1direction_UseSavedData.m |  1 gradient direction
+driver_spindoctor_MF_hardi_commented.m   |	HARDI
+driver_spindoctor_MF_hardi_UseSavedData.m | HARDI
 
 Authors: Jing-Rebecca Li, Try Nguyen Tran, Van-Dang Nguyen. 
 
