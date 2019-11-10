@@ -10,8 +10,6 @@ Matrix Formalism Gaussian Approximation signal for realistic neuron geometries (
 Matrix Formalism for permeable membranes and for general diffusion-encoding sequences are under development 
 and will be released in the future.  
 
-	The stable version of the MatrixFormalismModule will be released on November 11, 2019. 
-	Do not download the MatrixFormalismModule until then.
 
 Software requirements
  
@@ -22,13 +20,18 @@ Software requirements
 	due to certain difficulties of implementing the matrix eigenvalue solution on a restricted eigenvalue interval.  
 	This technical issue will be addressed in a future release.*****      
 
+
 Getting started
 		
 1. The DISTRIBUTE folder contains drivers for typical simulations.
-2. The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
-3. Other functions are stored in subfolders of DISTRIBUTE/SRC.
-4. Documentation of the top level functions can be found in DOC/
-5. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/MatrixFormalismModule/User%20Guide.pdf)
+2. Some neuron finite element meshes are stored in DISTRIBUTE/msh_files.
+3. The input files of the drivers are located at DISTRIBUTE/params_files.
+4. The saved simulation data are saved in DISTRIBUTE/saved_simul.
+5. The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
+6. Other functions are stored in subfolders of DISTRIBUTE/SRC.
+7. Documentation of the top level functions can be found in DOC/
+8. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/MatrixFormalismModule/User%20Guide.pdf)
+
 
 There are the following provided drivers
 
