@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of ADCFREE</title>
+  <meta name="keywords" content="ADCFREE">
+  <meta name="description" content="compute the free diffusion coefficients and the free signal">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; ADCFREE.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>ADCFREE
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>compute the free diffusion coefficients and the free signal</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [Sig_free,ADC_free_allcmpts] = ADCFREE(bvalues,DIFF_cmpts,VOL_cmpts,IC_cmpts) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> compute the free diffusion coefficients and the free signal
+ 
+ Input:
+     1. bvalues
+     2. DIFF_cmpts
+     3. VOL_cmpts
+     4. IC_cmpts
+ 
+ Output:
+     1. Sig_free
+     2. ADC_free_allcmpts</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Sig_free,ADC_free_allcmpts] = ADCFREE(bvalues,DIFF_cmpts,VOL_cmpts,IC_cmpts)</a>
+0002 
+0003 <span class="comment">% compute the free diffusion coefficients and the free signal</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Input:</span>
+0006 <span class="comment">%     1. bvalues</span>
+0007 <span class="comment">%     2. DIFF_cmpts</span>
+0008 <span class="comment">%     3. VOL_cmpts</span>
+0009 <span class="comment">%     4. IC_cmpts</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% Output:</span>
+0012 <span class="comment">%     1. Sig_free</span>
+0013 <span class="comment">%     2. ADC_free_allcmpts</span>
+0014     
+0015 nexperi = length(bvalues);
+0016 Ncmpt = length(DIFF_cmpts);
+0017 
+0018 VOL_allcmpts = 0;
+0019 
+0020 <span class="keyword">for</span> icmpt = 1:Ncmpt
+0021     VOL_allcmpts  = VOL_allcmpts + VOL_cmpts(icmpt);
+0022 <span class="keyword">end</span>
+0023 
+0024 <span class="keyword">for</span> icmpt = 1:Ncmpt
+0025     VF_cmpts(icmpt) = VOL_cmpts(icmpt)/VOL_allcmpts;
+0026 <span class="keyword">end</span>
+0027 
+0028 Sig_free = zeros(size(bvalues(:)));
+0029 
+0030 <span class="keyword">for</span> icmpt = 1:Ncmpt
+0031     Sig_free = Sig_free+IC_cmpts(1,icmpt)*VOL_cmpts(icmpt)*exp(-DIFF_cmpts(icmpt)*bvalues(:));
+0032 <span class="keyword">end</span>
+0033 
+0034 ADC_free_allcmpts = sum((IC_cmpts.*VF_cmpts)'.*DIFF_cmpts')./sum((IC_cmpts.*VF_cmpts)');
+0035</pre></div>
+<hr><address>Generated on Sun 10-Nov-2019 21:21:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

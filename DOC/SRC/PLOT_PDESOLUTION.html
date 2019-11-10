@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PLOT_PDESOLUTION</title>
+  <meta name="keywords" content="PLOT_PDESOLUTION">
+  <meta name="description" content="plot the PDE solution">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; PLOT_PDESOLUTION.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PLOT_PDESOLUTION
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>plot the PDE solution</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function PLOT_PDESOLUTION(mymesh,SOL,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,title_str) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> plot the PDE solution
+
+ Input:
+     1. mymesh is a structure with 10 elements:
+         Nnode
+         Nele
+         Nface
+         Pts_cmpt_reorder
+         Ele_cmpt_reorder
+         Pts_ind
+         Pts_boundary_reorder
+         Fac_boundary_reorder
+         Nboundary
+         Ncmpt
+     2. SOL: the PDE solution
+     3. OUT_cmpts_index
+     4. ECS_cmpts_index
+     5. IN_cmpts_index
+     6. title_str
+     
+ Output:
+     figures of the PDE</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PLOT_PDESOLUTION(mymesh,SOL,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,title_str)</a>
+0002 
+0003 <span class="comment">% plot the PDE solution</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Input:</span>
+0006 <span class="comment">%     1. mymesh is a structure with 10 elements:</span>
+0007 <span class="comment">%         Nnode</span>
+0008 <span class="comment">%         Nele</span>
+0009 <span class="comment">%         Nface</span>
+0010 <span class="comment">%         Pts_cmpt_reorder</span>
+0011 <span class="comment">%         Ele_cmpt_reorder</span>
+0012 <span class="comment">%         Pts_ind</span>
+0013 <span class="comment">%         Pts_boundary_reorder</span>
+0014 <span class="comment">%         Fac_boundary_reorder</span>
+0015 <span class="comment">%         Nboundary</span>
+0016 <span class="comment">%         Ncmpt</span>
+0017 <span class="comment">%     2. SOL: the PDE solution</span>
+0018 <span class="comment">%     3. OUT_cmpts_index</span>
+0019 <span class="comment">%     4. ECS_cmpts_index</span>
+0020 <span class="comment">%     5. IN_cmpts_index</span>
+0021 <span class="comment">%     6. title_str</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% Output:</span>
+0024 <span class="comment">%     figures of the PDE</span>
+0025 
+0026 xmin=0;
+0027 xmax=0;
+0028 ymin=0;
+0029 ymax=0;
+0030 zmin=0;
+0031 zmax=0;
+0032 <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0033     xx=max(mymesh.Pts_cmpt_reorder{icmpt}(1,:));
+0034     yx=max(mymesh.Pts_cmpt_reorder{icmpt}(2,:));
+0035     zx=max(mymesh.Pts_cmpt_reorder{icmpt}(3,:));
+0036     xn=min(mymesh.Pts_cmpt_reorder{icmpt}(1,:));
+0037     yn=min(mymesh.Pts_cmpt_reorder{icmpt}(2,:));
+0038     zn=min(mymesh.Pts_cmpt_reorder{icmpt}(3,:));
+0039     xmin = min(xmin,xn);
+0040     xmax = max(xmax,xx);
+0041     ymin = min(ymin,yn);
+0042     ymax = max(ymax,yx);
+0043     zmin = min(zmin,zn);
+0044     zmax = max(zmax,zx);
+0045 <span class="keyword">end</span>
+0046 <span class="keyword">if</span> (~isempty(OUT_cmpts_index))
+0047     figure;
+0048     hold on;
+0049     cmptvec = OUT_cmpts_index;
+0050     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0051         icmpt = cmptvec(ict);
+0052         Fac = [];
+0053         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0054             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0055         <span class="keyword">end</span>
+0056         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0057             mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}));
+0058         set(h,<span class="string">'facealpha'</span>,0.6);set(h,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0059         axis equal;
+0060         axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar(<span class="string">'eastoutside'</span>);
+0061         view(3);
+0062         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
+0063         grid on;
+0064         title([title_str,<span class="string">' Inner cmpts: '</span>,num2str(OUT_cmpts_index)]);
+0065     <span class="keyword">end</span>
+0066 <span class="keyword">end</span>
+0067 <span class="keyword">if</span> (~isempty(IN_cmpts_index))
+0068     figure;
+0069     hold on;
+0070     cmptvec = IN_cmpts_index;
+0071     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0072         icmpt = cmptvec(ict);
+0073         Fac = [];
+0074         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0075             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0076         <span class="keyword">end</span>
+0077         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0078             mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}));
+0079         set(h,<span class="string">'facealpha'</span>,0.6);set(h,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0080         axis equal;
+0081         axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar(<span class="string">'eastoutside'</span>);
+0082         view(3);
+0083         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
+0084         grid on;
+0085         title([title_str,<span class="string">' Outer cmpts: '</span>,num2str([IN_cmpts_index])]);
+0086     <span class="keyword">end</span>
+0087 <span class="keyword">end</span>
+0088 <span class="keyword">if</span> (~isempty(ECS_cmpts_index))
+0089     figure;
+0090     hold on;
+0091     cmptvec = ECS_cmpts_index;
+0092     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0093         icmpt = cmptvec(ict);
+0094         Fac = [];
+0095         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0096             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0097         <span class="keyword">end</span>
+0098         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0099             mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}));
+0100         set(h,<span class="string">'facealpha'</span>,0.6);set(h,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0101         axis equal;
+0102         axis([xmin,xmax,ymin,ymax,zmin,zmax]); c = colorbar(<span class="string">'eastoutside'</span>);
+0103         <span class="comment">%set(c,'Position',[0.9251 0.1095 0.0381 0.8167]);</span>
+0104         view(3);
+0105         xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>);
+0106         grid on;
+0107         title([title_str,<span class="string">' ECS cmpt: '</span>,num2str([ECS_cmpts_index])]);
+0108         <span class="comment">%xlabel('x');</span>
+0109         <span class="comment">%ylabel('y');</span>
+0110         view(-40,60);
+0111         <span class="comment">%view(90,90);</span>
+0112     <span class="keyword">end</span>
+0113 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 10-Nov-2019 21:21:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

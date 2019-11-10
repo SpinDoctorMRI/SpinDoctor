@@ -1,0 +1,505 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of create_femesh_fromcells</title>
+  <meta name="keywords" content="create_femesh_fromcells">
+  <meta name="description" content="create FE mesh from cells">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; create_femesh_fromcells.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>create_femesh_fromcells
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>create FE mesh from cells</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [fname_tetgen_femesh] =create_femesh_fromcells(params_cells,fname_cells,params_domain_geom,params_domain_femesh,fname_tetgen) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> create FE mesh from cells
+ 
+ Input:
+     1. params_cells is a structure with
+         a. 7 elements for spheres (cell_shape = 1):
+             cell_shape
+             ncell
+             Rmin
+             Rmax
+             dmin
+             dmax
+             para_deform 
+         b. 8 elements for cylinders (cell_shape = 2):
+             cell_shape
+             ncell
+             Rmin
+             Rmax
+             dmin
+             dmax
+             para_deform
+             Hcyl  
+
+     2. fname_cells
+
+     3. params_domain_geom is a structure with 3 elements:
+         Rratio_IN
+         include_ECS
+         ECS_gap
+
+     4. params_domain_femesh is a structure with 2 elements:
+         Htetgen
+         tetgen_cmd
+
+     5. fname_tetgen
+ 
+ Output: 
+     fname_tetgen_femesh</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [fname_tetgen_femesh] = </a><span class="keyword">...</span>
+0002    create_femesh_fromcells(params_cells,fname_cells,<span class="keyword">...</span>
+0003    params_domain_geom,params_domain_femesh,fname_tetgen)
+0004 
+0005 <span class="comment">% create FE mesh from cells</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Input:</span>
+0008 <span class="comment">%     1. params_cells is a structure with</span>
+0009 <span class="comment">%         a. 7 elements for spheres (cell_shape = 1):</span>
+0010 <span class="comment">%             cell_shape</span>
+0011 <span class="comment">%             ncell</span>
+0012 <span class="comment">%             Rmin</span>
+0013 <span class="comment">%             Rmax</span>
+0014 <span class="comment">%             dmin</span>
+0015 <span class="comment">%             dmax</span>
+0016 <span class="comment">%             para_deform</span>
+0017 <span class="comment">%         b. 8 elements for cylinders (cell_shape = 2):</span>
+0018 <span class="comment">%             cell_shape</span>
+0019 <span class="comment">%             ncell</span>
+0020 <span class="comment">%             Rmin</span>
+0021 <span class="comment">%             Rmax</span>
+0022 <span class="comment">%             dmin</span>
+0023 <span class="comment">%             dmax</span>
+0024 <span class="comment">%             para_deform</span>
+0025 <span class="comment">%             Hcyl</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%     2. fname_cells</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%     3. params_domain_geom is a structure with 3 elements:</span>
+0030 <span class="comment">%         Rratio_IN</span>
+0031 <span class="comment">%         include_ECS</span>
+0032 <span class="comment">%         ECS_gap</span>
+0033 <span class="comment">%</span>
+0034 <span class="comment">%     4. params_domain_femesh is a structure with 2 elements:</span>
+0035 <span class="comment">%         Htetgen</span>
+0036 <span class="comment">%         tetgen_cmd</span>
+0037 <span class="comment">%</span>
+0038 <span class="comment">%     5. fname_tetgen</span>
+0039 <span class="comment">%</span>
+0040 <span class="comment">% Output:</span>
+0041 <span class="comment">%     fname_tetgen_femesh</span>
+0042 
+0043 cell_shape = params_cells.cell_shape;
+0044 hreq = params_domain_femesh.Htetgen;
+0045 tetgen_cmd = params_domain_femesh.tetgen_cmd;
+0046 include_ECS = params_domain_geom.include_ECS;
+0047 ECS_gap = params_domain_geom.ECS_gap;
+0048 Rratio_IN = params_domain_geom.Rratio_IN;
+0049 
+0050 ndim = 3;
+0051 
+0052 <span class="keyword">if</span> (cell_shape == 2)
+0053     [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell,center,normal,Rcell,nslice_vec,nodes_ind_bottomring,nodes_ind_topring] <span class="keyword">...</span>
+0054         = create_cylinders_geometry(fname_cells,Rratio_IN);    
+0055 <span class="keyword">elseif</span> (cell_shape == 1)
+0056     [ncell,facets_cell,facets_labels_cell,nodes_cell,pt_in_cell,center,normal,Rcell] = <span class="keyword">...</span>
+0057         create_ellipses_geometry(fname_cells,Rratio_IN);
+0058 <span class="keyword">elseif</span> (cell_shape == 3)
+0059     fname_tetgen_femesh = fname_cells;
+0060     <span class="keyword">if</span> (exist([fname_cells, <span class="string">'_elements.txt'</span>], <span class="string">'file'</span>) <span class="keyword">...</span>
+0061             &amp;&amp; exist([fname_cells, <span class="string">'_nodes.txt'</span>], <span class="string">'file'</span>)) == 0        
+0062         gmsh_to_fem_Try(fname_cells);        
+0063     <span class="keyword">end</span>
+0064     disp([<span class="string">'Reading from neuron FE mesh from '</span>, fname_cells]);
+0065        
+0066     elements = load([fname_cells, <span class="string">'_elements.txt'</span>]);
+0067     nodes = load([fname_cells, <span class="string">'_nodes.txt'</span>]);
+0068             
+0069     [VOL,EleV,EleC] = get_volume_mesh(nodes',elements');    
+0070     centermass = ((EleC*EleV')/VOL);
+0071 
+0072     [elems2faces, faces2nodes] = get_faces(elements);
+0073     faces2elems=entryInWhichRows(elems2faces);
+0074     bindex=find(faces2elems(:, 2)==0);           <span class="comment">%index of boundary facets - belong to one element only</span>
+0075     bb=faces2nodes(bindex, :);    <span class="comment">%nodes of boundary facets</span>
+0076     aa=sort(bb, 2);
+0077     facets=unique(aa, <span class="string">'rows'</span>);
+0078     facets = facets';
+0079     
+0080     ncell = 1;
+0081     facets_cell{1} = facets;
+0082     nodes_cell{1} = nodes;
+0083     facets_labels_cell{1} =  ones(1,size(facets_cell{1},2));
+0084     pt_in_cell = zeros(1,3);
+0085     pt_in_cell(1,1:3) = centermass';
+0086 <span class="keyword">end</span>
+0087 
+0088 facets = [];
+0089 nodes = [];
+0090 offset = 0;
+0091 
+0092 boundary_attribute = [];
+0093 nboundary = 0;
+0094 <span class="keyword">for</span> icell = 1:ncell
+0095     facets = [facets,facets_cell{icell}+offset];    
+0096     nfacets = size(facets_cell{icell},2);
+0097     nnodes = size(nodes_cell{icell},1);            
+0098     boundary_attribute = [boundary_attribute;facets_labels_cell{icell}'+nboundary];    
+0099     nboundary = nboundary + max(facets_labels_cell{icell}');
+0100     nodes = [nodes;nodes_cell{icell}];
+0101     offset = offset+nnodes;
+0102 <span class="keyword">end</span>
+0103 
+0104 
+0105 nodes_allcell = nodes;
+0106 nnodes_allcell = size(nodes_allcell,1);
+0107 
+0108 facets_allcell = facets;
+0109 nfacets_allcell = size(facets_allcell,2);
+0110 
+0111 pt_in_allcell = pt_in_cell;
+0112 bd_attrib_allcell = boundary_attribute;
+0113 
+0114 <span class="keyword">if</span> (include_ECS == 2 &amp; cell_shape == 2)
+0115     theta = linspace(0,2*pi,21);
+0116     thetavec = theta(1:end-1);
+0117     xvec=cos(thetavec);
+0118     yvec=sin(thetavec);
+0119     
+0120     nodes_all2d = [];
+0121     <span class="keyword">for</span> icell = 1:ncell                  
+0122         center_one = center{icell};                   
+0123         Rcell_one = Rcell{icell}*(1+ECS_gap);
+0124         nodes_2d{icell}(:,1) = [xvec*Rcell_one(1,1)+center_one(1,1),center_one(1,1)]';
+0125         nodes_2d{icell}(:,2) = [yvec*Rcell_one(1,1)+center_one(1,2),center_one(1,2)]';
+0126         
+0127         nodes_all2d = [nodes_all2d;nodes_2d{icell}];
+0128         Rvec(icell) = Rcell_one(1,1);
+0129     <span class="keyword">end</span>
+0130     
+0131     Rmean = mean(Rvec(1:ncell));
+0132     Rmin = min(Rvec(1:ncell));
+0133     Rmax = max(Rvec(1:ncell));
+0134     
+0135     shp = alphaShape(nodes_all2d(:,1),nodes_all2d(:,2),Rmax*2);
+0136     vv = area(shp);
+0137     shp = alphaShape(nodes_all2d(:,1),nodes_all2d(:,2),Rmax,<span class="keyword">...</span>
+0138         <span class="string">'holeThreshold'</span>,vv/2,<span class="string">'regionThreshold'</span>,vv/2);
+0139   
+0140     <span class="keyword">if</span> (numRegions(shp) &gt; 1)
+0141         disp(<span class="string">'Can only have 1 region in ECS'</span>);
+0142         stop
+0143     <span class="keyword">end</span>    
+0144     [tri, xy] = shp.boundaryFacets();
+0145     shp_bd = polyshape([xy(:,1)],[xy(:,2)]);
+0146     clear shp_cell;
+0147     <span class="keyword">for</span> icell = 1:ncell
+0148         ii = nodes_ind_topring{icell};
+0149         nodes_topring{icell} = [nodes_cell{icell}(ii,1:3)];
+0150          
+0151         shp_cell(icell) = polyshape(nodes_topring{icell}(:,1),nodes_topring{icell}(:,2));
+0152 
+0153         ii = nodes_ind_bottomring{icell};
+0154         nodes_bottomring{icell} = [nodes_cell{icell}(ii,1:3)];        
+0155 
+0156     <span class="keyword">end</span>
+0157     shp_ecs = subtract(shp_bd,union(shp_cell(1:ncell)));
+0158 
+0159     tri = shp_ecs.triangulation;
+0160     <span class="comment">% figure;</span>
+0161     <span class="comment">% triplot(tri.ConnectivityList,tri.Points(:,1),tri.Points(:,2));</span>
+0162     <span class="comment">% title('ECS');</span>
+0163     <span class="comment">% axis equal;</span>
+0164     
+0165     Pts_ind = zeros(size(tri.Points,1),2);
+0166     <span class="keyword">for</span> icell = 1:ncell
+0167         ii = nodes_ind_topring{icell};              
+0168         <span class="keyword">for</span> jj = 1:length(ii)
+0169             kk = find(abs(nodes_cell{icell}(ii(jj),1)-tri.Points(:,1))&lt;1e-6 &amp; abs(nodes_cell{icell}(ii(jj),2)-tri.Points(:,2))&lt;1e-6);  
+0170             Pts_ind(kk,1:2) = [icell,ii(jj)];
+0171         <span class="keyword">end</span>      
+0172     <span class="keyword">end</span>
+0173     ii = (find(Pts_ind(:,1)==0));
+0174     Pts_ind(ii,1) = ncell+1;
+0175     nodes_ecs = tri.Points(ii,1:2);
+0176     Pts_ind(ii,2) = 1:length(ii);
+0177 
+0178     Pts_ecs_top = zeros(size(nodes_ecs,1),3);
+0179     Pts_ecs_top(:,1:2) = [nodes_ecs];
+0180     Pts_ecs_top(:,3) = nodes_cell{1}(nodes_ind_topring{1}(1),3);
+0181 
+0182     Pts_ecs_bottom = zeros(size(nodes_ecs,1),3);
+0183     Pts_ecs_bottom(:,1:2) = [nodes_ecs];
+0184     Pts_ecs_bottom(:,3) = nodes_cell{1}(nodes_ind_bottomring{1}(1),3);
+0185 
+0186 
+0187     nodes = [nodes_allcell;Pts_ecs_bottom;Pts_ecs_top];
+0188 
+0189     Cmat = tri.ConnectivityList;
+0190     Pts_top = zeros(size(tri.Points,1),3);
+0191     Pts_top(:,1:2) = [tri.Points];
+0192     Pts_top(:,3) = nodes_cell{1}(nodes_ind_topring{1}(1),3);
+0193 
+0194     Pts_bottom = zeros(size(tri.Points,1),3);
+0195     Pts_bottom(:,1:2) = [tri.Points];
+0196     Pts_bottom(:,3) = nodes_cell{1}(nodes_ind_bottomring{1}(1),3);
+0197 
+0198     Pts_both = [Pts_bottom;Pts_top];
+0199     nfacets = size(Pts_bottom,1);
+0200     Cmat_both = [Cmat;Cmat+nfacets];    
+0201 
+0202     
+0203     tol = 1e-6;
+0204     npt = size(Pts_both,1);
+0205     rep_ind = zeros(npt,1);
+0206     <span class="keyword">for</span> ipt = 1:npt
+0207         kk = find(abs(Pts_both(ipt,1)-nodes(:,1))&lt;=tol &amp; abs(Pts_both(ipt,2)<span class="keyword">...</span>
+0208                 -nodes(:,2))&lt;=tol &amp; abs(Pts_both(ipt,3)-nodes(:,3))&lt;=tol);
+0209         rep_ind(ipt) = kk;
+0210     <span class="keyword">end</span>
+0211     Cmat_new = zeros(size(Cmat_both));
+0212     <span class="keyword">for</span> ipt = 1:npt
+0213         ii = find(Cmat_both==ipt);
+0214         Cmat_new(ii) = rep_ind(ipt);        
+0215     <span class="keyword">end</span>    
+0216     necs = size(nodes_ecs,1);
+0217     [Cmat,Pts] = cylinder_connectivity(necs,necs);
+0218     Cmat_out = Cmat+nnodes_allcell;
+0219 
+0220     
+0221     nodes_box = [Pts_ecs_bottom; Pts_ecs_top];
+0222     facets_box = [Cmat_new;Cmat_out']'-nnodes_allcell;
+0223 
+0224     pt_in_box = Pts_ecs_bottom(1,1:3);
+0225     pt_in_box(1,3) = 0;
+0226 
+0227     bd_attrib_box = (nboundary+1)*ones(size(facets_box,2),1);
+0228 
+0229     nboundary = nboundary+1;
+0230     
+0231     nodes = [nodes_allcell;nodes_box];
+0232     
+0233     facets = [facets_allcell,facets_box+nnodes_allcell];
+0234 
+0235     bd_attrib = [bd_attrib_allcell; bd_attrib_box];    
+0236   
+0237 <span class="keyword">elseif</span> (include_ECS == 2 &amp; cell_shape == 1)
+0238 
+0239     <span class="keyword">for</span> icell = 1:ncell
+0240         Rvec(icell) = mean(Rcell(icell,1:3));
+0241     <span class="keyword">end</span>
+0242     
+0243     Rmean = mean(Rvec(1:ncell));
+0244     Rmin = min(Rvec(1:ncell));
+0245     Rmax = max(Rvec(1:ncell));
+0246         
+0247     x1min = min(nodes(:,1)); x1max = max(nodes(:,1));
+0248     x2min = min(nodes(:,2)); x2max = max(nodes(:,2));
+0249     x3min = min(nodes(:,3)); x3max = max(nodes(:,3));  
+0250     
+0251     x1gap = Rmax*3;
+0252     x2gap = Rmax*3;
+0253     x3gap = Rmax*3;
+0254     
+0255     x1min = x1min-x1gap;
+0256     x1max = x1max+x1gap;
+0257     x2min = x2min-x2gap;
+0258     x2max = x2max+x2gap;
+0259     x3min = x3min-x3gap;
+0260     x3max = x3max+x3gap;
+0261     
+0262     x1vec = linspace(x1min,x1max,80);
+0263     x2vec = linspace(x2min,x2max,80);
+0264     x3vec = linspace(x3min,x3max,80);
+0265     
+0266     [X1,X2,X3] = ndgrid(x1vec,x2vec,x3vec);
+0267     
+0268     xgap = ECS_gap*Rmax;
+0269     
+0270     distmat = Inf*ones(size(X1));
+0271     <span class="keyword">for</span> icell = 1:ncell
+0272         dd = max(0,sqrt((X1-center{icell}(1,1)).^2+(X2-center{icell}(1,2)).^2+<span class="keyword">...</span>
+0273             +(X3-center{icell}(1,3)).^2)-Rvec(icell));
+0274         distmat = min(distmat,dd);
+0275     <span class="keyword">end</span>
+0276  
+0277     [facets_box,nodes_box] = isosurface(X1,X2,X3,distmat,xgap);
+0278 
+0279     ii = find(distmat&lt;=xgap*0.9 &amp; distmat&gt;=xgap*0.1);
+0280     <span class="keyword">if</span> (~isempty(ii))
+0281         pt_in_box = [X1(ii(1)),X2(ii(1)),X3(ii(1))];
+0282     <span class="keyword">else</span>
+0283         disp([<span class="string">'did not find pt in'</span>]);
+0284         stop
+0285     <span class="keyword">end</span>
+0286     
+0287     facets_box = facets_box';
+0288 
+0289     <span class="comment">%figure; h=trisurf(facets_box',nodes_box(:,1),nodes_box(:,2),nodes_box(:,3)); set(h,'facealpha',0.1); view(3); axis equal;</span>
+0290  
+0291     bd_attrib_box = (nboundary+1)*ones(size(facets_box,2),1);
+0292     nboundary = nboundary+1;
+0293     
+0294     nodes = [nodes_allcell;nodes_box];
+0295     facets = [facets_allcell,facets_box+nnodes_allcell];
+0296     bd_attrib = [bd_attrib_allcell; bd_attrib_box];
+0297 
+0298 <span class="keyword">elseif</span> (include_ECS == 1)
+0299     
+0300     x1min = min(nodes(:,1)); x1max = max(nodes(:,1));
+0301     x2min = min(nodes(:,2)); x2max = max(nodes(:,2));
+0302     x3min = min(nodes(:,3)); x3max = max(nodes(:,3));
+0303     
+0304     x1len = x1max-x1min;
+0305     x2len = x2max-x2min;
+0306     x3len = x3max-x3min;
+0307     
+0308     x1gap = x1len*ECS_gap;
+0309     x2gap = x2len*ECS_gap;
+0310     x3gap = x3len*ECS_gap;
+0311     
+0312     x1min = x1min-x1gap;
+0313     x1max = x1max+x1gap;
+0314     x2min = x2min-x2gap;
+0315     x2max = x2max+x2gap;
+0316     x3min = x3min-x3gap;
+0317     x3max = x3max+x3gap;
+0318     
+0319     [nodes_box,facets_box,pt_in_box] = create_box_geometry(x1min,x1max,x2min,x2max,x3min,x3max);
+0320     
+0321     pt_in_box = [x1min+x1gap/2,x2min+x2gap/2,x3min+x3gap/2];
+0322     
+0323     bd_attrib_box = (nboundary+1)*ones(size(facets_box,2),1);
+0324     nboundary = nboundary+1;
+0325     
+0326     nodes = [nodes_allcell;nodes_box];
+0327     facets = [facets_allcell,facets_box+nnodes_allcell];
+0328     bd_attrib = [bd_attrib_allcell; bd_attrib_box];
+0329     
+0330 <span class="keyword">else</span>
+0331     
+0332     nodes = [nodes_allcell];
+0333     facets = [facets_allcell];
+0334     bd_attrib = [bd_attrib_allcell];
+0335 <span class="keyword">end</span>
+0336 
+0337 nfacets = size(facets,2);
+0338 nnodes = size(nodes,1);
+0339 
+0340 holes = [];
+0341 nholes = size(holes,1);
+0342 
+0343 regions = [pt_in_allcell];
+0344 <span class="keyword">if</span> (include_ECS ~= 0)
+0345     regions = [regions;pt_in_box];
+0346 <span class="keyword">end</span>
+0347     
+0348 nregions = size(regions,1);
+0349 
+0350 nodesindex = [1:nnodes]';
+0351 
+0352 filename = [fname_tetgen,<span class="string">'.node'</span>];
+0353 fid = fopen(filename,<span class="string">'w'</span>);
+0354 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'# Part 1 - node list'</span>);
+0355 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'# node count, 3 dim, no attribute, no boundary marker'</span>);
+0356 fprintf(fid, <span class="string">'%d %d %d %d\n'</span>, nnodes,ndim,0,0);
+0357 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'# Node index, node coordinates'</span>);
+0358 <span class="keyword">if</span> (fid ~= -1) 
+0359   fprintf(fid, <span class="string">'%d %26.16f %26.16f %26.16f\n'</span>, [nodesindex,nodes]');
+0360 <span class="keyword">end</span>
+0361 fclose(fid);
+0362 
+0363 filename = [fname_tetgen,<span class="string">'.poly'</span>];
+0364 fid = fopen(filename,<span class="string">'w'</span>);
+0365 
+0366 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'# Part 1 - node list'</span>);
+0367 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'#  0 indicates the node list is stored in file .node'</span>);
+0368 fprintf(fid, <span class="string">'%d\n'</span>, 0);
+0369 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'# Part 2 - facet list'</span>);
+0370 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'# facet count, yes boundary marker'</span>);
+0371 fprintf(fid, <span class="string">'%d %d\n'</span>, nfacets,1);
+0372 
+0373 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">'# Node index, node coordinates'</span>);
+0374 <span class="keyword">if</span> (fid ~= -1) 
+0375   <span class="keyword">for</span> ii = 1:nfacets
+0376     fprintf(fid, <span class="string">'%d %d %d\n'</span>, 1,0,bd_attrib(ii));  
+0377     fprintf(fid, <span class="string">'%d '</span>, 3);
+0378     <span class="keyword">for</span> jj = 1:3
+0379       fprintf(fid, <span class="string">'%d '</span>, facets(jj,ii));
+0380     <span class="keyword">end</span>
+0381     fprintf(fid, <span class="string">'\n'</span>);
+0382   <span class="keyword">end</span>
+0383 <span class="keyword">end</span>
+0384 
+0385 
+0386 
+0387 <span class="comment">%%%Part 3 - hole list</span>
+0388 <span class="comment">%%%Holes in the volume are specified by identifying a point inside each hole.</span>
+0389 <span class="comment">%%%  One line: &lt;# of holes&gt;</span>
+0390 <span class="comment">%%%  Following lines list # of holes:</span>
+0391 <span class="comment">%%%    &lt;hole #&gt; &lt;x&gt; &lt;y&gt; &lt;z&gt;</span>
+0392 <span class="comment">%%%    ...</span>
+0393 
+0394 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">' # Part 3 - hole list'</span>);
+0395 fprintf(fid, <span class="string">'%d\n'</span>, nholes);
+0396 <span class="keyword">if</span> (nholes&gt;=1) 
+0397     <span class="keyword">for</span> ih = 1:nholes
+0398         fprintf(fid, <span class="string">'%d %f %f %f\n'</span>, ih,holes(ih,1),holes(ih,2),holes(ih,3));
+0399     <span class="keyword">end</span>
+0400 <span class="keyword">end</span>
+0401 
+0402 
+0403 fprintf(fid, <span class="string">'%s\n'</span>, <span class="string">' # Part 4 - region list'</span>);
+0404 fprintf(fid, <span class="string">'%d\n'</span>, nregions);
+0405 <span class="keyword">if</span> (nregions &gt;= 1) 
+0406     <span class="keyword">for</span> ir = 1:nregions
+0407         fprintf(fid, <span class="string">'%d %f %f %f %d %f\n'</span>, ir,regions(ir,1),regions(ir,2),regions(ir,3),ir,0.1);
+0408     <span class="keyword">end</span>
+0409 <span class="keyword">end</span>
+0410 fclose(fid);
+0411 
+0412 <span class="keyword">if</span> (hreq &gt; 0) 
+0413     tetgen_options = [<span class="string">'-pqA'</span>,<span class="string">'a'</span>,num2str(hreq)];
+0414 <span class="keyword">else</span>
+0415     tetgen_options = [<span class="string">'-pqA'</span>];
+0416 <span class="keyword">end</span>
+0417 disp([<span class="string">'Running command &quot;'</span>,tetgen_cmd,<span class="string">' '</span>,tetgen_options,<span class="string">' '</span>,filename,<span class="string">'&quot;'</span>]);
+0418 disp([<span class="string">'*****Start Tetgen '</span>]);
+0419 system([tetgen_cmd,<span class="string">' '</span>,tetgen_options,<span class="string">' '</span>,filename]);
+0420 disp([<span class="string">'*****End Tetgen'</span>]);
+0421 
+0422 fname_tetgen_femesh = [fname_tetgen,<span class="string">'.1'</span>];</pre></div>
+<hr><address>Generated on Sun 10-Nov-2019 21:21:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

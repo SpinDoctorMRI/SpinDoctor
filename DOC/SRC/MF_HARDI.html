@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of MF_HARDI</title>
+  <meta name="keywords" content="MF_HARDI">
+  <meta name="description" content="compute the Matrix Formalism signal">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; MF_HARDI.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>MF_HARDI
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>compute the Matrix Formalism signal</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [points,SIG_EIG_cmpts_alldir,SIG_EIG_allcmpts_alldir]= MF_HARDI(experi_btpde,mymesh,IC_cmpts,EIG_value_cmpts,EIG_proj_cmpts) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> compute the Matrix Formalism signal 
+ for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.
+ 
+ Input:
+     1. experiment_btpde is a structure with 10 elements:
+         ngdir_total 
+         gdir        
+         sdeltavec   
+         bdeltavec   
+         seqvec       
+         npervec     
+         rtol        
+         atol        
+         qvalues     
+         bvalues        
+     2. mymesh is a structure with 10 elements:
+         Nnode
+         Nele
+         Nface
+         Pts_cmpt_reorder
+         Ele_cmpt_reorder
+         Pts_ind
+         Pts_boundary_reorder
+         Fac_boundary_reorder
+         Nboundary
+         Ncmpt
+     3. DIFF_cmpts
+     4. kappa_bdys
+     5. IC_cmpts
+ 
+ Output:
+     1. points (ngdir directions)
+     2. SIG_EIG_cmpts_alldir
+     3. SIG_EIG_allcmpts_alldir</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [points,SIG_EIG_cmpts_alldir,SIG_EIG_allcmpts_alldir] </a><span class="keyword">...</span>
+0002     = MF_HARDI(experi_btpde,mymesh,IC_cmpts,EIG_value_cmpts,EIG_proj_cmpts)
+0003 
+0004 <span class="comment">% compute the Matrix Formalism signal</span>
+0005 <span class="comment">% for ngdir directions and interpolate to 900 directions uniformly distributed on the sphere.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Input:</span>
+0008 <span class="comment">%     1. experiment_btpde is a structure with 10 elements:</span>
+0009 <span class="comment">%         ngdir_total</span>
+0010 <span class="comment">%         gdir</span>
+0011 <span class="comment">%         sdeltavec</span>
+0012 <span class="comment">%         bdeltavec</span>
+0013 <span class="comment">%         seqvec</span>
+0014 <span class="comment">%         npervec</span>
+0015 <span class="comment">%         rtol</span>
+0016 <span class="comment">%         atol</span>
+0017 <span class="comment">%         qvalues</span>
+0018 <span class="comment">%         bvalues</span>
+0019 <span class="comment">%     2. mymesh is a structure with 10 elements:</span>
+0020 <span class="comment">%         Nnode</span>
+0021 <span class="comment">%         Nele</span>
+0022 <span class="comment">%         Nface</span>
+0023 <span class="comment">%         Pts_cmpt_reorder</span>
+0024 <span class="comment">%         Ele_cmpt_reorder</span>
+0025 <span class="comment">%         Pts_ind</span>
+0026 <span class="comment">%         Pts_boundary_reorder</span>
+0027 <span class="comment">%         Fac_boundary_reorder</span>
+0028 <span class="comment">%         Nboundary</span>
+0029 <span class="comment">%         Ncmpt</span>
+0030 <span class="comment">%     3. DIFF_cmpts</span>
+0031 <span class="comment">%     4. kappa_bdys</span>
+0032 <span class="comment">%     5. IC_cmpts</span>
+0033 <span class="comment">%</span>
+0034 <span class="comment">% Output:</span>
+0035 <span class="comment">%     1. points (ngdir directions)</span>
+0036 <span class="comment">%     2. SIG_EIG_cmpts_alldir</span>
+0037 <span class="comment">%     3. SIG_EIG_allcmpts_alldir</span>
+0038 
+0039 Ncmpt = mymesh.Ncmpt;
+0040 [points,C,v] = spheresurface_regularpoints(1,experi_btpde.ngdir_total);
+0041 ngdir_total = size(points,1);
+0042 ii = find(points(:,3) &gt;= 0);
+0043 <span class="comment">% negii</span>
+0044 <span class="keyword">for</span> j = 1:size(ii,1)
+0045     <span class="keyword">for</span> k = 1:ngdir_total
+0046         <span class="keyword">if</span> (norm(points(j,1:2)-points(k,1:2)) &lt; 1e-10  &amp;&amp; points(j,3)+points(k,3) &lt; 1e-10)
+0047             negii(ii(j)) = k;
+0048         <span class="keyword">end</span>
+0049     <span class="keyword">end</span>
+0050 <span class="keyword">end</span>
+0051 jc = 0;
+0052 <span class="keyword">for</span> ic = 1:size(C,1)
+0053     jj = find(C(ic,1) == ii);
+0054     kk = find(C(ic,2) == ii);
+0055     ll = find(C(ic,3) == ii);
+0056     <span class="keyword">if</span> (~isempty(jj) &amp; ~isempty(kk) &amp; ~isempty(ll))
+0057         Ckeep(jc+1,1:3) = C(ic,1:3);
+0058         jc = jc+1;
+0059     <span class="keyword">end</span>
+0060 <span class="keyword">end</span>
+0061 graddir_index = ii;
+0062 ndir = length(graddir_index);
+0063 nexperi = length(experi_btpde.sdeltavec);
+0064 nb = size(experi_btpde.bvalues,2);
+0065 
+0066 SIG_EIG_cmpts_alldir = nan*ones(ngdir_total,Ncmpt,nexperi,nb);
+0067 SIG_EIG_allcmpts_alldir = nan*ones(ngdir_total,nexperi,nb);
+0068 <span class="keyword">for</span> idir = 1:ndir
+0069     experi_btpde.gdir = points(graddir_index(idir),:)';    
+0070     [SIG_EIG_cmpts,SIG_EIG_allcmpts] = BTPDE_EIG(experi_btpde,mymesh,<span class="keyword">...</span>
+0071     IC_cmpts,EIG_value_cmpts,EIG_proj_cmpts);   
+0072     SIG_EIG_cmpts_alldir(graddir_index(idir),:,:,:) = SIG_EIG_cmpts;
+0073     SIG_EIG_cmpts_alldir(negii(graddir_index(idir)),:,:,:) = SIG_EIG_cmpts;
+0074     SIG_EIG_allcmpts_alldir(graddir_index(idir),:,:) = SIG_EIG_allcmpts(:,:);
+0075     SIG_EIG_allcmpts_alldir(negii(graddir_index(idir)),:,:) = SIG_EIG_allcmpts(:,:);
+0076 <span class="keyword">end</span>
+0077 SIG_EIG_cmpts_alldir(find(SIG_EIG_cmpts_alldir==0)) = nan;
+0078 SIG_EIG_allcmpts_alldir(find(SIG_EIG_allcmpts_alldir==0)) = nan;</pre></div>
+<hr><address>Generated on Sun 10-Nov-2019 21:21:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

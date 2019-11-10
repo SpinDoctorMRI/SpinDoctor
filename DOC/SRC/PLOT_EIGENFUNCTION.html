@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PLOT_EIGENFUNCTION</title>
+  <meta name="keywords" content="PLOT_EIGENFUNCTION">
+  <meta name="description" content="plot the eigenfunction">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; PLOT_EIGENFUNCTION.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PLOT_EIGENFUNCTION
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>plot the eigenfunction</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function PLOT_EIGENFUNCTION(mymesh,SOL,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,nindex,title_str) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> plot the eigenfunction
+
+ Input:
+     1. mymesh is a structure with 10 elements:
+         Nnode
+         Nele
+         Nface
+         Pts_cmpt_reorder
+         Ele_cmpt_reorder
+         Pts_ind
+         Pts_boundary_reorder
+         Fac_boundary_reorder
+         Nboundary
+         Ncmpt
+     2. SOL: the set of eigenfunctions
+     3. OUT_cmpts_index
+     4. ECS_cmpts_index
+     5. IN_cmpts_index
+     6. nindex: the index of the eigenfunction to be plotted
+     7. title_str
+     
+ Output:
+     figures for the eigenfunction</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PLOT_EIGENFUNCTION(mymesh,SOL,OUT_cmpts_index,ECS_cmpts_index,IN_cmpts_index,nindex,title_str)</a>
+0002 
+0003 <span class="comment">% plot the eigenfunction</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Input:</span>
+0006 <span class="comment">%     1. mymesh is a structure with 10 elements:</span>
+0007 <span class="comment">%         Nnode</span>
+0008 <span class="comment">%         Nele</span>
+0009 <span class="comment">%         Nface</span>
+0010 <span class="comment">%         Pts_cmpt_reorder</span>
+0011 <span class="comment">%         Ele_cmpt_reorder</span>
+0012 <span class="comment">%         Pts_ind</span>
+0013 <span class="comment">%         Pts_boundary_reorder</span>
+0014 <span class="comment">%         Fac_boundary_reorder</span>
+0015 <span class="comment">%         Nboundary</span>
+0016 <span class="comment">%         Ncmpt</span>
+0017 <span class="comment">%     2. SOL: the set of eigenfunctions</span>
+0018 <span class="comment">%     3. OUT_cmpts_index</span>
+0019 <span class="comment">%     4. ECS_cmpts_index</span>
+0020 <span class="comment">%     5. IN_cmpts_index</span>
+0021 <span class="comment">%     6. nindex: the index of the eigenfunction to be plotted</span>
+0022 <span class="comment">%     7. title_str</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% Output:</span>
+0025 <span class="comment">%     figures for the eigenfunction</span>
+0026 
+0027 xmin=0;
+0028 xmax=0;
+0029 ymin=0;
+0030 ymax=0;
+0031 zmin=0;
+0032 zmax=0;
+0033 <span class="keyword">for</span> icmpt = 1:mymesh.Ncmpt
+0034     xx=max(mymesh.Pts_cmpt_reorder{icmpt}(1,:));
+0035     yx=max(mymesh.Pts_cmpt_reorder{icmpt}(2,:));
+0036     zx=max(mymesh.Pts_cmpt_reorder{icmpt}(3,:));
+0037     xn=min(mymesh.Pts_cmpt_reorder{icmpt}(1,:));
+0038     yn=min(mymesh.Pts_cmpt_reorder{icmpt}(2,:));
+0039     zn=min(mymesh.Pts_cmpt_reorder{icmpt}(3,:));
+0040     xmin = min(xmin,xn);
+0041     xmax = max(xmax,xx);
+0042     ymin = min(ymin,yn);
+0043     ymax = max(ymax,yx);
+0044     zmin = min(zmin,zn);
+0045     zmax = max(zmax,zx);
+0046 <span class="keyword">end</span>
+0047 
+0048 <span class="keyword">if</span> (~isempty(OUT_cmpts_index))
+0049     figure;
+0050     hold on;
+0051     cmptvec = OUT_cmpts_index;
+0052     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0053         icmpt = cmptvec(ict);
+0054         Fac = [];
+0055         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0056             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0057         <span class="keyword">end</span>
+0058         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0059             mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}(:,nindex)));
+0060         set(h,<span class="string">'facealpha'</span>,0.6);set(h,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0061         axis equal;
+0062         grid on;
+0063         axis([xmin,xmax,ymin,ymax,zmin,zmax]); 
+0064         colorbar(<span class="string">'eastoutside'</span>);
+0065         view(3);
+0066         title(title_str);
+0067     <span class="keyword">end</span>
+0068 <span class="keyword">end</span>
+0069 
+0070 <span class="keyword">if</span> (~isempty(IN_cmpts_index))
+0071     figure;
+0072     hold on;
+0073     cmptvec = IN_cmpts_index;
+0074     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0075         icmpt = cmptvec(ict);
+0076         Fac = [];
+0077         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0078             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0079         <span class="keyword">end</span>
+0080         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0081             mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}(:,nindex)));
+0082         set(h,<span class="string">'facealpha'</span>,0.6);set(h,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0083         set(gca,<span class="string">'FontSize'</span>,12);
+0084         axis equal;
+0085         axis([xmin,xmax,ymin,ymax,zmin,zmax]); colorbar(<span class="string">'eastoutside'</span>);
+0086         view(3);
+0087         title([title_str,<span class="string">' Outer cmpts: '</span>,num2str([IN_cmpts_index])]);
+0088     <span class="keyword">end</span>
+0089 <span class="keyword">end</span>
+0090 
+0091 <span class="keyword">if</span> (~isempty(ECS_cmpts_index))
+0092     figure;
+0093     hold on;
+0094     cmptvec = ECS_cmpts_index;
+0095     <span class="keyword">for</span> ict = 1:length(cmptvec)
+0096         icmpt = cmptvec(ict);
+0097         Fac = [];
+0098         <span class="keyword">for</span> iboundary = 1:mymesh.Nboundary
+0099             Fac = [Fac,mymesh.Fac_boundary_reorder{icmpt}{iboundary}];
+0100         <span class="keyword">end</span>
+0101         h = trisurf(Fac',mymesh.Pts_cmpt_reorder{icmpt}(1,:),mymesh.Pts_cmpt_reorder{icmpt}(2,:),<span class="keyword">...</span>
+0102             mymesh.Pts_cmpt_reorder{icmpt}(3,:),real(SOL{icmpt}(:,nindex)));
+0103         set(h,<span class="string">'facealpha'</span>,0.6);set(h,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0104         axis equal;
+0105         axis([xmin,xmax,ymin,ymax,zmin,zmax]); c = colorbar(<span class="string">'eastoutside'</span>);
+0106         view(3);
+0107         title([title_str,<span class="string">' ECS cmpt: '</span>,num2str([ECS_cmpts_index])]);
+0108         <span class="comment">%xlabel('x');</span>
+0109         <span class="comment">%ylabel('y');</span>
+0110     <span class="keyword">end</span>
+0111 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 10-Nov-2019 21:21:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

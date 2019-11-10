@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of MF_DTENSOR</title>
+  <meta name="keywords" content="MF_DTENSOR">
+  <meta name="description" content="compute the effective diffusion tensor">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">SRC</a> &gt; MF_DTENSOR.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SRC&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>MF_DTENSOR
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>compute the effective diffusion tensor</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [Deff_eig_tensor_cmpts,Deff_eig_tensor_allcmpts]= MF_DTENSOR(VOL_cmpts,IC_cmpts,EIG_value_cmpts,EIG_proj_cmpts,DIFF_cmpts,MF_JN_cmpts) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> compute the effective diffusion tensor
+
+ Input:
+     1. VOL_cmpts
+     2. IC_cmpts
+     3. EIG_value_cmpts
+     4. EIG_proj_cmpts
+     5. DIFF_cmpts
+     6. MF_JN_cmpts
+
+ Output:
+     1. Deff_eig_tensor_cmpts
+     2. Deff_eig_tensor_allcmpts</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Deff_eig_tensor_cmpts,Deff_eig_tensor_allcmpts] </a><span class="keyword">...</span>
+0002     = MF_DTENSOR(VOL_cmpts,IC_cmpts,EIG_value_cmpts,EIG_proj_cmpts,DIFF_cmpts,MF_JN_cmpts)
+0003 
+0004 <span class="comment">% compute the effective diffusion tensor</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Input:</span>
+0007 <span class="comment">%     1. VOL_cmpts</span>
+0008 <span class="comment">%     2. IC_cmpts</span>
+0009 <span class="comment">%     3. EIG_value_cmpts</span>
+0010 <span class="comment">%     4. EIG_proj_cmpts</span>
+0011 <span class="comment">%     5. DIFF_cmpts</span>
+0012 <span class="comment">%     6. MF_JN_cmpts</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Output:</span>
+0015 <span class="comment">%     1. Deff_eig_tensor_cmpts</span>
+0016 <span class="comment">%     2. Deff_eig_tensor_allcmpts</span>
+0017 
+0018 
+0019 disp([<span class="string">'DEFF MF: eigenfunction decomposition'</span>]);
+0020 
+0021 Ncmpt = length(VOL_cmpts);
+0022 
+0023 VOL_allcmpts = sum(VOL_cmpts);
+0024 VOL_frac = VOL_cmpts/VOL_allcmpts;
+0025 
+0026 nexperi = size(MF_JN_cmpts{1},1);
+0027 elapsed_time = zeros(Ncmpt, nexperi);
+0028 
+0029 
+0030 Deff_eig_tensor_cmpts = zeros(Ncmpt,nexperi,3,3);
+0031 
+0032 <span class="keyword">for</span> icmpt = 1:Ncmpt  
+0033     neig = length(EIG_value_cmpts{icmpt});
+0034    
+0035     <span class="keyword">for</span> iexperi = 1:nexperi
+0036         Deff_eig_tensor{icmpt} = zeros(neig,3,3);
+0037         disp([<span class="string">'      Experiment '</span>,num2str(iexperi)]);
+0038         <span class="keyword">for</span> ieig = 1:neig
+0039             [dtmp]=[MF_JN_cmpts{icmpt}(iexperi,ieig)*DIFF_cmpts(icmpt)];      
+0040             vvec = squeeze(EIG_proj_cmpts{icmpt}(1:3,1,ieig));        
+0041             Deff_eig_tensor{icmpt}(ieig,:,:) = dtmp*vvec*vvec';
+0042         <span class="keyword">end</span>
+0043         Deff_eig_tensor_cmpts(icmpt,iexperi,:,:) = squeeze(sum(Deff_eig_tensor{icmpt},1));        
+0044     <span class="keyword">end</span>
+0045 <span class="keyword">end</span>
+0046 
+0047 Deff_eig_tensor_allcmpts = zeros(nexperi,3,3);
+0048 <span class="keyword">for</span> iexperi = 1:nexperi
+0049     <span class="keyword">for</span> icmpt = 1:Ncmpt
+0050         Deff_eig_tensor_allcmpts(iexperi,:,:) = squeeze(Deff_eig_tensor_allcmpts(iexperi,:,:)) + <span class="keyword">...</span>
+0051             (IC_cmpts(icmpt)*VOL_frac(icmpt)*squeeze(Deff_eig_tensor_cmpts(icmpt,iexperi,:,:)))/sum((IC_cmpts.*VOL_frac)');
+0052     <span class="keyword">end</span>
+0053 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 10-Nov-2019 21:21:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
