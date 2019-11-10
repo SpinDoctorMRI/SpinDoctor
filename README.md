@@ -31,7 +31,7 @@ Getting started
 5. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/MatrixFormalismModule/User%20Guide.pdf)
 
 There are 4 provided drivers
-
+--- | --- 
 driver_spindoctor_MF_1direction_commented.m   |   1 gradient direction
 driver_spindoctor_MF_1direction_UseSavedData.m |  1 gradient direction
 driver_spindoctor_MF_hardi_commented.m   |	HARDI
