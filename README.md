@@ -35,8 +35,6 @@ There are 4 provided drivers
  Driver name                         	| Simulation details                                                                       	|
 |-------------------------------------	|------------------------------------------------------------------------------------------	|
 | driver_btpde_multidir_soma_OGSE.m   	| BTPDE simulation of 03b_spindle4aACC_soma in 30 gradient directions with OGSE sequences. 	|
-
-	| ------ | ------| 
 	| driver_spindoctor_MF_1direction_commented.m   |   1 gradient direction |
 	| driver_spindoctor_MF_1direction_UseSavedData.m |  1 gradient direction |
 	| driver_spindoctor_MF_hardi_commented.m   |	HARDI |
