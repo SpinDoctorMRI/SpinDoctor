@@ -30,6 +30,12 @@ Getting started
 4. Documentation of the top level functions can be found in DOC/
 5. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/MatrixFormalismModule/User%20Guide.pdf)
 
+There are 4 provided drivers
+
+driver_spindoctor_MF_1direction_commented.m     
+driver_spindoctor_MF_hardi_commented.m   
+driver_spindoctor_MF_1direction_UseSavedData.m  
+driver_spindoctor_MF_hardi_UseSavedData.m
 
 Authors: Jing-Rebecca Li, Try Nguyen Tran, Van-Dang Nguyen. 
 
