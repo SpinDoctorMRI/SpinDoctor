@@ -35,7 +35,8 @@ There are the following provided drivers
  Driver name                         	| Simulation details                                                                       	|
 |-------------------------------------	|------------------------------------------------------------------------------------------	|
 | driver_spindoctor_MF_1direction_commented.m   |   1 gradient direction, does not use saved simulation data, all simulations are run from scratch. |
-| driver_spindoctor_MF_1direction_UseSavedData.m |  1 gradient direction, save the simulated data or use previously saved simulation results if they are available. The minimum length scale of the eigenvalue interval is made slightly larger so the eigendecomposition data are under 1MB. |
+| driver_spindoctor_MF_1direction_UseSavedData.m |  1 gradient direction, save the simulated data or use previously saved simulation results if they are available. 
+The minimum length scale of the eigenvalue interval is made slightly larger so the eigendecomposition data are under 1MB. |
 | driver_spindoctor_MF_hardi_commented.m   |	HARDI, does not use saved simulation data, all simulations are run from scratch.|
 | driver_spindoctor_MF_hardi_UseSavedData.m | HARDI, save the simulated data or use previously saved simulation results if they are available. |
 
