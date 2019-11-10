@@ -30,15 +30,14 @@ Getting started
 4. Documentation of the top level functions can be found in DOC/
 5. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/MatrixFormalismModule/User%20Guide.pdf)
 
-There are 4 provided drivers
+There are the following provided drivers
 
  Driver name                         	| Simulation details                                                                       	|
 |-------------------------------------	|------------------------------------------------------------------------------------------	|
-| driver_btpde_multidir_soma_OGSE.m   	| BTPDE simulation of 03b_spindle4aACC_soma in 30 gradient directions with OGSE sequences. 	|
-| driver_spindoctor_MF_1direction_commented.m   |   1 gradient direction |
-| driver_spindoctor_MF_1direction_UseSavedData.m |  1 gradient direction |
-| driver_spindoctor_MF_hardi_commented.m   |	HARDI |
-| driver_spindoctor_MF_hardi_UseSavedData.m | HARDI |
+| driver_spindoctor_MF_1direction_commented.m   |   1 gradient direction, does not use saved simulation data, all simulations are run from scratch. |
+| driver_spindoctor_MF_1direction_UseSavedData.m |  1 gradient direction, save the simulated data or use previously saved simulation results if they are available. |
+| driver_spindoctor_MF_hardi_commented.m   |	HARDI, does not use saved simulation data, all simulations are run from scratch.|
+| driver_spindoctor_MF_hardi_UseSavedData.m | HARDI, save the simulated data or use previously saved simulation results if they are available. |
 
 Authors: Jing-Rebecca Li, Try Nguyen Tran, Van-Dang Nguyen. 
 
