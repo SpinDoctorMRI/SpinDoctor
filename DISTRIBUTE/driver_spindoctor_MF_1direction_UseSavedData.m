@@ -19,7 +19,7 @@ DO_PLOTS = true;
 %%%% User needs to choose to the minimum length scale of interest
 %%%% This controls the upper limit of eigenvalue interval to solve for
 %%%% Laplace eigenvalues.
-LSCALE_MIN = 4;
+LSCALE_MIN = 5;
 %%%% When there are too many eigenvalues in the requested eigenvalue
 %%%% interval, Matlab takes a long time to converge.  So it is better to
 %%%% break the requested eigenvalue interval into many subintervals so that
