@@ -18,7 +18,7 @@ SpinDoctor provides built-in options of including
 3) an extra-cellular space (ECS) enclosed either 
 a) in a box or b) in a tight wrapping around the cells; 
 4) deformation of canonical cells by bending and twisting.  
-5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeabilty).
+5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeability).
 Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsillating Gradient Spin Echo.
 
 **New Nov 2019: SpinDoctor has two modules called [Neuron Module](https://github.com/jingrebeccali/SpinDoctor/tree/NeuronModule) and [Matrix Formalism Module](https://github.com/jingrebeccali/SpinDoctor/tree/MatrixFormalismModule). Details about these modules can be found in the branches with those names.**
