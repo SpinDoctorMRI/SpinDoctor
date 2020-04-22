@@ -132,7 +132,7 @@ for icmpt = 1:mymesh.Ncmpt
         QVAL = 0;
         TLIST = [0,SDELTA+BDELTA];
         ICC = zeros(size(FEM_M,1),1);
-        sol = ode23t(@odefun_bt_includeb,TLIST,ICC,options);
+        sol = ode15s(@odefun_bt_includeb,TLIST,ICC,options);
        
         %deff_PDE_formulation_src{iexperi}{icmpt} = FEM_G.'*sol.y/VOL(icmpt)/VOL(icmpt)/DIFF_cmpts(icmpt);
         deff_PDE_formulation_src{iexperi}{icmpt} = FEM_G.'*sol.y/VOL(icmpt)/VOL(icmpt);
