@@ -155,9 +155,9 @@ for iexperi = 1:nexperi
             
             options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
                 'Jacobian',@odejac_bt_includeb);            
-            disp('***Coupled: start ode solve ode23t'); tic
-            sol = ode23t(@odefun_bt_includeb,TLIST,IC_couple,options);
-            disp('***Coupled: end ode solve ode23t'); toc
+            disp('***Coupled: start ode solve ode15s'); tic
+            sol = ode15s(@odefun_bt_includeb,TLIST,IC_couple,options);
+            disp('***Coupled: end ode solve ode15s'); toc
             for icmpt = 1:mymesh.Ncmpt
                 YOUT{iexperi}{ib}{icmpt} = sol.y(FEMcouple_ind0(icmpt):FEMcouple_indf(icmpt),:);
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
@@ -181,15 +181,15 @@ for iexperi = 1:nexperi
                 
                 options = odeset('Mass',FEM_M,'AbsTol',ODEsolve_atol,'RelTol',ODEsolve_rtol,'Vectorized','on','Stats','off',...
                     'Jacobian',@odejac_bt_includeb);
-                %disp('***Uncoupled: start ode solver ode23t'); tic
+                %disp('***Uncoupled: start ode solver ode15s'); tic
                 ICC = IC_Pts{icmpt};
                 if (max(abs(ICC))<=1e-16)
                     sol.y = zeros(size(ICC,1),size(TLIST,2));
                     sol.x = TLIST;
                 else
-                    sol = ode23t(@odefun_bt_includeb,TLIST,ICC,options);
+                    sol = ode15s(@odefun_bt_includeb,TLIST,ICC,options);
                 end
-                %disp('***Uncoupled: end ode solver ode23t'); toc
+                %disp('***Uncoupled: end ode solver ode15s'); toc
                 YOUT{iexperi}{ib}{icmpt} = sol.y;
                 TOUT{iexperi}{ib}{icmpt} = sol.x;
                 MT{iexperi}{ib}{icmpt} = sum(FEM_MAT{icmpt}.M*YOUT{iexperi}{ib}{icmpt},1);  
