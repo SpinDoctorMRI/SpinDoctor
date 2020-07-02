@@ -10,5 +10,5 @@
 0e-3		   							% permeability IN_OUT
 0e-3									% permeability OUT_ECS
 -1										% Htetgen
-'SRC\TETGEN\tetGen\win64\tetgen'        % tetgen_cmd
-'SRC/TETGEN/tetGen/mac64/tetgen'				     
+'SRC/TETGEN/tetGen/lin64/tetgen'        % tetgen_cmd
+'SRC\TETGEN\tetGen\win64\tetgen'				     
