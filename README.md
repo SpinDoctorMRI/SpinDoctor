@@ -4,46 +4,85 @@ SpinDoctor is a software package that performs numerical simulations of diffusio
 
 SpinDoctor can be used 
 
-1) to solve the Bloch-Torrey PDE to obtain the dMRI signal 
-(the toolbox provides a way of robustly fitting the dMRI signal to obtain the fitted Apparent Diffusion Coefficient (ADC)); 
-2) to solve the diffusion equation of the H-ADC model to obtain the ADC;
-3) a short-time approximation formula for the ADC is also included in the toolbox for comparison with the simulated ADC.
+1) to solve the Bloch-Torrey partial differential equation (BTDPE) to obtain the dMRI signal (the toolbox provides a way of robustly fitting the dMRI signal to obtain the fitted Apparent Diffusion Coefficient (ADC));
+2) to solve the diffusion equation for the homogenized ADC (HADC) model to obtain the ADC;
+3) a short-time approximation formula for the ADC is also included in the toolbox for comparison with the simulated ADC;
+4) Compute the dMRI signal using a matrix formalism (MF) analytical solution based Laplace eigenfunctions.
 
-The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations.
+The PDEs and Laplace eigenvalue decompositions are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations.
 The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
 
-SpinDoctor provides built-in options of including 
-1) spherical cells with a nucleus; 
-2) cylindrical cells with a myelin layer; 
-3) an extra-cellular space (ECS) enclosed either 
-a) in a box or b) in a tight wrapping around the cells; 
-4) deformation of canonical cells by bending and twisting.  
-5) permeable membranes for the BT-PDE (the H-ADC assumes negligible permeability).
-Built-in diffusion-encoding pulse sequences include the Pulsed Gradient Spin Echo and the Ocsillating Gradient Spin Echo.
+SpinDoctor has support for the following features:
+1. multiple compartments with compartment-wise constant
+	* initial spin densities,
+	* diffusion coefficients or diffusion tensors, and
+	* T2-relaxation coefficients;
+2. permeable membranes between compartments for the BTPDE and MF (the HADC assumes negligible permeability);
+3. built-in diffusion-encoding pulse sequences, including
+	* the Pulsed Gradient Spin Echo (PGSE) and double-PGSE,
+	* the Ocsillating Gradient Spin Echo (OGSE), or
+	* custom pulse sequences;
+4. uniformly distributed gradient directions in 2D and 3D for high angular resolution diffusion imaging (HARDI)
 
-**New Nov 2019: SpinDoctor has two modules called [Neuron Module](https://github.com/jingrebeccali/SpinDoctor/tree/NeuronModule) and [Matrix Formalism Module](https://github.com/jingrebeccali/SpinDoctor/tree/MatrixFormalismModule). Details about these modules can be found in the branches with those names.**
+SpinDoctor also comes with a geometry generation module, allowing for
+1. spherical cells with a nucleus;
+2. cylindrical cells with a myelin layer;
+3. an extra-cellular space (ECS) enclosed in either
+	* a box,
+	* a convex hull, or
+	* a tight wrapping around the cells;
+4. deformation of canonical cells by bending and twisting.
 
-Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
+In addition, a variety of neuron meshes is available, whose surface geometries were extracted from [NeuroMopho.org](http://neuromorpho.org). The neurons may also be enclosed in an extracellular space as described above.
 
-Software requirements: 
 
-	The SpinDoctor Toolbox and the Neuron Module have been developed in the MATLAB R2017b 
-	and require no additional MATLAB Toolboxes.  
+## SpinDoctor article
+The paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025.
 
-	*****However, the current version of the Matrix Formalism Module requires the MATLAB PDE Toolbox (2017 or later) 
-	due to certain difficulties of implementing the matrix eigenvalue solution on a restricted eigenvalue interval.  
-	This technical issue will be addressed in a future release.*****   
+## Software requirements
 
-Getting started
-1) The DISTRIBUTE folder contains drivers for examples in the SpinDoctor paper as well as a general purpose driver called driver_spindoctor.m
-2) The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
-3) Other functions are stored in subfolders of DISTRIBUTE/SRC.
-4) Documentation of the top level functions can be found in DOC/
-5) User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/User%20Guide.pdf)
+	The SpinDoctor Toolbox has been developed in the MATLAB R2020b
+	and require no additional MATLAB Toolboxes.
 
-Authors: Jing-Rebecca Li, Van-Dang Nguyen, Try Nguyen Tran.
+	However, if the MATLAB Parallel Computing Toolbox is available,
+	the simulations can be run in parallel.
+ 
+ 
+## Getting started
 
-Copyright (C) 2019
+1) The base folder contains a commented general purpose driver called `driver_spindoctor.m`. The other driver, `driver_save_load.m`, can save and load simulations.
+2) The input files for the drivers are found in the folder `input_files`, and define the structures needed for the simulations.
+3) Multiple neuron meshes are found in the folder `mesh_files`. These can be loaded in the `input_files/define_params_neuron.m` script.
+4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
+
+Authors: Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
+
+
+## How to cite us
+
+If you use our software for research, please consider citing us:
+```bibtex
+@article{Li2019,
+title = {{SpinDoctor: A MATLAB toolbox for diffusion MRI simulation}},
+journal = {NeuroImage},
+volume = {202},
+pages = {116120},
+year = {2019},
+issn = {1053-8119},
+doi = {https://doi.org/10.1016/j.neuroimage.2019.116120},
+url = {http://www.sciencedirect.com/science/article/pii/S1053811919307116},
+author = {Jing-Rebecca Li and Van-Dang Nguyen and Try Nguyen Tran and Jan Valdman and Cong-Bang Trang and Khieu Van Nguyen and Duc Thach Son Vu and Hoang An Tran and Hoang Trong An Tran and Thi Minh Phuong Nguyen},
+keywords = {Bloch-torrey equation, Diffusion magnetic resonance imaging, Finite elements, Simulation, Apparent diffusion coefficient}
+}
+```
+
+Citations for the Neuron Module and Matrix Formalism module can be found in the `CITATION.bib` file.
+
+
+
+## License
+
+	Copyright (C) 2019-2021 Jing-Rebecca Li
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
