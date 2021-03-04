@@ -1,19 +1,16 @@
-function plot_geometry_info(params_domain, volumes, surface_areas)
+function plot_geometry_info(setup, volumes, surface_areas)
 %PLOT_GEOMETRY_INFO Plot information of the geometry.
 %
-%   boundary_markers
-%   cmpts_out
-%   cmpts_in
-%   cmpts_ecs
-%   volumes
+%   setup: struct
+%   volumes: [1 x ncompartment]
 %   surface_areas
 %
 %   1 figure with title of "Connections boundary-compartment"
 %   1 figure with title of "volumes"
 %   1 figure with title of "Surface Area"
 
-compartments = params_domain.compartments;
-boundary_markers = params_domain.boundary_markers;
+compartments = setup.pde.compartments;
+boundary_markers = setup.pde.boundary_markers;
 
 cmpts_in = compartments == "in";
 cmpts_out = compartments == "out";

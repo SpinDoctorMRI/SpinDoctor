@@ -1,9 +1,8 @@
-function results = solve_btpde(femesh, params_domain, experiment)
+function results = solve_btpde(femesh, setup)
 %SOLVE_BTPDE Solve the Bloch-Torrey partial differential equation.
 %
 %   femesh: struct
-%   params_domain: struct
-%   experiment: struct
+%   setup: struct
 %
 %   results: struct with fields
 %       magnetization: cell(ncompartment, namplitude, nsequence, ndirection)
@@ -23,31 +22,31 @@ function results = solve_btpde(femesh, params_domain, experiment)
 starttime = tic;
 
 % Extract HARDI directions
-dir_points = experiment.directions.points;
-dir_inds = experiment.directions.indices;
-opposite = experiment.directions.opposite;
+dir_points = setup.gradient.directions.points;
+dir_inds = setup.gradient.directions.indices;
+opposite = setup.gradient.directions.opposite;
 
 % Extract domain parameters
-diffusivity = params_domain.diffusivity;
-relaxation = params_domain.relaxation;
-initial_density = params_domain.initial_density;
-permeability = params_domain.permeability;
-boundary_markers = params_domain.boundary_markers;
+diffusivity = setup.pde.diffusivity;
+relaxation = setup.pde.relaxation;
+initial_density = setup.pde.initial_density;
+permeability = setup.pde.permeability;
+boundary_markers = setup.pde.boundary_markers;
 
 % Extract experiment parameters
-qvalues = experiment.qvalues;
-bvalues = experiment.bvalues;
-sequences = experiment.sequences;
-reltol = experiment.btpde.reltol;
-abstol = experiment.btpde.abstol;
-solve_ode = experiment.btpde.ode_solver;
+qvalues = setup.gradient.qvalues;
+bvalues = setup.gradient.bvalues;
+sequences = setup.gradient.sequences;
+reltol = setup.btpde.reltol;
+abstol = setup.btpde.abstol;
+solve_ode = setup.btpde.ode_solver;
 solver_str = func2str(solve_ode);
 
 % Sizes
-ncompartment = length(params_domain.compartments);
+ncompartment = length(setup.pde.compartments);
 namplitude = size(qvalues, 1);
 nsequence = length(sequences);
-ndirection = experiment.ndirection;
+ndirection = setup.gradient.ndirection;
 ndirection_unique = length(dir_inds);
 
 % Number of points in each compartment
@@ -193,7 +192,10 @@ parfor iall = 1:prod(allinds)
 
         % Split global solution into compartments
         mag = mat2cell(mag, npoint_cmpts).';
-        magnetization(:, iall) = mag;
+        % magnetization(:, iall) = mag;  % does not work in parfor before R2020b
+        for icmpt = 1:ncompartment
+            magnetization{icmpt, iall} = mag{icmpt};
+        end
         signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
 
     end % unique direction case
@@ -224,4 +226,4 @@ results.itertimes = itertimes;
 results.totaltime = toc(starttime);
 
 % Display function evaluation time
-toc(starttime)
+toc(starttime);

@@ -1,11 +1,9 @@
-function mf_jn = compute_mf_jn(eigvals, diffusivity, experiment)
+function mf_jn = compute_mf_jn(eigvals, diffusivity, setup)
 %COMPUTE_MF_JN Compute the quantity J(lambda_n, f).
 %
 %   eigvals
 %   diffusivity
-%   experiment: struct with fields
-%   	sequences
-%       mf
+%   setup: struct
 %
 %   mf_jn
 
@@ -13,8 +11,8 @@ function mf_jn = compute_mf_jn(eigvals, diffusivity, experiment)
 disp("Computing the quantity J(lambda_n, f)");
 
 % Extract experiment parameters
-sequences = experiment.sequences;
-ninterval = experiment.mf.ninterval;
+sequences = setup.gradient.sequences;
+ninterval = setup.mf.ninterval;
 
 % Sizes
 nsequence = length(sequences);

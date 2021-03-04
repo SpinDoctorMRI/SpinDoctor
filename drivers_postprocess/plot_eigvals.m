@@ -110,7 +110,7 @@ cmpts_boundary = [22 20 24 23 27];
 cmpts_corner = [22 24];
 cmpts_interesting = [8 13 17 29];
 
-maxkappa = max(params_domain.permeability);
+maxkappa = max(setup.pde.permeability);
 
 markers = {"d", "+", "x", "o"};
 imrk = 1;
@@ -145,8 +145,8 @@ for idomain = 1:ndomain
         imrk = imrk + 1;
     end
 end
-seq = experiment.sequences{iseq};
-qval = experiment.qvalues(iamp, iseq);
+seq = setup.gradient.sequences{iseq};
+qval = setup.gradient.qvalues(iamp, iseq);
 experiment_str = sprintf("\\delta=%g, \\Delta=%g", seq.delta, seq.Delta);
 bvalue_str = sprintf("q-value=%g", qval);
 if length(dirs_use) == 1

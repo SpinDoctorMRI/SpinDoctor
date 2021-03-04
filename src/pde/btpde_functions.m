@@ -12,14 +12,14 @@ function [ode_func, Jacobian] = btpde_functions(K, Q, J, qvalue, sequence)
 % The matrix M refers to the mass matrix.
 %
 %   K: Stiffness matrix
-% 	Q: Flux matrix
-% 	J: Mass matrix weighted by dot(g, x), where g is the gradient direction
+%     Q: Flux matrix
+%     J: Mass matrix weighted by dot(g, x), where g is the gradient direction
 %           and x the spatial variable
-%  	qvalue
-%	sequence
+%      qvalue
+%    sequence
 %
 %   ode_func: ODE function at time t and state y
-%  	Jacobian: Jacobian of ODE function with respect to the state y
+%      Jacobian: Jacobian of ODE function with respect to the state y
 
 
 ode_func = @(t, y) -(K * y + Q * y + 1i * qvalue * sequence.call(t) * (J * y));

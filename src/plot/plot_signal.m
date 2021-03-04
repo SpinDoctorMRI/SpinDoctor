@@ -2,10 +2,10 @@ function plot_signal(bvalues, signal_allcmpts, signal_free, adc_allcmpts_S0, adc
 %PLOT_SIGNAL Plot signal from solving the Bloch-Torrey equation.
 %
 %   bvalues
-%  	signal_allcmpts
-%  	signal_free
-%  	adc_allcmpts_S0
-%  	adc_allcmpts
+%      signal_allcmpts
+%      signal_free
+%      adc_allcmpts_S0
+%      adc_allcmpts
 
 
 markervec_cell = cell(6, 1);

@@ -4,9 +4,9 @@ function directions = create_directions(ndirection, flat_dirs, remove_opposite)
 %   ndirection:
 %       Number of points on the unit sphere to create.
 %   flat_dirs: logical
-%     	Indicator for points on unit circle instead of unit sphere.
+%         Indicator for points on unit circle instead of unit sphere.
 %   remove_opposite: logical
-%   	Indicator for removing redundant (opposite) directions.
+%       Indicator for removing redundant (opposite) directions.
 %
 %   directions: struct with fields
 %       points: double(3, npoints)

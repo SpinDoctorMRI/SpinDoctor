@@ -1,32 +1,27 @@
-function [adc, adc_allcmpts] = compute_adc_sta(femesh, params_domain, experiment)
+function [adc, adc_allcmpts] = compute_adc_sta(femesh, setup)
 %COMPUTE_ADC_STA Compute the ADC in the short diffusion time regime.
 %
-%   femesh
-%   params_domain
-%       diffusivity: double(3, 3, ncompartment)
-%       initial_density: double(1, ncompartment)
-%   experiment: struct with fields
-%       sequences
-%   	directions
+%   femesh: struct
+%   setup: struct
 %
 %   adc: double(ncompartment, nsequence, ndirection)
-% 	adc_allcmpts: double(nsequence, ndirection)
+%     adc_allcmpts: double(nsequence, ndirection)
 
 
 % Extract domain parameters
-diffusivity = params_domain.diffusivity;
-initial_density = params_domain.initial_density;
+diffusivity = setup.pde.diffusivity;
+initial_density = setup.pde.initial_density;
 
 % Exeriment paramters
-sequences = experiment.sequences;
+sequences = setup.gradient.sequences;
 
 % Gradient directions
-dir_points = experiment.directions.points;
+dir_points = setup.gradient.directions.points;
 
 % Sizes
 nsequence = length(sequences);
 ncompartment = femesh.ncompartment;
-ndirection = experiment.ndirection;
+ndirection = setup.gradient.ndirection;
 
 % Prepare output structures
 adc = zeros(ncompartment, nsequence, ndirection);

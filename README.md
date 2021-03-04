@@ -2,7 +2,7 @@
 
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
 
-SpinDoctor can be used 
+SpinDoctor can be used
 
 1) to solve the Bloch-Torrey partial differential equation (BTDPE) to obtain the dMRI signal (the toolbox provides a way of robustly fitting the dMRI signal to obtain the fitted Apparent Diffusion Coefficient (ADC));
 2) to solve the diffusion equation for the homogenized ADC (HADC) model to obtain the ADC;
@@ -36,9 +36,6 @@ SpinDoctor also comes with a geometry generation module, allowing for
 In addition, a variety of neuron meshes is available, whose surface geometries were extracted from [NeuroMopho.org](http://neuromorpho.org). The neurons may also be enclosed in an extracellular space as described above.
 
 
-## SpinDoctor article
-The paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025.
-
 ## Software requirements
 
 	The SpinDoctor Toolbox has been developed in the MATLAB R2020b
@@ -51,8 +48,8 @@ The paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025.
 ## Getting started
 
 1) The base folder contains a commented general purpose driver called `driver_spindoctor.m`. The other driver, `driver_save_load.m`, can save and load simulations.
-2) The input files for the drivers are found in the folder `input_files`, and define the structures needed for the simulations.
-3) Multiple neuron meshes are found in the folder `mesh_files`. These can be loaded in the `input_files/define_params_neuron.m` script.
+2) The input files for the drivers are found in the folder `setups`, and define the structures needed for the simulations.
+3) Multiple neuron meshes are found in the folder `mesh_files`. These can be loaded in the `setups/setup_neuron.m` script.
 4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
 
 Authors: Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
@@ -60,7 +57,10 @@ Authors: Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguye
 
 ## How to cite us
 
+The paper about SpinDoctor can be found at https://www.sciencedirect.com/science/article/pii/S1053811919307116.
+
 If you use our software for research, please consider citing us:
+
 ```bibtex
 @article{Li2019,
 title = {{SpinDoctor: A MATLAB toolbox for diffusion MRI simulation}},

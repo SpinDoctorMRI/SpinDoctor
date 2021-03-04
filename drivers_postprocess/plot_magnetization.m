@@ -27,13 +27,13 @@ dir_inds = 1;
 % dir_inds = [64];
 % dir_inds = [17 33 49 64];
 
-maxkappa = max(params_domain.permeability);
+maxkappa = max(setup.pde.permeability);
 
 for iseq = 1:nsequence
-    seq = experiment.sequences{iseq};
+    seq = setup.gradient.sequences{iseq};
     for iamp = 1:namplitude
-        qvalue = experiment.qvalues(iamp, iseq);
-        bvalue = experiment.bvalues(iamp, iseq);
+        qvalue = setup.gradient.qvalues(iamp, iseq);
+        bvalue = setup.gradient.bvalues(iamp, iseq);
         for idir = dir_inds
             % BTDPE and MF Magnetizations
             if idir == 0
@@ -46,7 +46,7 @@ for iseq = 1:nsequence
                 solpde = btpde.magnetization(:, iamp, iseq, idir);
                 soleig = mf.magnetization(:, iamp, iseq, idir);
                 title_str = sprintf("magnetization, dir=[%.2f; %.2f; %.2f]", ...
-                    experiment.directions.points(:, idir));
+                    setup.gradient.directions.points(:, idir));
             end
 
             % % Title string
@@ -58,10 +58,10 @@ for iseq = 1:nsequence
             %     title_str = sprintf("%s, \\delta=%g, \\Delta=%g", title_str, seq.delta, seq.Delta);
             % end
             % title_str = sprintf("%s, q=%g", title_str, qvalue);
-            % title_str = sprintf("%s, b=%g", title_str, experiment.bvalues(iamp, iseq));
-            % title_str = sprintf("%s, q=%g, b=%g", title_str, qvalue, experiment.bvalues(iamp, iseq));
+            % title_str = sprintf("%s, b=%g", title_str, setup.gradient.bvalues(iamp, iseq));
+            % title_str = sprintf("%s, q=%g, b=%g", title_str, qvalue, setup.gradient.bvalues(iamp, iseq));
             gamma = 2.67513 * 1e-04;
-            title_str = sprintf("%s, g=%.3f, b=%g", title_str, qvalue / gamma, experiment.bvalues(iamp, iseq));
+            title_str = sprintf("%s, g=%.3f, b=%g", title_str, qvalue / gamma, setup.gradient.bvalues(iamp, iseq));
 
             % Max absolute value of BTPDE on the entire domain (for rel error)
             maxabs = max(cellfun(@(x) max(abs(x)), solpde));
@@ -92,7 +92,7 @@ for iseq = 1:nsequence
                 set(gca, "fontsize", 14);
                 if idir
                     % Plot gradient direction
-                    plot_gdir_arrow(experiment.directions.points(:, idir));
+                    plot_gdir_arrow(setup.gradient.directions.points(:, idir));
                 end
             end
 
@@ -105,7 +105,7 @@ for iseq = 1:nsequence
                 % set(gca, "fontsize", 14);
                 if idir
                     % Plot gradient direction
-                    plot_gdir_arrow(experiment.directions.points(:, idir));
+                    plot_gdir_arrow(setup.gradient.directions.points(:, idir));
                 end
             end
 
@@ -118,7 +118,7 @@ for iseq = 1:nsequence
                 set(gca, "fontsize", 14);
                 if idir
                     % Plot gradient direction
-                    plot_gdir_arrow(experiment.directions.points(:, idir));
+                    plot_gdir_arrow(setup.gradient.directions.points(:, idir));
                 end
             end
             % colorbar("off");
@@ -182,7 +182,7 @@ colors = ["r" "b" "k" "#008800" "m" "c" "g" "y"];
 markers = ["x" "o" "d" "s" ">" "v" "^"];
 linestyles = ["-" "-." "--" ":"];
 
-maxkappa = max(params_domain.permeability);
+maxkappa = max(setup.pde.permeability);
 
 figure;
 hold on;
@@ -190,21 +190,16 @@ hold on;
 a = get(gcf, "position");
 set(gcf, "position", 0.7 * a);
 
-labels = {};
+labels = strings(1, 0);
 for iseq = 1:nsequence
     for iamp = 1:namplitude
-        seq = experiment.sequences{iseq};
-        qvalue = experiment.qvalues(iamp, iseq);
-        bvalue = experiment.bvalues(iamp, iseq);
+        seq = setup.gradient.sequences{iseq};
+        qvalue = setup.gradient.qvalues(iamp, iseq);
+        bvalue = setup.gradient.bvalues(iamp, iseq);
 
         % Label
-        if seq.delta == seq.Delta
-            experi_str = sprintf("\\delta=\\Delta=%g", seq.delta);
-        else
-            experi_str = sprintf("\\delta=%g, \\Delta=%g", seq.delta, seq.Delta);
-        end
-        % labels{end + 1} = sprintf("b=%g, %s", bvalue, experi_str);
-        labels{end + 1} = sprintf("b=%g", bvalue);
+%         labels(end + 1) = sprintf("b=%g, %s", bvalue, seq2str(seq));
+        labels(end + 1) = sprintf("b=%g", bvalue);
 
         signal_allcmpts = real(signal_allcmpts);
 
@@ -219,7 +214,7 @@ for iseq = 1:nsequence
         % h.LineStyle = linestyles(iseq);
 
         % % Plot free diffusion
-        % hh = plot(volumes(inds) / sum(volumes(inds)), exp(-params_domain.diffusivity(inds).' * bvalue));
+        % hh = plot(volumes(inds) / sum(volumes(inds)), exp(-setup.pde.diffusivity(inds).' * bvalue));
         % hh.Color = colors(iseq);
         % hh.Marker = markers(iseq);
         % hh.LineStyle = linestyles(iseq);

@@ -15,24 +15,17 @@ addpath(genpath("src"));
 
 %% Define inputs
 
-% Define the directory where the input file is kept
-addpath input_files
+% Get setup
+addpath setups
 
-% Load input parameters using input file script. The following
-% structures will be added to the workspace:
-%    params_cells
-%    params_domain
-%    experiment
-% Choose input script:
-
-% define_params_1axon_multilayer;
-% define_params_1sphere_multilayer;
-% define_params_15spheres;
-define_params_2axons_deform;
-% define_params_5axons_myelin_relax;
-% define_params_neuron;
-% define_params_4axons_flat;
-% define_params_30axons_flat;
+% setup_1axon_analytical;
+% setup_1sphere_analytical;
+% setup_15spheres;
+% setup_2axons_deform;
+% setup_5axons_myelin_relax;
+% setup_neuron;
+setup_4axons_flat;
+% setup_30axons_flat;
 
 % Choose to see some of the typical plots or not
 do_plots = true;
@@ -40,51 +33,48 @@ do_plots = true;
 
 %% Prepare experiments
 
-% Create the geometrical configuration
-cells = create_cells(params_cells);
-
 % Set up the PDE model in the geometrical compartments
-params_domain = prepare_pde(params_cells, params_domain);
+setup.pde = prepare_pde(setup);
 
 % Prepare experiments (gradient sequence, bvalues, qvalues)
-experiment = prepare_experiments(experiment);
+setup = prepare_experiments(setup);
 
 % Get sizes
-ncompartment = length(params_domain.compartments);
-namplitude = length(experiment.values);
-nsequence = length(experiment.sequences);
-ndirection = experiment.ndirection;
+ncompartment = length(setup.pde.compartments);
+namplitude = length(setup.gradient.values);
+nsequence = length(setup.gradient.sequences);
+ndirection = setup.gradient.ndirection;
 
 % Create or load finite element mesh
-[femesh, surfaces] = create_femesh(cells, params_cells, params_domain);
+[femesh, surfaces, cells] = create_geometry(setup);
 
 % Get volume and surface area quantities from mesh
 [volumes, surface_areas] = get_vol_sa(femesh);
 
 % Compute volume weighted mean of diffusivities over compartments
 % Take trace of each diffusion tensor, divide by 3
-mean_diffusivity = trace(sum(params_domain.diffusivity .* shiftdim(volumes, -1), 3)) ...
+mean_diffusivity = trace(sum(setup.pde.diffusivity .* shiftdim(volumes, -1), 3)) ...
     / (3 * sum(volumes));
 
 % Initial total signal
-initial_signal = params_domain.initial_density * volumes';
+initial_signal = setup.pde.initial_density * volumes';
 
 
 % Create folder for saving results
-tmp = split(params_cells.filename, "/");
+tmp = split(setup.name, "/");
 tmp = tmp(end);
 if endsWith(tmp, ".stl")
     tmp = split(tmp, ".stl");
     tmp = tmp(1);
 end
 refinement_str = "";
-if isfield(params_cells, "refinement")
-    refinement_str = sprintf("_refinement%g", params_cells.refinement);
+if isfield(setup.geometry, "refinement")
+    refinement_str = sprintf("_refinement%g", setup.geometry.refinement);
 end
 save_dir_path_spindoctor = "saved_simul/" + tmp + refinement_str;
-couple_str = sprintf("kappa%g_%g", params_domain.permeability_in_out, ...
-    params_domain.permeability_out_ecs);
-if experiment.flat_dirs
+couple_str = sprintf("kappa%g_%g", setup.pde.permeability_in_out, ...
+    setup.pde.permeability_out_ecs);
+if setup.gradient.flat_dirs
     flat_str = "_flat";
 else
     flat_str = "";
@@ -98,7 +88,7 @@ end
 
 
 %% Solve BTPDE
-if isfield(experiment, "btpde")
+if isfield(setup, "btpde")
     disp("Computing or loading the BTPDE signals");
 
     % Inialize BTPDE output arguments
@@ -112,9 +102,9 @@ if isfield(experiment, "btpde")
     for iamp = 1:namplitude
         for iseq = 1:nsequence
             % Extract experiment parameters
-            seq = experiment.sequences{iseq};
-            bvalue = experiment.bvalues(iamp, iseq);
-            qvalue = experiment.qvalues(iamp, iseq);
+            seq = setup.gradient.sequences{iseq};
+            bvalue = setup.gradient.bvalues(iamp, iseq);
+            qvalue = setup.gradient.qvalues(iamp, iseq);
 
             % Create the filename string for the saving data
             if seq.delta == seq.Delta
@@ -122,13 +112,13 @@ if isfield(experiment, "btpde")
             else
                 experi_str = sprintf("%s_d%g_D%g", class(seq), seq.delta, seq.Delta);
             end
-            if experiment.values_type == "q"
+            if setup.gradient.values_type == "q"
                 bvalue_str = sprintf("q%g", qvalue);
             else
                 bvalue_str = sprintf("b%g", bvalue);
             end
             fname = sprintf("btpde_%s_%s_abstol%g_reltol%g.mat", experi_str, ...
-                bvalue_str, experiment.btpde.abstol, experiment.btpde.reltol);
+                bvalue_str, setup.btpde.abstol, setup.btpde.reltol);
             fname = save_dir_path_spindoctor + "/" + fname;
             
             % Choose whether to load or compute results
@@ -139,13 +129,13 @@ if isfield(experiment, "btpde")
             else
                 % Create temporary experiment structure only containing the
                 % current gradient sequence and b-value
-                experi_tmp = experiment;
-                experi_tmp.qvalues = experiment.qvalues(iamp, iseq);
-                experi_tmp.bvalues = experiment.bvalues(iamp, iseq);
-                experi_tmp.sequences = experiment.sequences(iseq);
+                setup_tmp = setup;
+                setup_tmp.gradient.qvalues = setup.gradient.qvalues(iamp, iseq);
+                setup_tmp.gradient.bvalues = setup.gradient.bvalues(iamp, iseq);
+                setup_tmp.gradient.sequences = setup.gradient.sequences(iseq);
 
                 % Solve the BTPDE for one experiment and bvalue
-                btpde_tmp = solve_btpde(femesh, params_domain, experi_tmp);
+                btpde_tmp = solve_btpde(femesh, setup_tmp);
 
                 % Extract results
                 magnetization = btpde_tmp.magnetization;
@@ -173,7 +163,7 @@ if isfield(experiment, "btpde")
     btpde.magnetization_avg = average_magnetization(btpde.magnetization);
 
     % Clear temporary variables
-    clear experi_tmp
+    clear setup_tmp
     clear seq
     clear btpde_tmp
     clear magnetization signal signal_allcmpts itertimes totaltime
@@ -182,7 +172,7 @@ end
 
 
 %% Solve HADC model
-if isfield(experiment, "hadc")
+if isfield(setup, "hadc")
     disp("Computing or loading the homogenized apparent diffusion coefficient");
 
     % Initialize data structures
@@ -192,11 +182,11 @@ if isfield(experiment, "hadc")
     hadc.totaltime = 0;
 
     for iseq = 1:nsequence
-        seq = experiment.sequences{iseq};
+        seq = setup.gradient.sequences{iseq};
         
         % File name
         fname = sprintf("hadc_%s_d%g_D%g_abstol%g_reltol%g.mat",...
-            class(seq), seq.delta, seq.Delta, experiment.hadc.abstol, experiment.hadc.reltol);
+            class(seq), seq.delta, seq.Delta, setup.hadc.abstol, setup.hadc.reltol);
         fname = save_dir_path_spindoctor + "/" + fname;
 
         % Save or load
@@ -205,12 +195,12 @@ if isfield(experiment, "hadc")
             disp("load " + fname);
             load(fname);
         else
-            % Create temporary experiment structure for given experiment index
-            experi_tmp = experiment;
-            experi_tmp.sequences = experiment.sequences(iseq);
+            % Create temporary setup structure for given index
+            setup_tmp = setup;
+            setup_tmp.gradient.sequences = setup.gradient.sequences(iseq);
 
             % Solve HADC model
-            hadc_tmp = solve_hadc(femesh, params_domain, experi_tmp);
+            hadc_tmp = solve_hadc(femesh, setup_tmp);
 
             % Extract results
             adc = hadc_tmp.adc;
@@ -227,11 +217,11 @@ if isfield(experiment, "hadc")
         hadc.adc(:, iseq, :) = adc;
         hadc.adc_allcmpts(iseq, :) = adc_allcmpts;
         hadc.itertimes(:, iseq, :) = itertimes;
-        hadc.totaltime(:, iseq, :) = hadc.totaltime(:, iseq, :) + totaltime;
+        hadc.totaltime = hadc.totaltime + totaltime;
     end
 
     % Clear temporary variables
-    clear experi_tmp
+    clear setup_tmp
     clear seq
     clear hadc_tmp
     clear adc adc_allcmpts itertimes totaltime
@@ -240,11 +230,11 @@ end
 
 
 %% Laplace eigendecomposition
-if isfield(experiment, "mf")
+if isfield(setup, "mf")
     disp("Computing or loading the Laplace eigenfunctions");
 
     % Filename
-    fname = sprintf("lap_eig_lengthscale%g.mat", experiment.mf.length_scale);
+    fname = sprintf("lap_eig_lengthscale%g.mat", setup.mf.length_scale);
     fname = save_dir_path_spindoctor + "/" + fname;
     
     % Save or load
@@ -260,8 +250,8 @@ if isfield(experiment, "mf")
         lap_eig.totaltime = totaltime;
     else
         % Perform eigendecomposition
-        eiglim = length2eig(experiment.mf.length_scale, mean_diffusivity);
-        lap_eig = compute_laplace_eig(femesh, params_domain, eiglim, experiment.mf.neig_max);
+        eiglim = length2eig(setup.mf.length_scale, mean_diffusivity);
+        lap_eig = compute_laplace_eig(femesh, setup.pde, eiglim, setup.mf.neig_max);
 
         % Save eigendecomposition
         disp("save " + fname + " -v7.3 -struct lap_eig");
@@ -278,10 +268,10 @@ end
 
 
 %% MF effective diffusion tensor
-if isfield(experiment, "mf")
+if isfield(setup, "mf")
     % Compute the JN value that relates the eigenmodes to their contribution
     % to the Matrix Formalism signal for a diffusion-encoding sequence
-    mf_jn = compute_mf_jn(lap_eig.values, mean_diffusivity, experiment);
+    mf_jn = compute_mf_jn(lap_eig.values, mean_diffusivity, setup);
 
     % Compute the Matrix Formalism effective diffusion tensor
     diffusion_tensor = compute_mf_diffusion_tensor(lap_eig, mf_jn, mean_diffusivity);
@@ -289,9 +279,9 @@ end
 
 
 %% Compute MF magnetization
-if isfield(experiment, "mf")
+if isfield(setup, "mf")
     % Compute MF magnetization and signal
-    mf = solve_mf(femesh, params_domain, experiment, lap_eig);
+    mf = solve_mf(femesh, setup, lap_eig);
 
     % MF direction averaged magnetization
     mf.magnetization_avg = average_magnetization(mf.magnetization);
@@ -305,12 +295,12 @@ if ~do_plots
     return
 end
 
-initial_density = params_domain.initial_density * volumes';
+initial_density = setup.pde.initial_density * volumes';
 
 % Plot finite element mesh
 % plot_femesh(femesh, cmpts_in, cmpts_out, cmpts_ecs);
-if isfield(params_cells, "refinement")
-    refinement_str = sprintf("refinement = %g", params_domain.refinement);
+if isfield(setup.geometry, "refinement")
+    refinement_str = sprintf("refinement = %g", setup.pde.refinement);
 else
     refinement_str = "automatic refinement";
 end
@@ -345,14 +335,14 @@ signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ 
 % Plot quantities over many directions
 if ndirection > 1
     % Plot HARDI signal
-    plot_hardi(experiment.directions, real(btpde.signal_allcmpts) / sum(volumes), "BTPDE signal")
-    plot_hardi(experiment.directions, real(mf.signal_allcmpts) / sum(volumes), "MF signal")
+    plot_hardi(setup.gradient.directions, real(btpde.signal_allcmpts) / sum(volumes), "BTPDE signal")
+    plot_hardi(setup.gradient.directions, real(mf.signal_allcmpts) / sum(volumes), "MF signal")
 
     % Plot relative difference
     fig_title = "Rel diff between BTPDE and MF";
-    plot_hardi(experiment.directions, signal_allcmpts_relerr, fig_title);
+    plot_hardi(setup.gradient.directions, signal_allcmpts_relerr, fig_title);
 
     % Plot difference normalized by volume
     fig_title = "Diff between BTPDE and MF normalized by volume";
-    plot_hardi(experiment.directions, signal_allcmpts_abserr_vol, fig_title);
+    plot_hardi(setup.gradient.directions, signal_allcmpts_abserr_vol, fig_title);
 end

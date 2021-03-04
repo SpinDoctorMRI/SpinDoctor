@@ -9,7 +9,7 @@ disp("Plotting the LAP eigenfunctions");
 eigindex_use_lap = 2:5;
 plot_diffdir = 0;
 
-maxkappa = max(params_domain.permeability);
+maxkappa = max(setup.pde.permeability);
 neig = length(lap_eig.values);
 
 % Split Laplace eigenfunctions into compartments
@@ -59,9 +59,9 @@ eigindex_use_btpde = 1:5;
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
 
 for iseq = 1%:nsequence
-    seq = experiment.sequences{iseq};
+    seq = setup.gradient.sequences{iseq};
     for iamp = 1:namplitude
-        qval = experiment.qvalues(iamp, iseq);
+        qval = setup.gradient.qvalues(iamp, iseq);
         for idir = 1%[1 17 33 49]
             bt_eig_funcs_sep = cell(1, ncompartment);
             % Clear results from previous iterations
@@ -75,7 +75,7 @@ for iseq = 1%:nsequence
             bt_eig_funcs_sep = mat2cell(bt_eig_funcs, npoint_cmpts);
             
             bvalue_str = sprintf("q-value=%g", qval);
-            dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", experiment.directions.points(:, idir));
+            dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", setup.gradient.directions.points(:, idir));
             
             % Plot selected eigenfunctions
             for ieig = eigindex_use_btpde
@@ -107,7 +107,7 @@ support_tol = 0.1;
 plot_supports = false;
 plot_gdir = true;
 
-maxkappa = max(params_domain.permeability);
+maxkappa = max(setup.pde.permeability);
 
 % Number of points in each compartment
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
@@ -123,9 +123,9 @@ elements = cellfun(@plus, femesh.elements, tmp, "UniformOutput", false);
 elements = [elements{:}];
 
 for iseq = experi_use
-    seq = experiment.sequences{iseq};
+    seq = setup.gradient.sequences{iseq};
     for iamp = b_use
-        qval = experiment.qvalues(iamp, iseq);
+        qval = setup.gradient.qvalues(iamp, iseq);
         for idir = dir_use
             clear bt_eig_func bt_eig_func_sum
             
@@ -198,7 +198,7 @@ for iseq = experi_use
             if plot_gdir
                 color = "r";
                 p = [24 29 0];
-                dir = 10 * experiment.directions.points(:, idir);
+                dir = 10 * setup.gradient.directions.points(:, idir);
                 q = quiver3(p(1), p(2), p(3), dir(1), dir(2), dir(3), 0);
                 q.LineWidth = 1.5;
                 q.Color = color;
@@ -221,7 +221,7 @@ for iseq = experi_use
             icol = 1;
             
             % Plot supports (only for cylinders)
-            if params_cells.shape == "cylinder"
+            if setup.geometry.cell_shape == "cylinder"
                 for ieig = eigindex_use_btpde
                     % % Make rectangle, convex hull or exact outline
                     % points = box_points_top(nodes(:, inodes_support{ieig}));

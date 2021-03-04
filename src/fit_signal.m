@@ -3,19 +3,16 @@ function results = fit_signal(signal, signal_allcmpts, bvalues)
 %
 %   signal: double(ncompartment, namplitude, nsequence, ndirection)
 %   signal_allcmpts: complex double(namplitude, nsequence, ndirection)
-% 	bvalues: double(namplitude, nsequence)
+%     bvalues: double(namplitude, nsequence)
 %
 %   results: struct with fields
-%   	adc: double(ncompartment, nsequence, ndirection)
-%      	adc_allcmpts_ double(nsequence, ndirection)
-%    	S0_allcmpts: double(nsequence, ndirection)
+%       adc: double(ncompartment, nsequence, ndirection)
+%          adc_allcmpts_ double(nsequence, ndirection)
+%        S0_allcmpts: double(nsequence, ndirection)
 
 
 % Sizes
-ncompartment = size(signal, 1);
-namplitude = size(signal, 2);
-nsequence = size(signal, 3);
-ndirection = size(signal, 4);
+[ncompartment, namplitude, nsequence, ndirection] = size(signal);
 
 % Initialize output arguments
 adc = zeros(ncompartment, nsequence, ndirection);

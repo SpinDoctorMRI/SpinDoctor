@@ -1,4 +1,4 @@
-function plot_signal_btpde_mf(experi_btpde, signal_allcmpts, signal_mf_allcmpts, signal_mfga_allcmpts)
+function plot_signal_btpde_mf(setup, signal_allcmpts, signal_mf_allcmpts, signal_mfga_allcmpts)
 %PLOT_SIGNAL_BTPDE_MF Plot BTPDE, MF and MFGA signal.
 
 markervec = strings(6, 1);
@@ -17,7 +17,7 @@ colorvec(4) = "c";
 colorvec(5) = "g";
 colorvec(6) = "m";
 
-bvalues = experi_btpde.bvalues;
+bvalues = setup.gradient.bvalues;
 nsequence = size(bvalues, 2);
 
 figure;

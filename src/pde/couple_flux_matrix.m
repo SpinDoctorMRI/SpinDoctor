@@ -2,10 +2,10 @@ function couple_Q = couple_flux_matrix(femesh, boundary_markers, Q)
 %COUPLE_FLUX_MATRIX Generate coupling between compartments in flux matrix.
 %
 %   femesh: struct with fields
-%   	ncompartment: int
-%    	point_map: cell(1, 4)
+%       ncompartment: int
+%        point_map: cell(1, 4)
 %       boundary_markers: cell(ncompartment, nboundary)
-% 	Q: cell(1, ncompartment)
+%     Q: cell(1, ncompartment)
 %
 %   couple_Q: double(ndof_total, ndof_total)
 

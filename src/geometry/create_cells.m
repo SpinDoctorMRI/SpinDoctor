@@ -1,34 +1,27 @@
-function cells = create_cells_inputfile(params_cells, cellfilename)
-%CREATE_CELLS_INPUTFILE Create geometrical configuration and write to file.
+function cells = create_cells(setup)
+%CREATE_CELLS Create geometrical configuration and write to file.
 %
 %   params_cell: struct
-%   cellfilename: string
+%
+%   cells: struct with fields
+%       centers: [d x ncell], where d is 2 (cylinders) or 3 (spheres)
+%       radii: [1 x ncell]
 
 
 % Extract cell parameters
-shape = params_cells.shape;
-ncell = params_cells.ncell;
-rmin = params_cells.rmin;
-rmax = params_cells.rmax;
-dmin = params_cells.dmin;
-dmax = params_cells.dmax;
-
-% Check that folder exists
-parts = split(cellfilename, "/");
-if length(parts) >= 2
-    folder = join(parts(1:end-1), "/");
-    if ~isfolder(folder)
-        mkdir(folder);
-    end
-end
+cell_shape = setup.geometry.cell_shape;
+ncell = setup.geometry.ncell;
+rmin = setup.geometry.rmin;
+rmax = setup.geometry.rmax;
+dmin = setup.geometry.dmin;
+dmax = setup.geometry.dmax;
 
 % Spatial dimension
-if shape == "sphere"
+if cell_shape == "sphere"
     d = 3;
-elseif shape == "cylinder"
+elseif cell_shape == "cylinder"
     d = 2;
 end
-
 
 % Maximum number of random cell centers to try out
 npoint_max = 100000 * ncell;
@@ -52,7 +45,7 @@ while icell < ncell && npoint < npoint_max
 
     % Generate a random point using a uniform distribution with zero mean and
     % variance proportional to rmean
-    if shape == "sphere"
+    if cell_shape == "sphere"
         point = (rand(3, 1) - 0.5) * rmean * max(10, ncell^(1 / 3));
     else
         point = (rand(2, 1) - 0.5) * rmean * max(10, sqrt(ncell)) * 40;
@@ -102,21 +95,6 @@ pmin = min(centers - radii, [], 2);
 pmax = max(centers + radii, [], 2);
 pmean = (pmin + pmax) / 2;
 centers = centers - pmean;
-
-% Save geometry to file
-disp("Writing geometry to " + cellfilename);
-fid = fopen(cellfilename, "w");
-fprintf(fid, "Number of cells:\n");
-fprintf(fid, "%d\n", ncell);
-fprintf(fid, "Shape:\n");
-fprintf(fid, shape + "\n");
-fprintf(fid, "Number, Center, Radius\n");
-for icell = 1:ncell
-    if fid ~= -1
-        fprintf(fid, "%d " + join(repmat("%g", 1, d)) + " %g\n", icell, centers(:, icell), radii(icell));
-    end
-end
-fclose(fid);
 
 % Create output structure
 cells.centers = centers;

@@ -1,19 +1,14 @@
-function [signal_allcmpts, itertimes] = compute_mf_signal_sub_bt(experiment, initial_signal, lap_eig, bt_eig, neig_bt)
+function [signal_allcmpts, itertimes] = compute_mf_signal_sub_bt(setup, initial_signal, lap_eig, bt_eig, neig_bt)
 %COMPUTE_MF_SIGNAL_SUB_BT Compute the explicit Matrix Formalism.
 %   This only works for PGSE, and requires a decomposed BT-matrix
 %
-%   experiment: struct with fields
-%       ndirection
-%     	directions
-%    	qvalues
-%    	bvalues
-%     	sequences
-% 	initial_signal
-% 	lap_eig
-%  	bt_eig (optional)
+%   setup: struct with fields
+%   initial_signal
+%   lap_eig
+%   bt_eig (optional)
 %
 %   signal_allcmpts
-%  	itertimes
+%   itertimes
 
 
 starttime = tic;
@@ -21,16 +16,16 @@ starttime = tic;
 do_reduce = nargin == nargin(@compute_mf_signal_sub_bt);
 
 % Extract experiment parameters
-sequences = experiment.sequences;
+sequences = setup.gradient.sequences;
 
 % Extract gradient directions
-dir_points = experiment.directions.points;
-dir_inds = experiment.directions.indices;
-dir_opposite = experiment.directions.opposite;
+dir_points = setup.gradient.directions.points;
+dir_inds = setup.gradient.directions.indices;
+dir_opposite = setup.gradient.directions.opposite;
 
 % Sizes
 nsequence = length(sequences);
-namplitude = size(experiment.bvalues, 2);
+namplitude = size(setup.gradient.bvalues, 2);
 ndirection = size(dir_points, 1);
 neig = length(lap_eig.values);
 
@@ -43,8 +38,8 @@ for iseq = 1:nsequence
     seq = sequences{iseq};
 
     for iamp = 1:namplitude
-        q = experiment.qvalues(iamp, iseq);
-        b = experiment.bvalues(iamp, iseq);
+        q = setup.gradient.qvalues(iamp, iseq);
+        b = setup.gradient.bvalues(iamp, iseq);
         for idir = dir_inds
             fprintf("Computing MF signal for:\n" ...
                 + "  Direction %d of %d: [%.2f; %.2f; %.2f]\n" ...

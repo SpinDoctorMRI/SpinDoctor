@@ -1,9 +1,9 @@
-function surfaces = create_surfaces_neuron(filename, params_cells)
+function surfaces = create_surfaces_neuron(filename, setup)
 %CREATE_SURFACES_NEURON Create neuron surface mesh.
 %   A neuron surface mesh is loaded or create and loaded. An ECS can be added.
 %
 %   filename: string
-%   params_cells: struct
+%   setup: struct
 %
 %   surfaces: struct with fields
 %       points: [3 x npoint]
@@ -16,8 +16,8 @@ function surfaces = create_surfaces_neuron(filename, params_cells)
 ndiscretize = 100;
 
 
-ecs_shape = params_cells.ecs_shape;
-ecs_ratio = params_cells.ecs_ratio;
+ecs_shape = setup.geometry.ecs_shape;
+ecs_ratio = setup.geometry.ecs_ratio;
 
 if ~exist(filename + "_elements.txt", "file") || ~exist(filename + "_nodes.txt", "file")
     gmsh_to_fem_try(filename);
@@ -87,7 +87,7 @@ if ecs_shape ~= "no_ecs"
             V = smooth3(V, "gaussian");%, [9, 9, 9]);
             FV = isosurface(X, Y, Z, V, 0);
             points_ecs = FV.vertices';
-            facets_ecs = FV.faces';
+            % facets_ecs = FV.faces';
             
             shp_ecs = alphaShape(points_ecs');
             shp_ecs.HoleThreshold = prod(pmax - pmin);
@@ -97,7 +97,6 @@ if ecs_shape ~= "no_ecs"
             points_ecs = P';
             facets_ecs = bf';
         case "tight_wrap"
-            TR = triangulation(facets', points');
             shp = alphaShape(points');
             shp.Alpha = 1.2 * shp.criticalAlpha("one-region");
             
@@ -121,7 +120,7 @@ if ecs_shape ~= "no_ecs"
     facetmarkers_ecs = 2 * ones(1, size(facets_ecs, 2));
     [~, ind] = sort(points(1, :));
     ind = ind(1);
-    regions_ecs = points(:, ind) - ecs_gap / 2 * [1; 0; 0];
+    regions_ecs = points(:, ind) - ecs_gap / 10 * [1; 0; 0];
     
     npoint_out = size(points, 2);
     points = [points points_ecs];

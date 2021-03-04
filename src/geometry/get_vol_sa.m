@@ -5,7 +5,7 @@ function [volumes, surface_areas] = get_vol_sa(femesh)
 %   direction: double(3, 1)
 %
 %   volumes: double(1, ncompartment)
-%  	surface_areas: double(1, ncompartment)
+%      surface_areas: double(1, ncompartment)
 
 
 % Number of compartments

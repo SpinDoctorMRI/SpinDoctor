@@ -31,7 +31,7 @@ for iseq = 1:nsequence
     if nsequence == 1
         experiment_str = "";
     else
-        experiment_str = sprintf(", experiment %d of %d", iseq, nsequence);
+        experiment_str = sprintf(", sequence %d of %d", iseq, nsequence);
     end
 
     % Create figure title label if more than one b-value

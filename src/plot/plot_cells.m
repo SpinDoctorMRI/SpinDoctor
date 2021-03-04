@@ -1,6 +1,8 @@
-function plot_cells(cells, params_cells)
+function plot_cells(cells, setup)
 %PLOT_CELLS Plot cells of canonical configuration.
 %
+%   cells: struct
+%   setup: struct
 
 centers = cells.centers;
 radii = cells.radii;
@@ -15,9 +17,9 @@ for icell = 1:ncell
         [X, Y, Z] = cylinder;
         X = radii(icell) * X + centers(1, icell);
         Y = radii(icell) * Y + centers(2, icell);
-        Z = params_cells.height * (Z - 0.5);
+        Z = setup.geometry.height * (Z - 0.5);
         surf(X, Y, Z);%, "edgealpha", 0);
-        p = [centers(:, icell); params_cells.height / 2 + 1];
+        p = [centers(:, icell); setup.geometry.height / 2 + 1];
     else
         % Spheres
         [X, Y, Z] = sphere;

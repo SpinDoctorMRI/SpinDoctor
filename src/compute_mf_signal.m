@@ -1,20 +1,15 @@
-function [signal_allcmpts, itertimes] = compute_mf_signal(experiment, initial_signal, lap_eig, neig_lap)
+function [signal_allcmpts, itertimes] = compute_mf_signal(setup, initial_signal, lap_eig, neig_lap)
 %COMPUTE_MF_SIGNAL Compute the Matrix Formalism total signal.
 %   This function only works under the assumption of a constant intial spin
 %   density.
 %
-%   experiment: struct with fields
-%    	ndirection
-%    	direction
-%      	qvalues
-%     	bvalues
-%      	sequences
-% 	initial_signal
-% 	lap_eig
-% 	neig_lap (optional)
+%   setup: struct
+%   initial_signal
+%   lap_eig
+%   neig_lap (optional)
 %
 %   signal_allcmpts
-% 	itertimes
+%   itertimes
 
 
 % Time function evaluation
@@ -23,20 +18,20 @@ starttime = tic;
 do_reduce = nargin == nargin(@compute_mf_signal);
 
 % Extract experiment parameters
-sequences = experiment.sequences;
+sequences = setup.gradient.sequences;
 
 % Extract gradient directions
-dir_points = experiment.directions.points;
-dir_inds = experiment.directions.indices;
-dir_opposite = experiment.directions.opposite;
+dir_points = setup.gradient.directions.points;
+dir_inds = setup.gradient.directions.indices;
+dir_opposite = setup.gradient.directions.opposite;
 
 lap_eig_vals = lap_eig.values;
 
 % Sizes
 nsequence = length(sequences);
-namplitude = length(experiment.values);
-ndirection = experiment.ndirection;
-ninterval = experiment.mf.ninterval;
+namplitude = length(setup.gradient.values);
+ndirection = setup.gradient.ndirection;
+ninterval = setup.mf.ninterval;
 neig = length(lap_eig_vals);
 
 % Initialize output arguments
@@ -65,8 +60,8 @@ for idir = dir_inds
         time = linspace(0, seq.echotime, ninterval + 1);
 
         for iamp = 1:namplitude
-            q = experiment.qvalues(iamp, iseq);
-            b = experiment.bvalues(iamp, iseq);
+            q = setup.gradient.qvalues(iamp, iseq);
+            b = setup.gradient.bvalues(iamp, iseq);
 
             fprintf("Computing MF signal for:\n" ...
                 + "  Direction %d of %d: g = [%.2f; %.2f; %.2f]\n" ...

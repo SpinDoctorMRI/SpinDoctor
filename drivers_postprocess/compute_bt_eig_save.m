@@ -1,6 +1,6 @@
 %% BT eigendecomposition
 
-if isfield(experiment, "mf")
+if isfield(setup, "mf")
 
     disp("Computing or loading the Bloch-Torrey eigenfunctions");
 
@@ -14,10 +14,10 @@ if isfield(experiment, "mf")
     % Compute or load the Bloch-Torrey eigenfunctions
     for iseq = 1:nsequence
         for iamp = 1:namplitude
-            q = experiment.qvalues(iamp, iseq);
+            q = setup.gradient.qvalues(iamp, iseq);
 
             % Make file name
-            fname = sprintf("bt_eig_lengthscale%g_q%g.mat", experiment.mf.length_scale, q);
+            fname = sprintf("bt_eig_lengthscale%g_q%g.mat", setup.mf.length_scale, q);
             fname = save_dir_path_spindoctor + "/" + fname;
             
             % Load existing or compute new decomposition
@@ -27,7 +27,7 @@ if isfield(experiment, "mf")
                 load(fname);
             else
                 % Compute Bloch-Torrey eigendecomposition
-                bt_eig_tmp = compute_blochtorrey_eig(q, lap_eig, experiment.directions);
+                bt_eig_tmp = compute_blochtorrey_eig(q, lap_eig, setup.gradient.directions);
 
                 % Extract results
                 Vsort = bt_eig_tmp.Vsort;

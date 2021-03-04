@@ -20,7 +20,7 @@ end
 if  nargin == nargin(@call_tetgen) && refinement > 0
     % Pass refinement to the 'a' flag of Tetgen. This gives a maximum
     % tetrahedron volume (not length, as in earlier versions)
-    % tetgen_options = "-pq0.5AVa" + num2str(params_domain.refinement);
+    % tetgen_options = "-pq0.5AVa" + num2str(setup.pde.refinement);
     tetgen_options = "-pqAVa" + num2str(refinement);
 else
     tetgen_options = "-pqAV";

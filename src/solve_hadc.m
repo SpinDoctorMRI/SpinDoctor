@@ -1,44 +1,40 @@
-function results = solve_hadc(femesh, params_domain, experiment)
+function results = solve_hadc(femesh, setup)
 %SOLVE_HADC Compute the ADC from HADC model.
 %
-% 	femesh: struct
-% 	params_domain: struct
-% 	experiment: struct
+%   femesh: struct
+%   setup: struct
 %
 %   results: struct with fields
 %       adc: double(ncompartment, nsequence, ndirection)
-%      	adc_allcmpts: double(nsequence, ndirection)
-%      	ctime: double(ncompartment, nsequence, ndirection)
+%       adc_allcmpts: double(nsequence, ndirection)
+%       itertimes: double(ncompartment, nsequence, ndirection)
+%       totaltime: double(ncompartment, nsequence, ndirection)
 
 
 % Measure function evaluation time
 starttime = tic;
 
 % Extract experiment parameters
-sequences = experiment.sequences;
-reltol = experiment.hadc.reltol;
-abstol = experiment.hadc.abstol;
-solve_ode = experiment.hadc.ode_solver;
+sequences = setup.gradient.sequences;
+reltol = setup.hadc.reltol;
+abstol = setup.hadc.abstol;
+solve_ode = setup.hadc.ode_solver;
 solver_str = func2str(solve_ode);
 
 % Extract domain parameters
-diffusivity = params_domain.diffusivity;
-initial_density = params_domain.initial_density;
-compartments = params_domain.compartments;
-
-% Take direction averaged diffusivity from tensor (trace)
-diffusivity_scalar = (diffusivity(1, 1, :) + diffusivity(2, 2, :) + diffusivity(3, 3, :)) / 3;
-diffusivity_scalar = shiftdim(diffusivity_scalar, 1);
+diffusivity = setup.pde.diffusivity;
+initial_density = setup.pde.initial_density;
+compartments = setup.pde.compartments;
 
 % Extract HARDI points
-dir_points = experiment.directions.points;
-dir_inds = experiment.directions.indices;
-opposite = experiment.directions.opposite;
+dir_points = setup.gradient.directions.points;
+dir_inds = setup.gradient.directions.indices;
+opposite = setup.gradient.directions.opposite;
 
 % Sizes
 ncompartment = length(compartments);
 nsequence = length(sequences);
-ndirection = experiment.ndirection;
+ndirection = setup.gradient.ndirection;
 ndirection_unique = length(dir_inds);
 
 % Number of points in each compartment

@@ -1,20 +1,20 @@
-function experiment = prepare_experiments(experiment)
+function setup = prepare_experiments(setup)
 %PREPARE_EXPERIMENTS Prepare experiments.
 %   The parameters are added to the input structure.
 %
-%   experiment: struct
+%   setup: struct
 %
-%   experiment: struct
+%   setup: struct
 
 
 % We here assume we are working with water protons
 gamma = 2.67513 * 1e-04;
 
 % Check consistency of gradient sequences
-nsequence = length(experiment.sequences);
-assert(isa(experiment.sequences, "cell"))
+nsequence = length(setup.gradient.sequences);
+assert(isa(setup.gradient.sequences, "cell"))
 for iseq = 1:nsequence
-    seq = experiment.sequences{iseq};
+    seq = setup.gradient.sequences{iseq};
     assert(isa(seq, "Sequence"))
     if isa(seq, "CosOGSE") || isa(seq, "SinOGSE")
         assert(seq.nperiod > 0)
@@ -22,73 +22,73 @@ for iseq = 1:nsequence
 end
 
 % Assign b-values and q-values
-namplitude = length(experiment.values);
-experiment.bvalues = zeros(namplitude, nsequence);
-experiment.qvalues = zeros(namplitude, nsequence);
+namplitude = length(setup.gradient.values);
+setup.gradient.bvalues = zeros(namplitude, nsequence);
+setup.gradient.qvalues = zeros(namplitude, nsequence);
 for iseq = 1:nsequence
-    bnq = experiment.sequences{iseq}.bvalue_no_q;
-    switch experiment.values_type
+    bnq = setup.gradient.sequences{iseq}.bvalue_no_q;
+    switch setup.gradient.values_type
         case "g"
-            experiment.qvalues(:, iseq) = experiment.values / gamma;
-            experiment.bvalues(:, iseq) = bnq * experiment.qvalues(:, iseq).^2;
+            setup.gradient.qvalues(:, iseq) = setup.gradient.values / gamma;
+            setup.gradient.bvalues(:, iseq) = bnq * setup.gradient.qvalues(:, iseq).^2;
         case "q"
-            experiment.qvalues(:, iseq) = experiment.values;
-            experiment.bvalues(:, iseq) = bnq * experiment.qvalues(:, iseq).^2;
+            setup.gradient.qvalues(:, iseq) = setup.gradient.values;
+            setup.gradient.bvalues(:, iseq) = bnq * setup.gradient.qvalues(:, iseq).^2;
         case "b"
-            experiment.bvalues(:, iseq) = experiment.values;
-            experiment.qvalues(:, iseq) = sqrt(experiment.bvalues(:, iseq) / bnq);
+            setup.gradient.bvalues(:, iseq) = setup.gradient.values;
+            setup.gradient.qvalues(:, iseq) = sqrt(setup.gradient.bvalues(:, iseq) / bnq);
         otherwise
-            error("The experiment values must be of type ""g"", ""q"" or ""b"".");
+            error("The values must be of type ""g"", ""q"" or ""b"".");
     end
 end
 
 % Create gradient directions
-ndirection = experiment.ndirection;
+ndirection = setup.gradient.ndirection;
 if ndirection == 1
     % Create structure for storing the one diffusion-encoding direction
-    experiment.directions = create_directions_onedir(experiment.direction);
+    setup.gradient.directions = create_directions_onedir(setup.gradient.direction);
 else
     % Obtain multiple diffusion-encoding directions uniformly distributed
     % in the unit circle or the unit sphere
-    experiment.directions = create_directions(ndirection, ...
-        experiment.flat_dirs, experiment.remove_opposite);
+    setup.gradient.directions = create_directions(ndirection, ...
+        setup.gradient.flat_dirs, setup.gradient.remove_opposite);
 end
-assert(isequal(experiment.directions.indices, 1:length(experiment.directions.indices)), ...
+assert(isequal(setup.gradient.directions.indices, 1:length(setup.gradient.directions.indices)), ...
     "directions.indices must be montonically increasing integers, starting from 1");
 
 % Check BTPDE experiment
-if isfield(experiment, "btpde")
-    if ~isfield(experiment.btpde, "ode_solver")
+if isfield(setup, "btpde")
+    if ~isfield(setup.btpde, "ode_solver")
         % Set default
-        experiment.btpde.("ode_solver") = @ode15s;
-    elseif ischar(experiment.btpde.ode_solver)
-        experiment.btpde.ode_solver = str2func(experiment.btpde.ode_solver);
-    elseif ~isa(experiment.btpde.ode_solver, "function_handle")
+        setup.btpde.ode_solver = @ode15s;
+    elseif ischar(setup.btpde.ode_solver)
+        setup.btpde.ode_solver = str2func(setup.btpde.ode_solver);
+    elseif ~isa(setup.btpde.ode_solver, "function_handle")
         error("The BTPDE ODE solver must be a function handle or a character vector");
     end
 end
 
 % Check HADC experiment
-if isfield(experiment, "hadc")
-    if ~isfield(experiment.hadc, "ode_solver")
+if isfield(setup, "hadc")
+    if ~isfield(setup.hadc, "ode_solver")
         % Set default
-        experiment.btpde.("ode_solver") = @ode15s;
-    elseif ischar(experiment.hadc.ode_solver)
-        experiment.hadc.ode_solver = str2func(experiment.hadc.ode_solver);
-    elseif ~isa(experiment.hadc.ode_solver, "function_handle")
+        setup.hadc.ode_solver = @ode15s;
+    elseif ischar(setup.hadc.ode_solver)
+        setup.hadc.ode_solver = str2func(setup.hadc.ode_solver);
+    elseif ~isa(setup.hadc.ode_solver, "function_handle")
         error("The HADC ODE solver must be a function handle or a character vector");
     end
 end
 
 % Check MF experiment
-if isfield(experiment, "mf")
-    assert(experiment.mf.length_scale >= 0)
-    assert(experiment.mf.neig_max >= 1)
-    assert(experiment.mf.ninterval >= 1)
+if isfield(setup, "mf")
+    assert(setup.mf.length_scale >= 0)
+    assert(setup.mf.neig_max >= 1)
+    assert(setup.mf.ninterval >= 1)
 end
 
-% Check multilayer experiment
-if isfield(experiment, "multilayer")
-    assert(experiment.multilayer.length_scale >= 0)
-    assert(experiment.multilayer.eigstep > 0)
+% Check analytical experiment
+if isfield(setup, "analytical")
+    assert(setup.analytical.length_scale >= 0)
+    assert(setup.analytical.eigstep > 0)
 end

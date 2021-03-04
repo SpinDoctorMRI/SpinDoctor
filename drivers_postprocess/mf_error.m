@@ -1,23 +1,23 @@
 %% Reference signal
-tmp = split(save_dir_path_spindoctor, sprintf("refinement%g", params_domain.refinement));
+tmp = split(save_dir_path_spindoctor, sprintf("refinement%g", setup.pde.refinement));
 assert(length(tmp) == 2);
 ref_str = tmp(1) + "refinement0.1" + tmp(end);
 signal_ref = zeros(nsequence, namplitude, ndirection);
 for iseq = 1:nsequence
     for iamp = 1:namplitude
         %%%% Extract experiment parameters
-        seq = experiment.sequences{iseq};
-        bvalue = experiment.bvalues(iamp, iseq);
-        qvalue = experiment.qvalues(iamp, iseq);
+        seq = setup.gradient.sequences{iseq};
+        bvalue = setup.gradient.bvalues(iamp, iseq);
+        qvalue = setup.gradient.qvalues(iamp, iseq);
 
         %%%% Load data
-        if experiment.values_type == "q"
+        if setup.gradient.values_type == "q"
             bvalue_str = sprintf("q%g", qvalue);
         else
             bvalue_str = sprintf("b%g", bvalue);
         end
         fname = sprintf("btpde_%s_%s_abstol%g_reltol%g.mat", class(seq), ...
-            bvalue_str, experiment.btpde.abstol, experiment.btpde.reltol);
+            bvalue_str, setup.btpde.abstol, setup.btpde.reltol);
         call_cmd = sprintf("load %s/%s signal_allcmpts", ref_str, fname);
         disp(call_cmd);
         eval(call_cmd);
@@ -74,18 +74,18 @@ end
 
 
 %% Plot relative deviation from full MF signal
-colors = {"r" "b" "k" "#008800" "m" "c" "g" "y"};
-markers = {"x" "o" "d" "s" ">" "v" "^"};
-linestyles = {"-" "-." "--" ":"};
+colors = ["r" "b" "k" "#008800" "m" "c" "g" "y"];
+markers = ["x" "o" "d" "s" ">" "v" "^"];
+linestyles = ["-" "-." "--" ":"];
 neig = length(lap_eig.values{1});
-maxkappa = max(abs(params_domain.permeability));
+maxkappa = max(abs(setup.pde.permeability));
 
 figure;
 
 a = get(gcf, "position");
 set(gcf, "position", 0.7 * a);
 
-labels = {};
+labels = strings(1, 0);
 
 dir = 0;
 if dir
@@ -95,10 +95,10 @@ else
 end
 
 for iseq = 1:nsequence
-    seq = experiment.sequences{iseq};
+    seq = setup.gradient.sequences{iseq};
     for iamp  = 1:namplitude
-        qvalue = experiment.qvalues(iamp, iseq);
-        bvalue = experiment.bvalues(iamp, iseq);
+        qvalue = setup.gradient.qvalues(iamp, iseq);
+        bvalue = setup.gradient.bvalues(iamp, iseq);
 
         % Signals
         if dir
@@ -118,9 +118,9 @@ for iseq = 1:nsequence
 
         % Plot
         h = semilogy(neig_bt, errorsig);
-        set(h, "color", colors{iseq});
-        set(h, "marker", markers{iseq});
-        set(h, "linestyle", linestyles{iamp});
+        set(h, "color", colors(iseq));
+        set(h, "marker", markers(iseq));
+        set(h, "linestyle", linestyles(iamp));
         hold on
 
         % Label
@@ -130,8 +130,8 @@ for iseq = 1:nsequence
             experiment_str = sprintf("\\delta=%g, \\Delta=%g", seq.delta, seq.Delta);
         end
         experiment_str = sprintf("b=%g", bvalue);
-        labels{end+1} = experiment_str;
-        % labels{end+1} = sprintf("%s, q=%g", experiment_str, qvalue);
+        labels(end+1) = experiment_str;
+        % labels(end+1) = sprintf("%s, q=%g", experiment_str, qvalue);
     end
 end
 legend(labels);%, "location", "southwest");

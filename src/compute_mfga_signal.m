@@ -1,28 +1,22 @@
-function results = compute_mfga_signal(experiment, initial_signal, dtensor)
+function results = compute_mfga_signal(setup, initial_signal, dtensor)
 %COMPUTE_MFGA_SIGNAL Compute the Matrix Formalism Gaussian approximation signal.
 %
-%   experiment: struct with fields
-%       ndirection
-%    	direction
-%     	qvalues
-%     	bvalues
-%    	sequences
-% 	volumes
-%	initial_density
-% 	dtensor
+%   setup: struct with fields
+%   initial_density
+%   dtensor
 %
 %   results: struct with fields
 %       signal_allcmpts
-%   	adc_allcmpts
+%       adc_allcmpts
 
 
 % Extract gradient directions
-dir_points = experiment.directions.points;
-dir_inds = experiment.directions.indices;
-opposite = experiment.directions.opposite;
+dir_points = setup.gradient.directions.points;
+dir_inds = setup.gradient.directions.indices;
+opposite = setup.gradient.directions.opposite;
 
 % Extract experiment parameters
-bvalues = experiment.bvalues;
+bvalues = setup.gradient.bvalues;
 
 % Sizes
 namplitude = size(bvalues, 1);
@@ -37,7 +31,7 @@ adc = zeros(nsequence, ndirection);
 for idir = dir_inds
     g = dir_points(:, idir);
     for iseq = 1:nsequence
-        b = experiment.bvalues(:, iseq);
+        b = setup.gradient.bvalues(:, iseq);
         D = g' * dtensor(:, :, iseq) * g;
         adc(iseq, idir) = D;
         signal(:, iseq, idir) = initial_signal * exp(-D * b);

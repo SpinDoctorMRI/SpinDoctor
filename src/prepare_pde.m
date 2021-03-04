@@ -1,29 +1,29 @@
-function params_domain = prepare_pde(params_cells, params_domain)
+function pde = prepare_pde(setup)
 %PREPARE_PDE Create initial data for solving PDE.
 %
-%   params_cells: struct
-%  	params_domain: struct
+%   setup: struct
 %
-%   params_domain: struct
+%   pde: struct
 
 
 % Extract compartment information
-ncell = params_cells.ncell;
-shape = params_cells.shape;
-include_in = params_cells.include_in;
-in_ratio = params_cells.in_ratio;
-include_ecs = params_cells.ecs_shape ~= "no_ecs";
-ecs_ratio = params_cells.ecs_ratio;
+ncell = setup.geometry.ncell;
+cell_shape = setup.geometry.cell_shape;
+include_in = setup.geometry.include_in;
+in_ratio = setup.geometry.in_ratio;
+include_ecs = setup.geometry.ecs_shape ~= "no_ecs";
+ecs_ratio = setup.geometry.ecs_ratio;
+pde = setup.pde;
 
 % Check for correct radius ratios and that neurons do not have in-compartments
-assert(~include_in || 0 < in_ratio && in_ratio < 1 && shape ~= "neuron");
+assert(~include_in || 0 < in_ratio && in_ratio < 1 && cell_shape ~= "neuron");
 assert(~include_ecs || 0 < ecs_ratio);
 
 % Number of compartments
 ncompartment = (1 + include_in) * ncell + include_ecs;
 
 % Find number of boundaries
-switch shape
+switch cell_shape
     case "cylinder"
         % An axon has a side interface, and a top-bottom boundary
         nboundary = (2 * include_in + 1 + include_ecs) * ncell + include_ecs;
@@ -65,7 +65,7 @@ if include_ecs
     nboundary_old = nboundary_old + ncell;
 end
 
-if shape == "cylinder"
+if cell_shape == "cylinder"
     if include_in
         % Add in boundary
         boundaries = [boundaries repmat("in", 1, ncell)];
@@ -97,40 +97,40 @@ else
 end
 
 % Diffusion coefficients (tensorize if scalars)
-params_domain.diffusivity_in = params_domain.diffusivity_in * eye(3);
-params_domain.diffusivity_out = params_domain.diffusivity_out * eye(3);
-params_domain.diffusivity_ecs = params_domain.diffusivity_ecs * eye(3);
+pde.diffusivity_in = pde.diffusivity_in * eye(3);
+pde.diffusivity_out = pde.diffusivity_out * eye(3);
+pde.diffusivity_ecs = pde.diffusivity_ecs * eye(3);
 diffusivity = zeros(3, 3, ncompartment);
-diffusivity(:, :, compartments == "in") = repmat(params_domain.diffusivity_in, 1, 1, sum(compartments == "in"));
-diffusivity(:, :, compartments == "out") = repmat(params_domain.diffusivity_out, 1, 1, sum(compartments == "out"));
-diffusivity(:, :, compartments == "ecs") = repmat(params_domain.diffusivity_ecs, 1, 1, sum(compartments == "ecs"));
+diffusivity(:, :, compartments == "in") = repmat(pde.diffusivity_in, 1, 1, sum(compartments == "in"));
+diffusivity(:, :, compartments == "out") = repmat(pde.diffusivity_out, 1, 1, sum(compartments == "out"));
+diffusivity(:, :, compartments == "ecs") = repmat(pde.diffusivity_ecs, 1, 1, sum(compartments == "ecs"));
 
 % T2-relaxation coefficients
 relaxation = zeros(1, ncompartment);
-relaxation(compartments == "in") = params_domain.relaxation_in;
-relaxation(compartments == "out") = params_domain.relaxation_out;
-relaxation(compartments == "ecs") = params_domain.relaxation_ecs;
+relaxation(compartments == "in") = pde.relaxation_in;
+relaxation(compartments == "out") = pde.relaxation_out;
+relaxation(compartments == "ecs") = pde.relaxation_ecs;
 
 % Initial conditions
 initial_density = zeros(1, ncompartment);
-initial_density(compartments == "in") = params_domain.initial_density_in;
-initial_density(compartments == "out") = params_domain.initial_density_out;
-initial_density(compartments == "ecs") = params_domain.initial_density_ecs;
+initial_density(compartments == "in") = pde.initial_density_in;
+initial_density(compartments == "out") = pde.initial_density_out;
+initial_density(compartments == "ecs") = pde.initial_density_ecs;
 
 % Permeability coefficients
 permeability = zeros(1, nboundary);
-permeability(boundaries == "in") = params_domain.permeability_in;
-permeability(boundaries == "out") = params_domain.permeability_out;
-permeability(boundaries == "ecs") = params_domain.permeability_ecs;
-permeability(boundaries == "in,out") = params_domain.permeability_in_out;
-permeability(boundaries == "out,ecs") = params_domain.permeability_out_ecs;
+permeability(boundaries == "in") = pde.permeability_in;
+permeability(boundaries == "out") = pde.permeability_out;
+permeability(boundaries == "ecs") = pde.permeability_ecs;
+permeability(boundaries == "in,out") = pde.permeability_in_out;
+permeability(boundaries == "out,ecs") = pde.permeability_out_ecs;
 
 
 % Update domain parameters with new variables
-params_domain.diffusivity = diffusivity;
-params_domain.relaxation = relaxation;
-params_domain.initial_density = initial_density;
-params_domain.permeability = permeability;
-params_domain.compartments = compartments;
-params_domain.boundaries = boundaries;
-params_domain.boundary_markers = boundary_markers;
+pde.diffusivity = diffusivity;
+pde.relaxation = relaxation;
+pde.initial_density = initial_density;
+pde.permeability = permeability;
+pde.compartments = compartments;
+pde.boundaries = boundaries;
+pde.boundary_markers = boundary_markers;

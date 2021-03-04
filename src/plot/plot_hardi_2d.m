@@ -30,9 +30,9 @@ end
 
 % Check if signal is also indexed for b-values
 if namplitude == 1
-    make_label = @(iamp, iseq) sprintf("Experiment %d", iseq);
+    make_label = @(iamp, iseq) sprintf("Sequence %d", iseq);
 else
-    make_label = @(iamp, iseq) sprintf("Experiment %d, b-value %d", iseq, iamp);
+    make_label = @(iamp, iseq) sprintf("Sequence %d, b-value %d", iseq, iamp);
 end
 
 % Angles

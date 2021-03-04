@@ -1,32 +1,31 @@
-function results = solve_mf(femesh, params_domain, experiment, lap_eig)
+function results = solve_mf(femesh, setup, lap_eig)
 %SOLVE_MF Compute the solution to the BTPDE using Matrix Formalism.
 %
 %   femesh: struct
-% 	params_domain: struct
-%  	experiment: struct
-% 	lap_eig: struct with fields
-%      	values: cell(1, ndomain)
-%     	funcs: cell(1, ndomain)
-%    	moments: cell(1, ndomain)
+%   setup: struct
+%   lap_eig: struct with fields
+%       values: cell(1, ndomain)
+%       funcs: cell(1, ndomain)
+%       moments: cell(1, ndomain)
 %
 %   results: struct with fields
-%    	signal: double(ncompartment, nsequence, namplitude, ndirection)
-%      	signal_allcmpts: double(nsequence, namplitude, ndirection)
-%      	ctime: double(nsequence, namplitude, ndirection)
-%    	magnetization: cell(nsequence, namplitude, ncompartment, ndirection)
+%       signal: double(ncompartment, nsequence, namplitude, ndirection)
+%       signal_allcmpts: double(nsequence, namplitude, ndirection)
+%       ctime: double(nsequence, namplitude, ndirection)
+%       magnetization: cell(nsequence, namplitude, ncompartment, ndirection)
 
 
 % Measure time of function evaluation
 starttime = tic;
 
 % Extract parameters
-initial_density = params_domain.initial_density;
-qvalues = experiment.qvalues;
-bvalues = experiment.bvalues;
-sequences = experiment.sequences;
-dir_points = experiment.directions.points;
-dir_inds = experiment.directions.indices;
-opposite = experiment.directions.opposite;
+initial_density = setup.pde.initial_density;
+qvalues = setup.gradient.qvalues;
+bvalues = setup.gradient.bvalues;
+sequences = setup.gradient.sequences;
+dir_points = setup.gradient.directions.points;
+dir_inds = setup.gradient.directions.indices;
+opposite = setup.gradient.directions.opposite;
 eigvals = lap_eig.values;
 eigfuncs = lap_eig.funcs;
 moments = lap_eig.moments;
@@ -34,12 +33,12 @@ L = diag(eigvals);
 
 % Sizes
 ncompartment = femesh.ncompartment;
-namplitude = length(experiment.values);
+namplitude = length(setup.gradient.values);
 nsequence = length(sequences);
-ndirection = experiment.ndirection;
+ndirection = setup.gradient.ndirection;
 ndirection_unique = length(dir_inds);
 neig = length(lap_eig.values);
-ninterval = experiment.mf.ninterval;
+ninterval = setup.mf.ninterval;
 
 % Number of points in each compartment
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
@@ -146,7 +145,10 @@ parfor iall = 1:prod(allinds)
 
         % Split magnetization into compartments
         mag = mat2cell(mag, npoint_cmpts);
-        magnetization(:, iall) = mag;
+        % magnetization(:, iall) = mag;  % does not work in parfor before R2020b
+        for icmpt = 1:ncompartment
+            magnetization{icmpt, iall} = mag{icmpt};
+        end
         signal(:, iall) = cellfun(@(M, m) sum(M * m), M_cmpts', mag);
 
     end % unique direction case

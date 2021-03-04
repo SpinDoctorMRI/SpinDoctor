@@ -10,11 +10,11 @@ function femesh = split_mesh(femesh_all)
 %
 %   femesh: struct with fields
 %       ncompartment: [1 x 1]
-%     	nboundary: [1 x 1]
+%         nboundary: [1 x 1]
 %       points: {1 x ncompartment}[3 x npoint]
 %       facets: {ncompartment x nboundary}[3 x nfacet]
 %       elements: {1 x ncompartment}[4 x nelement]
-%   	point_map: {1 x ncompartment}[npoint x 1]
+%       point_map: {1 x ncompartment}[npoint x 1]
 
 
 % Extract global mesh

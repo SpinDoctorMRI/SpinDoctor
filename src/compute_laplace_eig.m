@@ -1,10 +1,10 @@
-function lap_eig = compute_laplace_eig(femesh, params_domain, eiglim, neig_max)
+function lap_eig = compute_laplace_eig(femesh, pde, eiglim, neig_max)
 %COMPUTE_LAPLACE_EIG Compute Laplace eigenvalues, functions and product moments.
 %
 %   femesh: struct
-%   params_domain: struct
+%   pde: struct
 %   eiglim: double
-% 	neig_max: int
+%     neig_max: int
 %
 %   lap_eig: struct with fields
 %       values: cell(1,ndomain)
@@ -28,10 +28,10 @@ if nargin < nargin(@compute_laplace_eig)
 end
 
 % Extract domain parameters
-diffusivity = params_domain.diffusivity;
-permeability = params_domain.permeability;
-relaxation = params_domain.relaxation;
-boundary_markers = params_domain.boundary_markers;
+diffusivity = pde.diffusivity;
+permeability = pde.permeability;
+relaxation = pde.relaxation;
+boundary_markers = pde.boundary_markers;
 
 % Sizes
 ncompartment = femesh.ncompartment;

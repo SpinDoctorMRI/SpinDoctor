@@ -23,7 +23,7 @@ units.q = "\mu m^{-1}";
 units.eigval = "ms^{-1}";
 
 
-maxkappa = max(params_domain.permeability);
+maxkappa = max(setup.pde.permeability);
 
 neig = length(lap_eig.length_scales);
 neig_lap = find(lap_eig.length_scales >= 1.0, 1, "last");
@@ -36,7 +36,7 @@ experi_vec = 1:nsequence;
 
 b_vec = 1:namplitude;
 
-sequences = experiment.sequences;
+sequences = setup.gradient.sequences;
 
 %% Plot BT eigenvalues
 clear mf_signal_reduce mf_signal_reduce_fromgrid
@@ -77,9 +77,9 @@ for iseq = 1:nsequence
                 leg_dir_str = "";
             end
             gamma = 2.67513 * 1e-04;
-            % legend_vec{iplot + 1} = sprintf("%sq=%g%s", leg_dir_str, experiment.qvalues(iamp, iseq), units.q);
-            % legend_vec{iplot + 1} = sprintf("%sq=%g", leg_dir_str, experiment.qvalues(iamp, iseq));
-            legend_vec{iplot + 1} = sprintf("%sg=%.3f", leg_dir_str, experiment.qvalues(iamp, iseq) / gamma);
+            % legend_vec{iplot + 1} = sprintf("%sq=%g%s", leg_dir_str, setup.gradient.qvalues(iamp, iseq), units.q);
+            % legend_vec{iplot + 1} = sprintf("%sq=%g", leg_dir_str, setup.gradient.qvalues(iamp, iseq));
+            legend_vec{iplot + 1} = sprintf("%sg=%.3f", leg_dir_str, setup.gradient.qvalues(iamp, iseq) / gamma);
             iplot = iplot + 1;
         end
     end
@@ -92,7 +92,7 @@ grid on;
 if length(dir_vec) > 1
     dir_str = sprintf("dir [" + join(repmat("%d", 1, length(dir_vec))) + "]", dir_vec);
 else
-    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", experiment.directions.points(:, dir_vec));
+    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", setup.gradient.directions.points(:, dir_vec));
 end
 
 % xlabel(sprintf("Real part (%s)", units.eigval));
@@ -106,7 +106,7 @@ title_str = sprintf("\\kappa=%g, %s", maxkappa, dir_str);
 title(title_str, "fontsize", 18);
 
 % idir = dir_vec(1);
-exportgraphics(gca, sprintf("output/k%g_dir%d.png", maxkappa, idir));
+% exportgraphics(gca, sprintf("output/k%g_dir%d.png", maxkappa, idir));
 % exportgraphics(gca, sprintf("output/k%g_dir%d_wrap.png", maxkappa, idir));
 
 
@@ -130,7 +130,7 @@ for iseq = experi_vec
             set(h, "markersize", 20 - 3 * iamp);
             set(h, "linewidth", 1 + iamp / 2);
             legend_vec{iplot+1} = sprintf("dir %d, t=%g%s, q=%g%s", idir, ...
-                0 / 1000, units.t, experiment.qvalues(iamp, iseq), units.q);
+                0 / 1000, units.t, setup.gradient.qvalues(iamp, iseq), units.q);
             iplot = iplot + 1;
         end
     end
@@ -153,7 +153,7 @@ for iamp = b_vec
     iplot = 0;
     for idir = dir_vec
         for iseq = 1:nsequence%experi_vec
-            seq = experiment.sequences{iseq};
+            seq = setup.gradient.sequences{iseq};
             sdelta = seq.delta;
             bdelta = seq.Delta;
             Dsort = bt_eig.Dsort{iamp, iseq, idir};
@@ -184,7 +184,7 @@ for iamp = b_vec
 
             set(h, "markersize", 20 - 3 * iamp);
             set(h, "linewidth", 1 + iamp / 2);
-            legend_vec{iplot + 1} = sprintf("dir %d, t=%g%s, q=%g%s", idir, sdelta / 1000, units.t, experiment.qvalues(iamp, iseq), units.q);
+            legend_vec{iplot + 1} = sprintf("dir %d, t=%g%s, q=%g%s", idir, sdelta / 1000, units.t, setup.gradient.qvalues(iamp, iseq), units.q);
 
             iplot = iplot + 1;
         end
@@ -216,7 +216,7 @@ for iamp = b_vec
     iplot = 0;
     for idir = dir_vec
         for iseq = experi_vec
-            seq = experiment.sequences{iseq};
+            seq = setup.gradient.sequences{iseq};
             sdelta = seq.delta;
             bdelta = seq.Delta;
             Dsort = bt_eig.Dsort{iamp, iseq, idir};
@@ -253,7 +253,7 @@ for iamp = b_vec
                 set(h, "markersize", 8 + 3 * iseq);
                 set(h, "linewidth", iseq);
                 legend_vec{iplot + 1} = ("dir=" + num2str(idir) + ", t = " + num2str(sdelta / 1000) + "ms, q=" ...
-                    + num2str(experiment.qvalues(iamp, iseq)) + ", \lambda_0 contrib=" ...
+                    + num2str(setup.gradient.qvalues(iamp, iseq)) + ", \lambda_0 contrib=" ...
                     + num2str(abs(vvec(1)), 4));
                 iplot = iplot + 1;
             end
@@ -298,7 +298,7 @@ for idir = dir_vec
     iplot = 0;
     for iamp = b_vec
         for iseq = experi_vec
-            seq = experiment.sequences{iseq};
+            seq = setup.gradient.sequences{iseq};
             sdelta = seq.delta;
             bdelta = seq.Delta;
 
@@ -356,7 +356,7 @@ for idir = dir_vec
             % % set(gca, "xlim", [0, 3]);
             % ylabel("- BT eig value (ms^{-1})");
             % title(sprintf("gdir %d, sdelta=%g, g=.2e",...
-            %     idir, sdelta, experiment.qvalues(1, iamp))
+            %     idir, sdelta, setup.gradient.qvalues(1, iamp))
             % %axis equal;
             % %grid on;
             % axis square;
@@ -365,7 +365,7 @@ for idir = dir_vec
             subplot(length(b_vec), length(experi_vec), iplot);
             spy(abs(mattmp2_keeplarge(1:end, 1:end).'));
             title("idir=" + num2str(idir) + ", sdelta=" + num2str(sdelta) ...
-                + ", g=" + num2str(experiment.qvalues(iamp, iseq)));
+                + ", g=" + num2str(setup.gradient.qvalues(iamp, iseq)));
             xlabel("LAP eig index");
             ylabel("BT eig index");
         end
@@ -400,13 +400,13 @@ for idir = dir_vec
     figure;
     hold on;
     iplot = 0;
-    gdir = experiment.directions.points(:, idir);
+    gdir = setup.gradient.directions.points(:, idir);
     for iamp = b_vec
         W_mat = sum(lap_eig.moments .* shiftdim(gdir, -2), 3);
         L_mat = diag(lap_eig.values);
         for iseq = experi_vec
-            qval = experiment.qvalues(iamp, iseq);
-            seq = experiment.sequences{iseq};
+            qval = setup.gradient.qvalues(iamp, iseq);
+            seq = setup.gradient.sequences{iseq};
             sdelta = seq.delta;
             bdelta = seq.Delta;
 
@@ -469,7 +469,7 @@ for idir = dir_vec
             subplot(length(b_vec), length(experi_vec), iplot);
             spy(abs(mattmp2_keeplarge(1:end, 1:end).'));
             title("idir=" + num2str(idir) + ", sdelta=" + num2str(sdelta) ...
-                + ", g=" + num2str(experiment.qvalues(iamp, iseq)));
+                + ", g=" + num2str(setup.gradient.qvalues(iamp, iseq)));
             xlabel("LAP eig index");
             ylabel("BT eig index");
             if (~isempty(ii))
@@ -497,8 +497,8 @@ disp(squeeze(signal_mf_btpde_meanrelerror));
 clear bmat;
 for iseq = experi_vec
     for iamp = b_vec
-        seq = experiment.sequences{iseq};
-        qv = experiment.qvalues(iamp, iseq);
+        seq = setup.gradient.sequences{iseq};
+        qv = setup.gradient.qvalues(iamp, iseq);
         bmat(iamp, iseq) = qv^2 * seq.bvalue_no_q;
     end
 end

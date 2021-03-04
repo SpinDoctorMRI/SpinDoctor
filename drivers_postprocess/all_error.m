@@ -1,23 +1,23 @@
 %% Reference signal
-tmp = split(save_dir_path_spindoctor, sprintf("refinement%g", params_domain.refinement));
+tmp = split(save_dir_path_spindoctor, sprintf("refinement%g", setup.pde.refinement));
 assert(length(tmp) == 2);
 ref_str = tmp(1) + "refinement0.1" + tmp(end);
 signal_ref = zeros(nsequence, namplitude, ndirection);
 for iseq = 1:nsequence
     for iamp = 1:namplitude
         % Extract experiment parameters
-        bvalue = experiment.bvalues(iamp, iseq);
-        qvalue = experiment.qvalues(iamp, iseq);
-        seq = experiment.sequences{iseq};
+        bvalue = setup.gradient.bvalues(iamp, iseq);
+        qvalue = setup.gradient.qvalues(iamp, iseq);
+        seq = setup.gradient.sequences{iseq};
 
         % Load data
-        if experiment.values_type == "q"
+        if setup.gradient.values_type == "q"
             bvalue_str = sprintf("q%g", qvalue);
         else
             bvalue_str = sprintf("b%g", bvalue);
         end
         fname = sprintf("btpde_%s_%s_abstol%g_reltol%g.mat", class(seq), ...
-            bvalue_str, experiment.btpde.abstol, experiment.btpde.reltol);
+            bvalue_str, setup.btpde.abstol, setup.btpde.reltol);
         call_cmd = sprintf("load %s/%s signal_allcmpts", ref_str, fname);
         disp(call_cmd);
         eval(call_cmd);
@@ -34,8 +34,8 @@ disp(mean(signal_ref, 3) / sum(volumes));
 
 %%
 signal_allcmpts_reduce = btpde.signal_allcmpts;
-maxkappa = max(abs(params_domain.permeability));
-fname = sprintf("output/btpde_sig_k%g_h%g.mat", maxkappa, params_domain.refinement);
+maxkappa = max(abs(setup.pde.permeability));
+fname = sprintf("output/btpde_sig_k%g_h%g.mat", maxkappa, setup.pde.refinement);
 save(fname, "signal_allcmpts_reduce");
 
 %% Number of Laplace eigenvalues
@@ -51,12 +51,12 @@ for i = [2 4 6 8]%1:length(neig_lap)
     signal_allcmpts_reduce{i} = signal_allcmpts;
 end
 
-maxkappa = max(abs(params_domain.permeability));
-fname = sprintf("output/mf_sig_k%g_h%g.mat", maxkappa, params_domain.refinement);
+maxkappa = max(abs(setup.pde.permeability));
+fname = sprintf("output/mf_sig_k%g_h%g.mat", maxkappa, setup.pde.refinement);
 save(fname, "signal_allcmpts_reduce");
 
 %%
-maxkappa = max(abs(params_domain.permeability));
+maxkappa = max(abs(setup.pde.permeability));
 
 load(sprintf("output/mf_sig_k%g_h0.5.mat", maxkappa));
 signal_mf_h0p5 = signal_allcmpts_reduce;
@@ -73,7 +73,7 @@ signal_btpde_h0p2 = signal_allcmpts_reduce;
 colors = ["r" "b" "k" "#008800" "m" "c" "g" "y"];
 markers = ["x" "o" "d" "s" ">" "v" "^"];
 linestyles = ["-" "-." "--" ":"];
-maxkappa = max(abs(params_domain.permeability));
+maxkappa = max(abs(setup.pde.permeability));
 
 dir = 0;
 if dir
@@ -101,10 +101,10 @@ error_btpde_h0p5 = abs(signal_btpde_h0p5 - signal_reference) ./ abs(signal_refer
 error_btpde_h0p2 = abs(signal_btpde_h0p2 - signal_reference) ./ abs(signal_reference);
 
 for iseq = 1:nsequence
-    seq = experiment.sequences{iseq};
+    seq = setup.gradient.sequences{iseq};
     for iamp  = 1:namplitude
-        qvalue = experiment.qvalues(iamp, iseq);
-        bvalue = experiment.bvalues(iamp, iseq);
+        qvalue = setup.gradient.qvalues(iamp, iseq);
+        bvalue = setup.gradient.bvalues(iamp, iseq);
 
         figure;
 
@@ -113,14 +113,14 @@ for iseq = 1:nsequence
 
         % Plot
 
-        h = semilogy(length_scales, shiftdim(error_mf_h0p5(iseq, iamp, :)), "color", "r", "marker", "o");
+        semilogy(length_scales, shiftdim(error_mf_h0p5(iseq, iamp, :)), "color", "r", "marker", "o");
         hold on
-        l = line([1 5], error_btpde_h0p5(iseq, iamp) * [1 1], "color", "r", "linestyle", "--");
+        line([1 5], error_btpde_h0p5(iseq, iamp) * [1 1], "color", "r", "linestyle", "--");
         hold on
 
-        h = semilogy(length_scales, shiftdim(error_mf_h0p2(iseq, iamp, :)), "color", "b", "marker", "d");
+        semilogy(length_scales, shiftdim(error_mf_h0p2(iseq, iamp, :)), "color", "b", "marker", "d");
         hold on
-        l = line([1 5], error_btpde_h0p2(iseq, iamp) * [1 1], "color", "b", "linestyle", "--");
+        line([1 5], error_btpde_h0p2(iseq, iamp) * [1 1], "color", "b", "linestyle", "--");
         hold on
 
         % Label

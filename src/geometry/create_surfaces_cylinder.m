@@ -1,11 +1,11 @@
-function surfaces = create_surfaces_cylinder(cells, params_cells)
+function surfaces = create_surfaces_cylinder(cells, setup)
 %CREATE_SURFACES_CYLINDER Create cylinder surface mesh.
 %   Surfaces may include in, out, and ecs compartments.
 %
 %   cells: struct with fields
 %       centers: [2 x ncell]
 %       radii: [1 x ncell]
-%   params_cells: struct
+%   setup: struct
 %
 %   surfaces: struct with fields
 %       points: [3 x npoint]
@@ -21,14 +21,14 @@ nside_min = 12;
 % Extract parameters
 centers = cells.centers;
 radii = cells.radii;
-ncell = params_cells.ncell;
-rmin = params_cells.rmin;
-rmax = params_cells.rmax;
-height = params_cells.height;
-include_in = params_cells.include_in;
-in_ratio = params_cells.in_ratio;
-ecs_shape = params_cells.ecs_shape;
-ecs_ratio = params_cells.ecs_ratio;
+ncell = setup.geometry.ncell;
+rmin = setup.geometry.rmin;
+rmax = setup.geometry.rmax;
+height = setup.geometry.height;
+include_in = setup.geometry.include_in;
+in_ratio = setup.geometry.in_ratio;
+ecs_shape = setup.geometry.ecs_shape;
+ecs_ratio = setup.geometry.ecs_ratio;
 
 include_ecs = ecs_shape ~= "no_ecs";
 nboundary = (2 * include_in + 1 + include_ecs) * ncell + include_ecs;

@@ -2,19 +2,19 @@ function results = compute_blochtorrey_eig(q, lap_eig, directions)
 %COMPUTE_BLOCHTORREY_EIG Compute the eigenvectors and eigenvalues of the Bloch-Torrey operator.
 %
 %   q: double
-%   	q-value
-%  	lap_eig: struct with fields
-%   	values: double(neig, 1)
-%   	moments: double(neig, neig, 3)
-% 	directions: struct
-%   	Gradient directions.
+%       q-value
+%      lap_eig: struct with fields
+%       values: double(neig, 1)
+%       moments: double(neig, neig, 3)
+%     directions: struct
+%       Gradient directions.
 %
 %   results: struct with fields
-%    	Vsort: cell(1, ndirection)
-%   	Dsort: cell(1, ndirection)
-%    	invVsortC1: cell(1, ndirection)
-%    	invVsort: cell(1, ndirection)
-%     	totaltime: double
+%        Vsort: cell(1, ndirection)
+%       Dsort: cell(1, ndirection)
+%        invVsortC1: cell(1, ndirection)
+%        invVsort: cell(1, ndirection)
+%         totaltime: double
 
 
 % Measure computational time

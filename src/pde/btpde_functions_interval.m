@@ -14,15 +14,15 @@ function [ode_func, Jacobian] = btpde_functions_interval(K, Q, J, q, sequence, i
 % The matrix M refers to the mass matrix.
 %
 %   K: Stiffness matrix
-% 	Q: Flux matrix
-% 	J: Mass matrix weighted by dot(g, x), where g is the gradient direction
+%     Q: Flux matrix
+%     J: Mass matrix weighted by dot(g, x), where g is the gradient direction
 %           and x the spatial variable
-%  	q: q-value
-%	sequence
-% 	interval_midpoint
+%      q: q-value
+%    sequence
+%     interval_midpoint
 %
 %   ode_func: ODE function at time t and state y
-%  	Jacobian: Jacobian of ODE function with respect to the state y
+%      Jacobian: Jacobian of ODE function with respect to the state y
 
 
 % Check for possible simplifications

@@ -1,4 +1,4 @@
-function cells = read_cells_inputfile(cellfilename)
+function cells = read_cells(cellfilename)
 %READ_CELLS_INPUTFILE Create geometrical configuration and write to file.
 %
 %   cellfilename: string
@@ -12,12 +12,7 @@ tline = fgetl(fid);
 ncell = sscanf(tline, "%d", 1);
 fgetl(fid);
 tline = fgetl(fid);
-shape = sscanf(tline, "%s", 1);
-if shape == "sphere"
-    d = 3;
-else
-    d = 2;
-end
+d = sscanf(tline, "%d", 1);
 centers = zeros(d, ncell);
 radii = zeros(1, ncell);
 fgetl(fid);

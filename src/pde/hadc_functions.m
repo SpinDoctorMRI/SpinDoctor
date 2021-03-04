@@ -15,10 +15,10 @@ function [ode_func, Jacobian] = hadc_functions(K, surfint, sequence)
 %       Stiffness matrix
 %   surfint: double(nnode, 1)
 %       Boundary integral of normal component of gradient direction
-%	sequence
+%    sequence
 %
 %   ode_func: ODE function at time t and state y
-%  	Jacobian: Jacobian of ODE function with respect to the state y
+%      Jacobian: Jacobian of ODE function with respect to the state y
 
 
 ode_func = @(t, y) -(K * y) + surfint .* sequence.integral(t);
