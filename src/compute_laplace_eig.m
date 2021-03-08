@@ -42,6 +42,7 @@ M_cmpts = cell(1, ncompartment);
 K_cmpts = cell(1, ncompartment);
 Q_cmpts = cell(1, ncompartment);
 Jx_cmpts = cell(1, 3);
+MT2_cmpts = cell(1, ncompartment);
 for idim = 1:3
     Jx_cmpts{idim} = cell(1, ncompartment);
 end
@@ -67,7 +68,11 @@ for icmpt = 1:ncompartment
     % decay operator to the diffusion operator
     if isfinite(relaxation(icmpt)) && relaxation(icmpt) > 0
         fprintf("Adding T2-relaxation matrix in compartment %d of %d: %g\n", icmpt, ncompartment, relaxation(icmpt));
-        K_cmpts{icmpt} = K_cmpts{icmpt} + 1 / relaxation(icmpt) * M_cmpts{icmpt};
+        % K_cmpts{icmpt} = K_cmpts{icmpt} + 1 / relaxation(icmpt) * M_cmpts{icmpt};
+        MT2_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
+    else
+        n = size(M_cmpts{icmpt}, 1);
+        MT2_cmpts{icmpt} = sparse(n, n);
     end
 end
 
@@ -77,7 +82,7 @@ M = blkdiag(M_cmpts{:});
 K = blkdiag(K_cmpts{:});
 Q = couple_flux_matrix(femesh, boundary_markers, Q_cmpts);
 Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
-
+MT2 = blkdiag(MT2_cmpts{:});
 
 fprintf("Eigendecomposition of FE matrices: size %d x %d\n", size(M));
 
@@ -139,12 +144,19 @@ moments = zeros(neig, neig, 3);
 for idim = 1:3
     moments(:, :, idim) = funcs' * Jx{idim} * funcs;
 end
+disp("Computing T2-weighted Laplace mass matrix");
+if nnz(MT2)
+    massrelax = funcs' * MT2 * funcs;
+else
+    massrelax = sparse(neig, neig);
+end
 toc
 
 % Create output structure
 lap_eig.values = values;
 lap_eig.funcs = funcs;
 lap_eig.moments = moments;
+lap_eig.massrelax = massrelax;
 lap_eig.totaltime = toc(starttime);
 
 % Display function evaluation time

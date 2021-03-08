@@ -3,7 +3,7 @@ function plot_femesh(femesh, compartments)
 %
 %   femesh: struct
 %   compartments
-
+colors = ["r" "b" "g" "y" "k" "c" "w"];
 
 ncompartment = length(compartments);
 include_in = any(compartments == "in");
@@ -35,7 +35,12 @@ for icmpt = 1:ncompartment
     figure(figs.(compartments(icmpt)));
     h = trisurf(facets', points(1, :), points(2, :), points(3, :));
     set(h, "facealpha", 0.7);
-    set(h, "facecolor", "interp");
+    if ncompartment <= length(colors)
+        set(h, "facecolor", colors(icmpt));
+    else
+        set(h, "facecolor", "interp");
+    end
+    
     % set(h, "LineStyle", "none");
     set(h, "LineWidth", 0.03);
     center = mean(points, 2);

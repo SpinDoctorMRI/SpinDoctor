@@ -1,12 +1,12 @@
 function [femesh, surfaces, cells] = create_geometry(setup)
 %CREATE_GEOMETRY Create cells, surfaces and finite element mesh.
 %   This function does the following:
-%   - Checks geometry setup consistency
+%   - Check geometry setup consistency
 %   - Create or load cell configuration
 %   - Create or load surface triangulation
-%   - Calls TetGen
-%   - Deforms the domain
-%   - Splits mesh into compartments
+%   - Call TetGen
+%   - Deform domain
+%   - Split mesh into compartments
 %   For custom geometries with more than one compartment, call `split_mesh`
 %   directly instead. This requires facet and element labels.
 %
@@ -37,7 +37,7 @@ nboundary = length(setup.pde.boundaries);
 
 
 % Check correct input format
-assert(any(setup.geometry.cell_shape == ["sphere", "cylinder", "neuron"]))
+assert(ismember(setup.geometry.cell_shape, ["sphere" "cylinder" "neuron"]))
 if setup.geometry.cell_shape == "neuron"
     % We do not deform the finite elements mesh if in the Neuron module. We do
     % deform the finite elements mesh if in SpinDoctor White Matter mode.
@@ -50,7 +50,7 @@ if setup.geometry.cell_shape == "neuron"
 end
 assert(~(setup.geometry.ecs_shape == "no_ecs" && setup.geometry.ncell > 1), ...
     "Geometry must include ECS if more than one cell");
-assert(any(setup.geometry.ecs_shape == ["no_ecs", "box", "convex_hull", "tight_wrap"]))
+assert(ismember(setup.geometry.ecs_shape, ["no_ecs" "box" "convex_hull" "tight_wrap"]))
 
 
 % Check that folder exists
@@ -153,7 +153,7 @@ femesh_all = read_tetgen(fname_tetgen_femesh);
 % Check that at correct number of compartments and boundaries has been found
 compartments = unique(femesh_all.elementmarkers);
 boundaries = unique(femesh_all.facetmarkers);
-solution = "use smaller hmax or change surf triangulation.";
+solution = "use smaller refinement or change surface triangulation.";
 assert(ncompartment == length(compartments), "Incorrect number of compartments, " + solution);
 assert(nboundary == length(boundaries), "Incorrect number of boundaries, " + solution);
 

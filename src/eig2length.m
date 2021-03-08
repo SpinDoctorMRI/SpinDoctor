@@ -7,4 +7,4 @@ function length_scales = eig2length(eigenvalues, diffusivity)
 %   length_scales: double(neig, 1)
 
 
-length_scales = pi * sqrt(diffusivity ./ eigenvalues);
+length_scales = pi * sqrt(diffusivity ./ max(0, eigenvalues));

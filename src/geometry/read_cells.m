@@ -1,7 +1,9 @@
 function cells = read_cells(cellfilename)
-%READ_CELLS_INPUTFILE Create geometrical configuration and write to file.
+%READ_CELLS_INPUTFILE Read cell configuration (centers and radii).
 %
 %   cellfilename: string
+%
+%   cells: struct
 
 
 % Read geometry from file

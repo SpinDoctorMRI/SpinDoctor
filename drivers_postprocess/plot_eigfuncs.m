@@ -21,9 +21,9 @@ for ieig = eigindex_use_lap
     lscale_str = sprintf("L=%.1f", lap_eig.length_scales(ieig));
     title_str = sprintf("\\kappa=%g, eig %d/%d (%s)", maxkappa, ieig, neig, lscale_str);
     
-    % plot_field(femesh, lap_eig_funcs_sep, cmpts_in, cmpts_out, cmpts_ecs, title_str,ieig);
-    plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
-    set(gca, "fontsize", 14);
+    plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
+    % plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
+    % set(gca, "fontsize", 14);
     
     % Plot diffusion direction
     if plot_diffdir
@@ -41,7 +41,7 @@ for ieig = eigindex_use_lap
     end
     % view(2);
     % caxis([-0.03, 0.05]);
-    title(title_str, "fontsize", 18);
+    % title(title_str, "fontsize", 18);
     % exportgraphics(gca, sprintf("output/lap_k%g_%d.png", maxkappa, ieig));
 end
 

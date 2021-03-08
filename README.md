@@ -38,11 +38,11 @@ In addition, a variety of neuron meshes is available, whose surface geometries w
 
 ## Software requirements
 
-	The SpinDoctor Toolbox has been developed in the MATLAB R2020b
-	and require no additional MATLAB Toolboxes.
+The SpinDoctor Toolbox has been developed in the MATLAB R2020b
+and require no additional MATLAB Toolboxes.
 
-	However, if the MATLAB Parallel Computing Toolbox is available,
-	the simulations can be run in parallel.
+However, if the MATLAB Parallel Computing Toolbox is available,
+the simulations can be run in parallel.
  
  
 ## Getting started

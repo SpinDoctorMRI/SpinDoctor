@@ -26,10 +26,10 @@ sequences = setup.gradient.sequences;
 dir_points = setup.gradient.directions.points;
 dir_inds = setup.gradient.directions.indices;
 opposite = setup.gradient.directions.opposite;
-eigvals = lap_eig.values;
 eigfuncs = lap_eig.funcs;
 moments = lap_eig.moments;
-L = diag(eigvals);
+T2 = lap_eig.massrelax;
+L = diag(lap_eig.values);
 
 % Sizes
 ncompartment = femesh.ncompartment;
@@ -117,15 +117,15 @@ parfor iall = 1:prod(allinds)
         % If PGSE, use three intervals, otherwise many intervals
         if isa(seq, "PGSE")
             % Constant BT operator in Laplace basis
-            K = L + 1i * q * A;
+            K = L + T2 + 1i * q * A;
             edK = expm(-seq.delta * K);
-            edL = exp(-(seq.Delta - seq.delta) * eigvals);
+            edL = expm(-(seq.Delta - seq.delta) * (L + T2));
 
             % Laplace coefficients of final magnetization
-            nu = edK' * (edL .* (edK * nu0));
+            nu = edK' * (edL * (edK * nu0));
         else
             % BT operator in Laplace basis for a given time profile value
-            K = @(ft) L + sqrt(-1) * q * ft * A;
+            K = @(ft) L + T2 + 1i * q * ft * A;
 
             % Transform Laplace coefficients using piecewise constant
             % approximation of time profile

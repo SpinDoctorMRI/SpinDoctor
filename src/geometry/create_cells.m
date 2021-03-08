@@ -1,5 +1,5 @@
 function cells = create_cells(setup)
-%CREATE_CELLS Create geometrical configuration and write to file.
+%CREATE_CELLS Create random cell centers and radii for cylinders or spheres.
 %
 %   params_cell: struct
 %
@@ -87,7 +87,7 @@ end
 
 % Check that all cells were created
 if icell < ncell
-    error("Did not find enough cell centers.");
+    error("Did not find enough cell centers. Consider using larger separation tolerances.");
 end
 
 % Center cell collection
