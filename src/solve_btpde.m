@@ -5,17 +5,17 @@ function results = solve_btpde(femesh, setup)
 %   setup: struct
 %
 %   results: struct with fields
-%       magnetization: cell(ncompartment, namplitude, nsequence, ndirection)
+%       magnetization: {ncompartment x namplitude x nsequence x
+%                       ndirection}[npoint x 1]
 %           Magnetization field at final timestep
-%       signal: complex double(ncompartment, namplitude, nsequence, ndirection)
+%       signal: [ncompartment x namplitude x nsequence x ndirection]
 %           Compartmentwise total magnetization at final timestep
-%       signal_allcmpts: complex double(namplitude, nsequence, ndirection)
+%       signal_allcmpts: [namplitude x nsequence x ndirection]
 %           Total magnetization at final timestep
-%       itertimes: double(namplitude, nsequence, ndirection)
+%       itertimes: [namplitude x nsequence x ndirection]
 %           Computational time for each iteration
-%       totaltime: double
+%       totaltime: [1 x 1]
 %           Total computational time, including matrix assembly
-
 
 
 % Measure function evaluation time
@@ -196,6 +196,7 @@ parfor iall = 1:prod(allinds)
         for icmpt = 1:ncompartment
             magnetization{icmpt, iall} = mag{icmpt};
         end
+        % [magnetization{:, iall}] = deal(mag{:});
         signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
 
     end % unique direction case

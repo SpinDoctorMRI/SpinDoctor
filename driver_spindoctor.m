@@ -27,6 +27,7 @@ addpath setups
 % setup_neuron;
 setup_4axons_flat;
 % setup_30axons_flat;
+% setup_200axons;
 
 % Choose to see some of the typical plots or not
 do_plots = true;

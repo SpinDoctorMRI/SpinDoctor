@@ -35,16 +35,14 @@ SpinDoctor also comes with a geometry generation module, allowing for
 
 In addition, a variety of neuron meshes is available, whose surface geometries were extracted from [NeuroMopho.org](http://neuromorpho.org). The neurons may also be enclosed in an extracellular space as described above.
 
-
 ## Software requirements
 
-The SpinDoctor Toolbox has been developed in the MATLAB R2020b
-and require no additional MATLAB Toolboxes.
+The SpinDoctor Toolbox has been developed in the MATLAB R2020b and tested with MATLAB R2018a-R2020b.
 
-However, if the MATLAB Parallel Computing Toolbox is available,
+SpinDoctor requires no additional MATLAB Toolboxes. However, if the MATLAB Parallel Computing Toolbox is available,
 the simulations can be run in parallel.
- 
- 
+
+
 ## Getting started
 
 1) The base folder contains a commented general purpose driver called `driver_spindoctor.m`. The other driver, `driver_save_load.m`, can save and load simulations.
@@ -53,6 +51,24 @@ the simulations can be run in parallel.
 4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
 
 Authors: Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
+
+
+## Updates March 2021
+
+All modules (master, T2, NeuronModule, MatrixFormalismModule) are now merged and found in the `master` branch. The previous versions of the modules are still found in their branches.
+
+New features:
+
+* Code refactoring, change of data structures
+* New input file system, controlled by a structure `setup`
+* Som speed and memory improvements (extensive vectorization, reduced memory usage in ODE solvers)
+* Support for parallel outer loops (solve for multiple directions, amplitudes and sequences in parallel)
+* Diffusion tensors as an alternative to scalar diffusion coefficients
+* Matrix formalism with built in Matlab functions instead of PDE Toolbox
+* Add convex hull ECS + tight wrap ECS for neurons (experimental feature)
+* Simple interface for pulse sequences, the user can add custom sequences
+	* by passing a function handle, for which the integral quantities are computed numerically,
+	* or by manually defining a subclass of the `Sequence` class
 
 
 ## How to cite us

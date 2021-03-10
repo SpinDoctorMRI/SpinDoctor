@@ -16,6 +16,7 @@ function surfaces = create_surfaces_cylinder(cells, setup)
 
 % Design parameters
 nside = 30;
+% nside = 60;
 nside_min = 12;
 
 % Extract parameters
@@ -116,7 +117,7 @@ if include_ecs
         case "tight_wrap"
             shp_ecs = alphaShape(points_ecs');
             shp_ecs.HoleThreshold = 2 * pi * ((1 + ecs_ratio) * max(radii)).^2;
-            shp_ecs.Alpha = 1.2 * shp_ecs.criticalAlpha("one-region");
+            shp_ecs.Alpha = 1.3 * shp_ecs.criticalAlpha("one-region");
             [bf, P] = boundaryFacets(shp_ecs);
             points_ecs = P';
             edges_ecs = bf';
@@ -144,6 +145,7 @@ npoint = size(points, 2);
 if ecs_shape == "tight_wrap"
     shp = alphaShape(points');
     shp.Alpha = shp_ecs.Alpha;
+    shp_ecs.HoleThreshold = 2 * pi * (2 * (1 + ecs_ratio) * max(radii)).^2;
     facets = shp.alphaTriangulation';
     [~, P] = boundaryFacets(shp);
     assert(size(P, 1) == size(points_ecs, 2));
