@@ -13,20 +13,18 @@ Y = kron(elements, ones(1, 3));
 
 if nargin < 3
     Z = kron(areas, reshape((ones(3) + eye(3)) / 12, 1, 9));
+elseif numel(coeffs) == size(elements, 1)
+    % P0 coefficients
+    Z = kron(areas .* coeffs, reshape((ones(3)+eye(3)) / 12, 1, 9));
 else
-    if numel(coeffs) == size(elements, 1)
-        % P0 coefficients
-        Z = kron(areas .* coeffs, reshape((ones(3)+eye(3)) / 12, 1, 9));
-    else
-        % P1 coefficients
-        M1 = [6 2 2; 2 2 1; 2 1 2] / 60;
-        M2 = M1([3, 1, 2], [3, 1, 2]);
-        M3 = M2([3, 1, 2], [3, 1, 2]);
-
-        Z = kron(areas .* coeffs(elements(:, 1)), reshape(M1, 1, 9)) ...
-            + kron(areas .* coeffs(elements(:, 2)), reshape(M2, 1, 9)) ...
-            + kron(areas .* coeffs(elements(:, 3)), reshape(M3, 1, 9));
-    end
+    % P1 coefficients
+    M1 = [6 2 2; 2 2 1; 2 1 2] / 60;
+    M2 = M1([3, 1, 2], [3, 1, 2]);
+    M3 = M2([3, 1, 2], [3, 1, 2]);
+    
+    Z = kron(areas .* coeffs(elements(:, 1)), reshape(M1, 1, 9)) ...
+        + kron(areas .* coeffs(elements(:, 2)), reshape(M2, 1, 9)) ...
+        + kron(areas .* coeffs(elements(:, 3)), reshape(M3, 1, 9));
 end
 
 M = sparse(X, Y, Z); % M(X(k), Y(k)) = Z(k)

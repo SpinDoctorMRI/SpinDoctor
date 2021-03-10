@@ -1,5 +1,5 @@
 function M = mass_matrixP1_3D(elements, volumes, coeffs)
-%MASS_MATRIXP1_2D Assemble 3D mass matrix using P1 elements.
+%MASS_MATRIXP1_3D Assemble 3D mass matrix using P1 elements.
 %   Copyright (c) 2016, Jan Valdman
 %
 % coeffs can be only P0 (elementwise constant) function
@@ -12,23 +12,20 @@ Y = kron(elements, ones(1, 4));
 
 if nargin < 3
     Z = kron(volumes, reshape((ones(4) + eye(4)) / 20, 1, 16));
+elseif numel(coeffs) == size(elements, 1)
+    % P0 coefficients
+    Z = kron(volumes .* coeffs, reshape((ones(4) + eye(4)) / 20, 1, 16));
 else
-    if numel(coeffs) == size(elements, 1)
-        % P0 coefficients
-        Z = kron(volumes .* coeffs, reshape((ones(4) + eye(4)) / 20, 1, 16));
+    % P1 coefficients
+    M1 = [6 2 2 2; 2 2 1 1; 2 1 2 1; 2 1 1 2]/120;
+    M2 = M1([4, 1, 2, 3], [4, 1, 2, 3]);
+    M3 = M2([4, 1, 2, 3], [4, 1, 2, 3]);
+    M4 = M3([4, 1, 2, 3], [4, 1, 2, 3]);
 
-    else
-        % P1 coefficients
-        M1 = [6 2 2 2; 2 2 1 1; 2 1 2 1; 2 1 1 2]/120;
-        M2 = M1([4, 1, 2, 3], [4, 1, 2, 3]);
-        M3 = M2([4, 1, 2, 3], [4, 1, 2, 3]);
-        M4 = M3([4, 1, 2, 3], [4, 1, 2, 3]);
-
-        Z = kron(volumes .* coeffs(elements(:, 1)), reshape(M1, 1, 16)) ...
-            +kron(volumes .* coeffs(elements(:, 2)), reshape(M2, 1, 16)) ...
-            +kron(volumes .* coeffs(elements(:, 3)), reshape(M3, 1, 16)) ...
-            +kron(volumes .* coeffs(elements(:, 4)), reshape(M4, 1, 16));
-    end
+    Z = kron(volumes .* coeffs(elements(:, 1)), reshape(M1, 1, 16)) ...
+        + kron(volumes .* coeffs(elements(:, 2)), reshape(M2, 1, 16)) ...
+        + kron(volumes .* coeffs(elements(:, 3)), reshape(M3, 1, 16)) ...
+        + kron(volumes .* coeffs(elements(:, 4)), reshape(M4, 1, 16));
 end
 
 M = sparse(X, Y, Z);
