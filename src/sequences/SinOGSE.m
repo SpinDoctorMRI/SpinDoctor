@@ -53,7 +53,7 @@ classdef SinOGSE < Sequence
         
         function t = diffusion_time(obj)
         %DIFFUSION_TIME Get diffusion time of the PGSE sequence.
-            t = 1 / 8 * obj.nperiod / obj.delta;
+            t = 3 / 8 * obj.delta / obj.nperiod;
         end
         
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
