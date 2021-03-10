@@ -9,18 +9,12 @@ ncompartment = length(compartments);
 include_in = any(compartments == "in");
 include_ecs = any(compartments == "ecs");
 
-cmpts = "out";
-figs.out = figure;
-hold on
+labels = "out";
 if include_in
-    cmpts = ["in" cmpts];
-    figs.in = figure;
-    hold on
+    labels = ["in" labels];
 end
 if include_ecs
-    cmpts = [cmpts "ecs"];
-    figs.ecs = figure;
-    hold on
+    labels = [labels "ecs"];
 end
 
 % Determine limits of domain
@@ -28,28 +22,27 @@ pmin = min([femesh.points{:}], [], 2);
 pmax = max([femesh.points{:}], [], 2);
 axis_vec = [pmin(1) pmax(1) pmin(2) pmax(2) pmin(3) pmax(3)];
 
-for icmpt = 1:ncompartment
-    facets = [femesh.facets{icmpt, :}];
-    points = femesh.points{icmpt};
-    
-    figure(figs.(compartments(icmpt)));
-    h = trisurf(facets', points(1, :), points(2, :), points(3, :));
-    set(h, "facealpha", 0.7);
-    if ncompartment <= length(colors)
-        set(h, "facecolor", colors(icmpt));
-    else
-        set(h, "facecolor", "interp");
-    end
-    
-    % set(h, "LineStyle", "none");
-    set(h, "LineWidth", 0.03);
-    center = mean(points, 2);
-    center(3) = max(points(3, :)) + 1;
-    text(center(1), center(2), center(3), num2str(icmpt), "color", "r", "fontsize", 20);
-end
+for label = labels
+    figure;
+    for icmpt = find(compartments == label)
+        facets = [femesh.facets{icmpt, :}];
+        points = femesh.points{icmpt};
 
-for cmpt = cmpts
-    figure(figs.(cmpt));
+        h = trisurf(facets', points(1, :), points(2, :), points(3, :));
+        set(h, "facealpha", 0.7);
+        if ncompartment <= length(colors)
+            set(h, "facecolor", colors(icmpt));
+        else
+            set(h, "facecolor", "interp");
+        end
+
+        % set(h, "LineStyle", "none");
+        set(h, "LineWidth", 0.03);
+        center = mean(points, 2);
+        center(3) = max(points(3, :)) + 1;
+        text(center(1), center(2), center(3), num2str(icmpt), "color", "r", "fontsize", 20);
+    end
+
     xlabel("x");
     ylabel("y");
     zlabel("z");
@@ -57,7 +50,7 @@ for cmpt = cmpts
     view(3);
     axis equal;
     axis(axis_vec);
-    inds = find(compartments == cmpt);
+    inds = find(compartments == label);
     cmpt_str = sprintf(join(repmat("%d", 1, length(inds))), inds);
-    title(sprintf("Finite element mesh, %s compartment: [%s]", cmpt, cmpt_str));
+    title(sprintf("Finite element mesh, %s compartment: [%s]", label, cmpt_str));
 end
