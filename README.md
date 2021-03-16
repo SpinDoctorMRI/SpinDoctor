@@ -61,7 +61,7 @@ New features:
 
 * Code refactoring, change of data structures
 * New input file system, controlled by a structure `setup`
-* Som speed and memory improvements (extensive vectorization, reduced memory usage in ODE solvers)
+* Some speed and memory improvements (extensive vectorization, reduced memory usage in ODE solvers)
 * Support for parallel outer loops (solve for multiple directions, amplitudes and sequences in parallel)
 * Diffusion tensors as an alternative to scalar diffusion coefficients
 * Matrix formalism with built in Matlab functions instead of PDE Toolbox
@@ -79,16 +79,15 @@ If you use our software for research, please consider citing us:
 
 ```bibtex
 @article{Li2019,
-title = {{SpinDoctor: A MATLAB toolbox for diffusion MRI simulation}},
-journal = {NeuroImage},
-volume = {202},
-pages = {116120},
-year = {2019},
-issn = {1053-8119},
-doi = {https://doi.org/10.1016/j.neuroimage.2019.116120},
-url = {http://www.sciencedirect.com/science/article/pii/S1053811919307116},
-author = {Jing-Rebecca Li and Van-Dang Nguyen and Try Nguyen Tran and Jan Valdman and Cong-Bang Trang and Khieu Van Nguyen and Duc Thach Son Vu and Hoang An Tran and Hoang Trong An Tran and Thi Minh Phuong Nguyen},
-keywords = {Bloch-torrey equation, Diffusion magnetic resonance imaging, Finite elements, Simulation, Apparent diffusion coefficient}
+  author  = {Jing-Rebecca Li and Van-Dang Nguyen and Try Nguyen Tran and Jan Valdman and Cong-Bang Trang and Khieu Van Nguyen and Duc Thach Son Vu and Hoang An Tran and Hoang Trong An Tran and Thi Minh Phuong Nguyen},
+  doi     = {https://doi.org/10.1016/j.neuroimage.2019.116120},
+  issn    = {1053-8119},
+  journal = {NeuroImage},
+  pages   = {116120},
+  title   = {{SpinDoctor: A MATLAB toolbox for diffusion MRI simulation}},
+  url     = {http://www.sciencedirect.com/science/article/pii/S1053811919307116},
+  volume  = {202},
+  year    = {2019}
 }
 ```
 
