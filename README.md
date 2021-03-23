@@ -35,6 +35,12 @@ SpinDoctor also comes with a geometry generation module, allowing for
 
 In addition, a variety of neuron meshes is available, whose surface geometries were extracted from [NeuroMopho.org](http://neuromorpho.org). The neurons may also be enclosed in an extracellular space as described above.
 
+### Spinning spindle spins in SpinDoctor
+
+![Spindle](misc/spindle.gif)
+
+The above graphic visualizes the magnetization as a z-displacement for the spindle neuron geometry `03b_spindle4aACC` (extracted from NeuroMorpho). The gradient is a PGSE sequence in the x-direction.
+
 ## Software requirements
 
 The SpinDoctor Toolbox has been developed in the MATLAB R2020b and tested with MATLAB R2018a-R2020b.
