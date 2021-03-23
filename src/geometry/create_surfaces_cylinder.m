@@ -16,7 +16,6 @@ function surfaces = create_surfaces_cylinder(cells, setup)
 
 % Design parameters
 nside = 30;
-% nside = 60;
 nside_min = 12;
 
 % Extract parameters
@@ -37,13 +36,14 @@ nboundary = (2 * include_in + 1 + include_ecs) * ncell + include_ecs;
 rmean = (rmin + rmax) / 2;
 
 create_nside = @(r) max(nside_min, round(nside * r / rmean));
+% create_nside = @(r) nside;
 create_angles = @(n) 2 * pi * (0:n-1) / n;
 create_circle = @(center, r, angles) center + r .* [cos(angles); sin(angles)];
 create_edges = @(n) [1:n-1 n; 2:n 1];
 
 
 if include_in
-    radii_in = in_ratio .* radii;
+    radii_in = in_ratio * radii;
     nside_in = create_nside(radii_in);
     circles_in = cell(1, ncell);
     circle_edges_in = cell(1, ncell);
@@ -117,7 +117,7 @@ if include_ecs
         case "tight_wrap"
             shp_ecs = alphaShape(points_ecs');
             shp_ecs.HoleThreshold = 2 * pi * ((1 + ecs_ratio) * max(radii)).^2;
-            shp_ecs.Alpha = 1.3 * shp_ecs.criticalAlpha("one-region");
+            shp_ecs.Alpha = 2.5 * shp_ecs.criticalAlpha("one-region");
             [bf, P] = boundaryFacets(shp_ecs);
             points_ecs = P';
             edges_ecs = bf';
@@ -145,10 +145,17 @@ npoint = size(points, 2);
 if ecs_shape == "tight_wrap"
     shp = alphaShape(points');
     shp.Alpha = shp_ecs.Alpha;
-    shp_ecs.HoleThreshold = 2 * pi * (2 * (1 + ecs_ratio) * max(radii)).^2;
+    shp.HoleThreshold = 2 * pi * (2 * (1 + ecs_ratio) * max(radii)).^2;
     facets = shp.alphaTriangulation';
     [~, P] = boundaryFacets(shp);
-    assert(size(P, 1) == size(points_ecs, 2));
+    if size(P, 1) ~= size(points_ecs, 2)
+        plot(shp_ecs);
+        hold on;
+        plot(shp, "FaceColor", "r", "FaceAlpha", 0.5, "EdgeColor", "b")
+        title("Error in green area.")
+        error("Problem in cylinder ground mesh tight wrap generation. " ...
+            + "Try deleting geometry files and rerun geometry generation.");
+    end
 else
     DT = delaunayTriangulation(points', edges');
     facets = DT.ConnectivityList';
@@ -184,8 +191,6 @@ for ifacet = 1:nfacet
         facetmarkers(ifacet) = nboundary;%ncell_in + ncell;
     end
 end
-
-
 
 % Copy points, edges and markers two the two 3D planes top and bottom
 z = repelem(height / 2, 1, npoint);
