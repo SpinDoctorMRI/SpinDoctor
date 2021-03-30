@@ -118,6 +118,16 @@ disp("Done with eigendecomposition");
 [values, indices] = sort(diag(values));
 funcs = funcs(:, indices);
 
+if any(values < 0)
+    i = find(values < 0);
+    iformat = join(repmat("%d", 1, length(i)));
+    vformat = join(repmat("%g", 1, length(i)));
+    warning("Found negative eigenvalues: indices " + iformat + ", values " ...
+        + vformat + ". Setting them to zero.", ...
+        i, values(i));
+    values(i) = 0;
+end
+
 % Remove eigenvalues above interval defined by length scale
 neig_all = length(values);
 inds_keep = values <= eiglim;
