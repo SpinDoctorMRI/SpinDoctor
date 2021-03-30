@@ -27,6 +27,7 @@ addpath setups
 % setup_neuron;
 setup_4axons_flat;
 % setup_30axons_flat;
+% setup_30axons;
 % setup_200axons;
 
 % Choose to see some of the typical plots or not
@@ -80,6 +81,13 @@ if isfield(setup, "analytical")
 end
 
 
+%% Solve Karger model
+if isfield(setup, "karger")
+    % Solve analytical analytical model
+    karger = solve_karger(femesh, setup);
+end
+
+
 %% Perform BTPDE experiments
 if isfield(setup, "btpde")
     % Solve BTPDE
@@ -129,12 +137,6 @@ if isfield(setup, "mf")
     mfga = compute_mfga_signal(setup, initial_signal, diffusion_tensor);
 end
 
-% Perform analytical experiment
-if isfield(setup, "analytical")
-    % Solve analytical analytical model
-    analytical_signal = solve_analytical(setup);
-end
-
 
 %% Postprocess
 
@@ -156,12 +158,6 @@ plot_femesh(femesh, setup.pde.compartments);
 
 % Plot information about the geometry
 plot_geometry_info(setup, volumes, surface_areas);
-
-% Get sizes
-ncompartment = length(setup.pde.compartments);
-namplitude = length(setup.gradient.values);
-nsequence = length(setup.gradient.sequences);
-ndirection = setup.gradient.ndirection;
 
 % Plot BTPDE magnetization in some directions
 if isfield(setup, "btpde")
@@ -269,3 +265,6 @@ if isfield(setup, "mf")
         plot_hardi(setup.gradient.directions, signal_allcmpts_abserr_vol, fig_title);
     end
 end
+
+%%
+plot_hardi(setup.gradient.directions, karger.signal_allcmpts / initial_signal, "Karger signal")

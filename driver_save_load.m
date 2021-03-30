@@ -24,9 +24,10 @@ addpath setups
 % setup_2axons_deform;
 % setup_5axons_myelin_relax;
 % setup_neuron;
-setup_4axons_flat;
+% setup_4axons_flat;
 % setup_30axons_flat;
-setup_200axons;
+setup_30axons;
+% setup_200axons;
 
 % Choose to see some of the typical plots or not
 do_plots = true;

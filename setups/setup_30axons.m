@@ -1,4 +1,4 @@
-%SETUP_15SPHERES Define setup structure for SpinDoctor.
+%SETUP_200AXONS Define setup structure for SpinDoctor.
 %
 %   The setup structure may contain the following substructures:
 %
@@ -34,22 +34,22 @@
 
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
-setup.name = "mesh_files/spheres/15spheres";
+setup.name = "mesh_files/cylinders/30axons";
 
 %% Geometry parameters
-setup.geometry.cell_shape = "sphere";                   % Cell shape; "sphere", "cylinder" or "neuron"
-setup.geometry.ncell = 15;                              % Number of cells
-setup.geometry.rmin = 1;                                % Minimum radius
-setup.geometry.rmax = 10;                               % Maximum radius
-setup.geometry.dmin = 0.3;                              % Minimum distance between cells (times mean(rmin,rmax))
-setup.geometry.dmax = 0.4;                              % Maximum distance between cells (times mean(rmin,rmax))
-% setup.geometry.height = 40;                           % Cylinder height (ignored if not cylinder)
-setup.geometry.deformation = [0; 0];                    % Domain deformation; [a_bend,a_twist]
-setup.geometry.include_in = true;                       % Ratio Rin/R, within range [0,0.99]
-setup.geometry.in_ratio = 0.75;                         % Ratio Rin/R, within range [0,0.99]
-setup.geometry.ecs_shape = "tight_wrap";                % Shape of ECS: "no_ecs", "box", "convex_hull", or "tight_wrap".
-setup.geometry.ecs_ratio = 0.3;                         % ECS gap; percentage in side length
-% setup.geometry.refinement = 0.5;                      % Tetgen refinement parameter (comment for automatic)
+setup.geometry.cell_shape = "cylinder";                 % Cell shape; "sphere", "cylinder" or "neuron"
+setup.geometry.ncell = 30;                              % Number of cells
+setup.geometry.rmin = 2;                                % Minimum radius
+setup.geometry.rmax = 6;                                % Maximum radius
+setup.geometry.dmin = 0.2;                              % Minimum distance between cells (times mean(rmin,rmax))
+setup.geometry.dmax = 0.3;                              % Maximum distance between cells (times mean(rmin,rmax))
+setup.geometry.height = 50;                             % Cylinder height (ignored if not cylinder)
+setup.geometry.deformation = [0.0; pi/4];               % Domain deformation; [a_bend,a_twist]
+setup.geometry.include_in = false;                      % Ratio Rin/R, within range [0,0.99]
+setup.geometry.in_ratio = 0.6;                          % Ratio Rin/R, within range [0,0.99]
+setup.geometry.ecs_shape = "convex_hull";               % Shape of ECS: "no_ecs", "box", "convex_hull", or "tight_wrap".
+setup.geometry.ecs_ratio = 0.5;                         % ECS gap (times rmean)
+setup.geometry.refinement  = 0.5;                       % Tetgen refinement parameter (comment for automatic)
 
 %% PDE parameters
 setup.pde.diffusivity_in = 0.002;                       % Diffusion coefficient IN (scalar or 3x3-tensor)
@@ -61,21 +61,22 @@ setup.pde.relaxation_ecs = Inf;                         % T2-relaxtion ECS. No r
 setup.pde.initial_density_in = 1.0;                     % Initial density in IN
 setup.pde.initial_density_out = 1.0;                    % Initial density in OUT
 setup.pde.initial_density_ecs = 1.0;                    % Initial density in ECS
-setup.pde.permeability_in_out = 5e-5;                   % Permeability IN-OUT interface
-setup.pde.permeability_out_ecs = 5e-5;                  % Permeability OUT-ECS interface
+setup.pde.permeability_in_out = 1e-4;                   % Permeability IN-OUT interface
+setup.pde.permeability_out_ecs = 1e-4;                  % Permeability OUT-ECS interface
 setup.pde.permeability_in = 0;                          % Permeability IN boundary
 setup.pde.permeability_out = 0;                         % Permeability OUT boundary
 setup.pde.permeability_ecs = 0;                         % Permeability ECS boundary
 
 %% Gradient sequences
-setup.gradient.ndirection = 1;                          % Number of gradient directions to simulate
+setup.gradient.ndirection = 7;                          % Number of gradient directions to simulate
 setup.gradient.flat_dirs = false;                       % Choose between 3d or 2d distributed gradient directions
-setup.gradient.remove_opposite = false;                 % Choose whether to not compute opposite directions
-setup.gradient.direction = [1.0; 1.0; 1.0];             % Gradient direction; [g1; g2; g3] (ignored if ndirection>1)
-setup.gradient.values = [0 100 500 1000 2000 3000 4000];% g-, q-, or b-values [1 x namplitude]
+setup.gradient.remove_opposite = true;                  % Choose whether to not compute opposite directions
+setup.gradient.direction = [1.0; 1.0; 0.0];             % Gradient direction; [g1; g2; g3] (if ndirection=1)
+setup.gradient.values = (1:3:10) * 1000;                % g-, q-, or b-values [1 x namplitude]
+% setup.gradient.values = (2) * 1000;                   % g-, q-, or b-values [1 x namplitude]
 setup.gradient.values_type = "b";                       % Type of values; "g", "q" or "b"
-setup.gradient.sequences{1} = PGSE(2500, 10000);        % Gradient sequences {1 x nsequence}
-setup.gradient.sequences{2} = PGSE(5000, 10000);        % Gradient sequences {1 x nsequence}
+setup.gradient.sequences{1} = PGSE(5000, 5000);         % Gradient sequences {1 x nsequence}
+setup.gradient.sequences{2} = PGSE(10000, 50000);       % Gradient sequences {1 x nsequence}
 
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
@@ -83,21 +84,21 @@ setup.btpde.reltol = 1e-4;                              % Relative tolerance for
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
 
 %% HADC experiment parameters (comment block to skip experiment)
-setup.hadc.ode_solver = @ode15s;                        % ODE solver for HADC
-setup.hadc.reltol = 1e-4;                               % Relative tolerance for ODE solver
-setup.hadc.abstol = 1e-4;                               % Absolute tolerance for ODE solver
+% setup.hadc.ode_solver = @ode15s;                      % ODE solver for HADC
+% setup.hadc.reltol = 1e-4;                             % Relative tolerance for ODE solver
+% setup.hadc.abstol = 1e-4;                             % Absolute tolerance for ODE solver
 
 %% MF experiment parameters (comment block to skip experiment)
-setup.mf.length_scale = 3;                              % Minimum length scale of eigenfunctions
-setup.mf.neig_max = 250;                                % Requested number of eigenvalues
-setup.mf.ninterval = 100;                               % Number of intervals to discretize time profile in MF (if not PGSE)
+setup.mf.length_scale = 0;                              % Minimum length scale of eigenfunctions
+setup.mf.neig_max =  500;                               % Requested number of eigenvalues
+setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE)
 
 %% Analytical experiment parameters (comment block to skip experiment)
 % setup.analytical.length_scale = 1;                    % Minimum length scale of eigenfunctions
 % setup.analytical.eigstep = 1e-8;                      % Minimum distance between eigenvalues
 
 %% Karger model parameters (comment block to skip experiment)
-% setup.karger.ode_solver = @ode45;                     % ODE solver for BTPDE
+% setup.karger.ode_solver = @ode45;                     % ODE solver for Karger model
 % setup.karger.reltol = 1e-4;                           % Relative tolerance for ODE solver
 % setup.karger.abstol = 1e-6;                           % Absolute tolerance for ODE solver
 
