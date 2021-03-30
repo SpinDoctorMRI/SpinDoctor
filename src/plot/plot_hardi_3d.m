@@ -38,7 +38,7 @@ for iseq = 1:nsequence
     if namplitude == 1
         bvalue_str = "";
     else
-        tmp = sprintf(repmat("%d ", 1, namplitude-1) + "%d", 1:namplitude);
+        tmp = sprintf(join(repmat("%d", 1, namplitude)), 1:namplitude);
         bvalue_str = sprintf(", b-values [%s] of %d", tmp, namplitude);
     end
 

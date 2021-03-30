@@ -19,7 +19,7 @@ ndiscretize = 100;
 ecs_shape = setup.geometry.ecs_shape;
 ecs_ratio = setup.geometry.ecs_ratio;
 
-if ~exist(filename + "_elements.txt", "file") || ~exist(filename + "_nodes.txt", "file")
+if ~isfile(filename + "_elements.txt") || ~isfile(filename + "_nodes.txt")
     gmsh_to_fem_try(filename);
 end
 disp("Reading from neuron FE mesh from " + filename);
@@ -124,7 +124,7 @@ if ecs_shape ~= "no_ecs"
     
     npoint_out = size(points, 2);
     points = [points points_ecs];
-    facets = [facets facets_ecs + npoint_out];
+    facets = [facets facets_ecs+npoint_out];
     facetmarkers = [facetmarkers facetmarkers_ecs];
     regions = [regions regions_ecs];
 end

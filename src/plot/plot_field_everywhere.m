@@ -31,7 +31,7 @@ for icmpt = 1:ncompartment
     facets = [femesh.facets{icmpt, :}];
     points = femesh.points{icmpt};
     h = trisurf(facets', points(1, :), points(2, :), points(3, :), real(field{icmpt}(:, ifield)));
-    % set(h, "facealpha", 0.6);
+    set(h, "facealpha", 0.6);
     set(h, "facecolor", "interp");
     set(h, "edgecolor", "none");
 

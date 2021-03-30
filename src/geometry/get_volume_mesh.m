@@ -1,12 +1,12 @@
 function [total_volume, volumes, centers] = get_volume_mesh(points, elements)
 %GET_VOLUME_MESH Compute volumes and centers of finite elements.
 %
-%   points: double(3, npoints)
-%   elements: int(4, nelement)
+%   points: [3 x npoint]
+%   elements: [4 x nelement]
 %
-%   total_volume: double
-%   volumes: double(1, nelement)
-%   centers: double(3, nelement)
+%   total_volume: [1 x 1]
+%   volumes: [1 x nelement]
+%   centers: [3 x nelement]
 
 
 % Sizes

@@ -36,6 +36,7 @@ end
 xlabel("x");
 ylabel("y");
 zlabel("z");
+view(3);
 grid on;
 axis equal;
 axis(axis_vec);

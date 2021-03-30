@@ -1,6 +1,11 @@
 function call_tetgen(filename, refinement)
-%CALL_TETGEN Summary of this function goes here
-%   Detailed explanation goes here
+%CALL_TETGEN Call Tetgen executable from system with refinement.
+%   The tetgen executable is chosen according to the operating system. If an
+%   error occurs, you might have to manually change the rights of the Tetgen
+%   executable.
+%
+%   filename: string
+%   refinement: [1 x 1]
 
 
 % Tetgen command for corresponding operating system
@@ -14,7 +19,6 @@ else
     warning("Using Linux Tetgen command.")
     tetgen_cmd = "src/tetgen/tetGen/lin64/tetgen";
 end
-
 
 % Options for Tetgen command
 if  nargin == nargin(@call_tetgen) && refinement > 0

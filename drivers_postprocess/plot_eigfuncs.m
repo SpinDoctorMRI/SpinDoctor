@@ -83,7 +83,7 @@ for iseq = 1%:nsequence
                     bvalue_str, dir_str, ieig);
                 
                 % Plot
-                % plot_field(femesh, bt_eig_funcs_sep, cmpts_in, cmpts_out, cmpts_ecs, title_str, ieig);
+                % plot_field(femesh, bt_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
                 plot_field_everywhere(femesh, bt_eig_funcs_sep, title_str, ieig);
             end
         end

@@ -1,5 +1,5 @@
 function cells = read_cells(cellfilename)
-%READ_CELLS_INPUTFILE Read cell configuration (centers and radii).
+%READ_CELLS Read cell configuration (centers and radii).
 %
 %   cellfilename: string
 %

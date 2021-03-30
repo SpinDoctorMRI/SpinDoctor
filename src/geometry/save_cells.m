@@ -25,7 +25,7 @@ c = "x,y";
 if dim == 3
     c = c + ",z";
 end
-fprintf(fid, "Number n, Center (%s), Radius\n", c);
+fprintf(fid, "Number n, Center (%s), Radius r\n", c);
 for icell = 1:ncell
     if fid ~= -1
         fprintf(fid, "%d " + join(repmat("%g", 1, dim)) + " %g\n", icell, centers(:, icell), radii(icell));

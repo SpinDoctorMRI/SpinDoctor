@@ -1,6 +1,6 @@
 %DRIVER_SPINDOCTOR Solve BTPDE, HADC, MF or analytical.
 %   Compare different ADC. Plot results in many directions.
-%   
+%
 %   It is highly recommended to read this driver to understand the workflow
 %   of SpinDoctor.
 %
@@ -55,8 +55,14 @@ mean_diffusivity = trace(sum(setup.pde.diffusivity .* shiftdim(volumes, -1), 3))
 % Initial total signal
 initial_signal = setup.pde.initial_density * volumes';
 
+% Get sizes
+ncompartment = length(setup.pde.compartments);
+namplitude = length(setup.gradient.values);
+nsequence = length(setup.gradient.sequences);
+ndirection = setup.gradient.ndirection;
 
-%% Perform experiments
+
+%% Perform small experiments
 
 % Short time approximation (STA) of the ADC
 [sta_adc, sta_adc_allcmpts] = compute_adc_sta(femesh, setup);
@@ -65,7 +71,16 @@ initial_signal = setup.pde.initial_density * volumes';
 free = compute_free_diffusion(setup.gradient.bvalues, setup.pde.diffusivity, ...
     volumes, setup.pde.initial_density);
 
-% Perform BTPDE experiments
+
+%% Perform analytical experiment
+if isfield(setup, "analytical")
+    % Solve analytical analytical model
+    analytical_signal = solve_analytical(setup, volumes); % With FE volumes
+    % analytical_signal = solve_analytical(setup); % With pure volumes
+end
+
+
+%% Perform BTPDE experiments
 if isfield(setup, "btpde")
     % Solve BTPDE
     btpde = solve_btpde(femesh, setup);
@@ -77,13 +92,15 @@ if isfield(setup, "btpde")
     btpde.magnetization_avg = average_magnetization(btpde.magnetization);
 end
 
-% Perform HADC experiment
+
+%% Perform HADC experiment
 if isfield(setup, "hadc")
     % Solve HADC model
     hadc = solve_hadc(femesh, setup);
 end
 
-% Perform MF experiments
+
+%% Perform MF experiments
 if isfield(setup, "mf")
     % Perform Laplace eigendecomposition
     eiglim = length2eig(setup.mf.length_scale, mean_diffusivity);

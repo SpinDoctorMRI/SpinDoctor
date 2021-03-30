@@ -60,7 +60,6 @@ mean_diffusivity = trace(sum(setup.pde.diffusivity .* shiftdim(volumes, -1), 3))
 % Initial total signal
 initial_signal = setup.pde.initial_density * volumes';
 
-
 % Create folder for saving results
 tmp = split(setup.name, "/");
 tmp = tmp(end);
@@ -80,8 +79,8 @@ if setup.gradient.flat_dirs
 else
     flat_str = "";
 end
-save_dir_path_spindoctor = sprintf("%s/%s_ndir%d%s", save_dir_path_spindoctor, ...
-    couple_str, ndirection, flat_str);
+dir_str = sprintf("ndir%d%s", ndirection, flat_str);
+save_dir_path_spindoctor = save_dir_path_spindoctor + "/" + couple_str;
 
 if ~isfolder(save_dir_path_spindoctor)
     mkdir(save_dir_path_spindoctor);
@@ -98,10 +97,11 @@ if isfield(setup, "btpde")
     btpde.signal_allcmpts = zeros(namplitude, nsequence, ndirection);
     btpde.itertimes = zeros(namplitude, nsequence, ndirection);
     btpde.totaltime = 0;
-
+    
     % Solve or load BTPDE, one experiment and b-value at the time
-    for iamp = 1:namplitude
-        for iseq = 1:nsequence
+    for iseq = 1:nsequence
+        for iamp = 1:namplitude
+            
             % Extract experiment parameters
             seq = setup.gradient.sequences{iseq};
             bvalue = setup.gradient.bvalues(iamp, iseq);
@@ -118,8 +118,8 @@ if isfield(setup, "btpde")
             else
                 bvalue_str = sprintf("b%g", bvalue);
             end
-            fname = sprintf("btpde_%s_%s_abstol%g_reltol%g.mat", experi_str, ...
-                bvalue_str, setup.btpde.abstol, setup.btpde.reltol);
+            fname = sprintf("btpde_%s_%s_%s_abstol%g_reltol%g.mat", dir_str, ...
+                experi_str, bvalue_str, setup.btpde.abstol, setup.btpde.reltol);
             fname = save_dir_path_spindoctor + "/" + fname;
             
             % Choose whether to load or compute results
@@ -186,7 +186,7 @@ if isfield(setup, "hadc")
         seq = setup.gradient.sequences{iseq};
         
         % File name
-        fname = sprintf("hadc_%s_d%g_D%g_abstol%g_reltol%g.mat",...
+        fname = sprintf("hadc_%s_%s_d%g_D%g_abstol%g_reltol%g.mat", dir_str, ...
             class(seq), seq.delta, seq.Delta, setup.hadc.abstol, setup.hadc.reltol);
         fname = save_dir_path_spindoctor + "/" + fname;
 
@@ -248,6 +248,7 @@ if isfield(setup, "mf")
         lap_eig.values = values;
         lap_eig.funcs = funcs;
         lap_eig.moments = moments;
+        lap_eig.massrelax = massrelax;
         lap_eig.totaltime = totaltime;
     else
         % Perform eigendecomposition
@@ -299,12 +300,12 @@ end
 initial_density = setup.pde.initial_density * volumes';
 
 % Plot finite element mesh
-% plot_femesh(femesh, cmpts_in, cmpts_out, cmpts_ecs);
 if isfield(setup.geometry, "refinement")
-    refinement_str = sprintf("refinement = %g", setup.pde.refinement);
+    refinement_str = sprintf("refinement = %g", setup.geometry.refinement);
 else
     refinement_str = "automatic refinement";
 end
+% plot_femesh(femesh, cmpts_in, cmpts_out, cmpts_ecs);
 plot_femesh_everywhere(femesh, refinement_str);
 
 % Plot Matrix Formalism effective diffusion tensor
@@ -322,7 +323,7 @@ for ieig = nshow:nshow
     % Split Laplace eigenfunctions into compartments
     npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
     lap_eig_funcs_sep = mat2cell(lap_eig.funcs, npoint_cmpts);
-    % plot_field(femesh, lap_eig_funcs_sep, cmpts_in, cmpts_out, cmpts_ecs, title_str, ieig);
+    % plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
     plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
 end
 

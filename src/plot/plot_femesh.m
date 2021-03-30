@@ -24,13 +24,14 @@ axis_vec = [pmin(1) pmax(1) pmin(2) pmax(2) pmin(3) pmax(3)];
 
 for label = labels
     figure;
+    hold on
     for icmpt = find(compartments == label)
         facets = [femesh.facets{icmpt, :}];
         points = femesh.points{icmpt};
 
         h = trisurf(facets', points(1, :), points(2, :), points(3, :));
         set(h, "facealpha", 0.7);
-        if ncompartment <= length(colors)
+        if 0 % ncompartment <= length(colors)
             set(h, "facecolor", colors(icmpt));
         else
             set(h, "facecolor", "interp");

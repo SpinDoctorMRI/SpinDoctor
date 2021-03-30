@@ -87,7 +87,7 @@ for iseq = 1:nsequence
             % Plot BTPDE
             if plot_btpde
                 plot_field_everywhere(femesh, solpde, "BTPDE " + title_str);
-                % plot_field(femesh, solpde, cmpts_in, cmpts_out, cmpts_ecs, title_str)
+                % plot_field(femesh, solpde, setup.pde.compartments, title_str)
                 % caxis([cmin, cmax]);
                 set(gca, "fontsize", 14);
                 if idir
@@ -100,7 +100,7 @@ for iseq = 1:nsequence
             if plot_mf
                 title_str = "MF " + title_str;
                 plot_field_everywhere(femesh, soleig, title_str);
-                % plot_field(femesh, soleig, cmpts_in, cmpts_out, cmpts_ecs, "MF " + title_str)
+                % plot_field(femesh, soleig, setup.pde.compartments, "MF " + title_str)
                 % caxis([cmin, cmax]);
                 % set(gca, "fontsize", 14);
                 if idir
@@ -112,7 +112,7 @@ for iseq = 1:nsequence
             % Plot difference between MF and BTPDE
             if plot_diff
                 plot_field_everywhere(femesh, relerr, "Relative error MF BTPDE " + title_str);
-                % plot_field(femesh, relerr, cmpts_in, cmpts_out, cmpts_ecs, "MF " + title_str])
+                % plot_field(femesh, relerr, setup.pde.compartments, "MF " + title_str])
 
                 % caxis([0,0.01]);% 1]);
                 set(gca, "fontsize", 14);
@@ -123,7 +123,7 @@ for iseq = 1:nsequence
             end
             % colorbar("off");
             % view(-90, 90);
-            view(2);
+            % view(2);
 
             % title(title_str, "fontsize", 16);
             % fname = sprintf("output/mag/k%g_q%g_b%g.png", maxkappa, qvalue, bvalue);
@@ -209,6 +209,7 @@ for iseq = 1:nsequence
         % h = plot(volumes(inds) / sum(volumes(inds)), signal(inds, iamp, iseq) / sum(volumes));
         % h = plot(volumes(inds) / sum(volumes(inds)), signal(inds, iamp, iseq) ./ volumes(inds)');
         h = plot(volumes(inds), signal(inds, iamp, iseq) ./ volumes(inds)');
+        % h = plot(sqrt(volumes(inds)), signal(inds, iamp, iseq) ./ volumes(inds)');
         h.Color = colors(iseq);
         h.Marker = markers(iseq);
         % h.LineStyle = linestyles(iseq);

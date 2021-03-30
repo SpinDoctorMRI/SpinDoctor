@@ -43,7 +43,7 @@ The above graphic visualizes the magnetization as a z-displacement for the spind
 
 ## Software requirements
 
-The SpinDoctor Toolbox has been developed in the MATLAB R2020b and tested with MATLAB R2018a-R2020b.
+The SpinDoctor Toolbox has been developed in the MATLAB R2020b and tested with MATLAB R2018a-R2021a.
 
 SpinDoctor requires no additional MATLAB Toolboxes. However, if the MATLAB Parallel Computing Toolbox is available,
 the simulations can be run in parallel.

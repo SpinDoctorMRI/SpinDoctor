@@ -50,11 +50,11 @@ if fid ~= -1
 end
 
 % Write list of holes (empty)
-fprintf(fid, " # Part 3 - hole list\n");
-fprintf(fid, "%d\n", 0);
+fprintf(fid, "# Part 3 - hole list\n");
+fprintf(fid, "0\n");
 
 % Write list of interior points with their corresponding compartment
-fprintf(fid, " # Part 4 - region list\n");
+fprintf(fid, "# Part 4 - region list\n");
 fprintf(fid, "%d\n", nregion);
 for iregion = 1:nregion
     fprintf(fid, "%d %f %f %f %d %f\n", iregion, regions(:, iregion), iregion, default_refinement);

@@ -1,5 +1,5 @@
 function femesh_all = read_tetgen(filename)
-%READ_TETGEN Read mesh from Tetgen. Deform domain.
+%READ_TETGEN Read mesh from Tetgen.
 %
 %   filename: string
 %
