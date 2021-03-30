@@ -1,40 +1,27 @@
-function flux_matrix = assemble_flux_matrix(points, facets, permeability)
+function flux_matrices = assemble_flux_matrix(points, facets)
 %ASSEMBLE_FLUX_MATRIX Assemble flux matrix in compartment
 %
-%   points: double(3, nnode)
-%   facets: cell(1, nboundary)
-%   permeability: double(1, nboundary)
+%   points: {1 x ncompartment}[3 x npoint]
+%   facets: {ncompartment x nboundary}[[3 x nfacet]
 %
-%   flux_matrix: double(nnode, nnode)
+%   flux_matrix: {ncompartment x nboundary}[npoint x npoint]
 
 
 % Number of boundaries
-nboundary = length(facets);
+[ncompartment, nboundary] = size(facets);
 
-% Initialize output matrix
-flux_matrix = sparse(length(points), length(points));
+% Initialize output matrices
+flux_matrices = cell(ncompartment, nboundary);
 
-% Add block in matrix for each touching boundary
-for iboundary = 1:nboundary
-    
-    % Check that the boundary is permeable
-    if permeability(iboundary) > 1e-16
-        
+for icmpt = 1:ncompartment
+    for iboundary = 1:nboundary
         % Extract boundary facets
-        boundary = facets{iboundary}';
+        boundary = facets{icmpt, iboundary};
         
         % Only proceed if the boundary touches the current compartment
         if ~isempty(boundary)
-            
-            % Identify nodes in boundary
-            inds = unique(boundary);
-
-            % Set weigths to boundary permeability for boundary nodes, else 0
-            coeffs = zeros(max(inds), 1);
-            coeffs(inds) = permeability(iboundary);
-
-            % Add block to flux matrix (the blocks do not overlap)
-            flux_matrix = flux_matrix + flux_matrixP1_3D(boundary, points', coeffs);
+            % Assemble flux matrix compartment-boundary
+            flux_matrices{icmpt, iboundary} = flux_matrixP1_3D(boundary', points{icmpt}');
         end
     end
 end

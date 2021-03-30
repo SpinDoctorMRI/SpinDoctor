@@ -40,7 +40,6 @@ ncompartment = femesh.ncompartment;
 disp("Setting up FEM matrices");
 M_cmpts = cell(1, ncompartment);
 K_cmpts = cell(1, ncompartment);
-Q_cmpts = cell(1, ncompartment);
 Jx_cmpts = cell(1, 3);
 MT2_cmpts = cell(1, ncompartment);
 for idim = 1:3
@@ -56,7 +55,6 @@ for icmpt = 1:ncompartment
     % Assemble flux, stiffness and mass matrices in compartment
     M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
     K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
-    Q_cmpts{icmpt} = assemble_flux_matrix(points, facets, permeability);
 
     % Assemble moment matrices (coordinate weighted mass matrices)
     for idim = 1:3
@@ -80,9 +78,10 @@ end
 disp("Coupling FEM matrices");
 M = blkdiag(M_cmpts{:});
 K = blkdiag(K_cmpts{:});
-Q = couple_flux_matrix(femesh, boundary_markers, Q_cmpts);
 Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
 MT2 = blkdiag(MT2_cmpts{:});
+Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
+Q = couple_flux_matrix(femesh, pde, Q_blocks, false);
 
 fprintf("Eigendecomposition of FE matrices: size %d x %d\n", size(M));
 
