@@ -76,26 +76,30 @@ for iboundary = 1:nboundary
         % Check whether to use same permeability coefficients on both sides
         if symmetrical
             % Use the same permeability coefficient on each side of the boundary
-            k1 = pde.permeability(iboundary);
-            k2 = pde.permeability(iboundary);
+            c12 = 1;
+            c21 = 1;
         else
             % Weigh permeability coefficients on each side of the boundary with
             % initial spin density equilibrium
             rho1 = pde.initial_density(cmpt1);
             rho2 = pde.initial_density(cmpt2);
-            k1 = 2 * rho2 / (rho1 + rho2) * pde.permeability(iboundary);
-            k2 = 2 * rho1 / (rho1 + rho2) * pde.permeability(iboundary);
+            c21 = 2 * rho2 / (rho1 + rho2);
+            c12 = 2 * rho1 / (rho1 + rho2);
         end
+        
+        % Adjust permeability coefficients
+        k1 = c21 * pde.permeability(iboundary);
+        k2 = c12 * pde.permeability(iboundary);
         
         % Global indices of the boundary in each of the compartments
         inds1 = get_inds(cmpt1);
         inds2 = get_inds(cmpt2);
         
-        % Add boundary contribution to global flux matrix for compartment 1
+        % Add interface contribution to global flux matrix for compartment 1
         Q(inds1, inds1) = Q(inds1, inds1) + k1 * Q11;
         Q(inds1, inds2) = Q(inds1, inds2) - k2 * Q12;
         
-        % Add boundary contribution to global flux matrix for compartment 2
+        % Add interface contribution to global flux matrix for compartment 2
         Q(inds2, inds1) = Q(inds2, inds1) - k1 * Q21;
         Q(inds2, inds2) = Q(inds2, inds2) + k2 * Q22;
         

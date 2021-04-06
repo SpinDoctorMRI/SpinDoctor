@@ -298,8 +298,6 @@ if ~do_plots
     return
 end
 
-initial_density = setup.pde.initial_density * volumes';
-
 % Plot finite element mesh
 if isfield(setup.geometry, "refinement")
     refinement_str = sprintf("refinement = %g", setup.geometry.refinement);
@@ -333,7 +331,7 @@ signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
     ./ max(abs(btpde.signal_allcmpts), [], 3);
 
 % Difference between BTPDE and MF signal, normalized by initial signal
-signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ initial_density;
+signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ initial_signal;
 
 % Plot quantities over many directions
 if ndirection > 1

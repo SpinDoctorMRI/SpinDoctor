@@ -14,7 +14,7 @@ function [femesh, surfaces, cells] = create_geometry(setup)
 %
 %   femesh: struct with fields
 %       ncompartment: [1 x 1]
-%         nboundary: [1 x 1]
+%       nboundary: [1 x 1]
 %       points: {1 x ncompartment}[3 x npoint(icmpt)]
 %       facets: {ncompartment x nboundary}[3 x nfacet(icmpt, ibdry)]
 %       elements: {1 x ncompartment}[4 x nelement(icmpt)]
@@ -31,14 +31,14 @@ function [femesh, surfaces, cells] = create_geometry(setup)
 
 % Extract parameters
 filename = setup.name;
-shape = setup.geometry.cell_shape;
+cell_shape = setup.geometry.cell_shape;
 ncompartment = length(setup.pde.compartments);
 nboundary = length(setup.pde.boundaries);
 
 
 % Check correct input format
-assert(ismember(setup.geometry.cell_shape, ["sphere" "cylinder" "neuron"]))
-if setup.geometry.cell_shape == "neuron"
+assert(ismember(cell_shape, ["sphere" "cylinder" "neuron"]))
+if cell_shape == "neuron"
     % We do not deform the finite elements mesh if in the Neuron module. We do
     % deform the finite elements mesh if in SpinDoctor White Matter mode.
     if isfield(setup.geometry, "deformation") && any(setup.geometry.deformation ~= 0)
@@ -48,10 +48,11 @@ if setup.geometry.cell_shape == "neuron"
         error("Neuron cell type is only available for ncell=1.")
     end
 end
-assert(~(setup.geometry.ecs_shape == "no_ecs" && setup.geometry.ncell > 1), ...
-    "Geometry must include ECS if more than one cell");
 assert(ismember(setup.geometry.ecs_shape, ["no_ecs" "box" "convex_hull" "tight_wrap"]))
-
+% assert(~ismember(cell_shape, ["sphere" "cylinder"]) ...
+%     || setup.geometry.ecs_shape ~= "no_ecs" ...
+%     || setup.geometry.ncell == 1, ...
+%     "Geometry must include ECS if more than one cell");
 
 % Check that folder exists
 parts = split(filename, "/");
@@ -69,7 +70,7 @@ cellfilename = filename + "_cells";
 % Check if cell description file is already available
 if isfile(cellfilename)
     cells = read_cells(cellfilename);
-elseif ismember(setup.geometry.cell_shape, ["sphere" "cylinder"])
+elseif ismember(cell_shape, ["sphere" "cylinder"])
     % Create cells
     cells = create_cells(setup);
     
@@ -86,8 +87,8 @@ is_stl = endsWith(filename, ".stl");
 if is_stl
     % ECS is currently only available for surface meshes
     assert(setup.geometry.ecs_shape == "no_ecs");
-    tmp = split(filename, ".stl");
-    filename = tmp(1);
+    parts = split(filename, ".stl");
+    filename = parts(1);
 end
 save_meshdir_path = filename + "_dir";
 if ~isfolder(save_meshdir_path)
@@ -102,14 +103,14 @@ refinement_str = "";
 if isfield(setup.geometry, "refinement")
     refinement_str = sprintf("_refinement%g", setup.geometry.refinement);
 end
-tmp = split(filename, "/");
-fname_tetgen = save_meshdir_path + "/" + tmp(end) + refinement_str + "_mesh";
+parts = split(filename, "/");
+fname_tetgen = save_meshdir_path + "/" + parts(end) + refinement_str + "_mesh";
 
 % Read or create surface triangulation
 if isfile(fname_tetgen + ".node") && isfile(fname_tetgen + ".poly")
     surfaces = read_surfaces(fname_tetgen);
 else
-    switch shape
+    switch cell_shape
         case "sphere"
             % Create surface geometry of spheres
             surfaces = create_surfaces_sphere(cells, setup);

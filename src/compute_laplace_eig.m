@@ -3,14 +3,15 @@ function lap_eig = compute_laplace_eig(femesh, pde, eiglim, neig_max)
 %
 %   femesh: struct
 %   pde: struct
-%   eiglim: double
-%     neig_max: int
+%   eiglim: [1 x 1]
+%   neig_max: [1 x 1]
 %
 %   lap_eig: struct with fields
-%       values: cell(1,ndomain)
-%       funcs: cell(1,ndomain)
-%       moments: cell(1,ndomain)
-%       totaltime: double
+%       values: [neig x 1]
+%       funcs: [npoint x neig]
+%       moments: [neig x neig x 3]
+%       massrelax: [neig x neig]
+%       totaltime: [1 x 1]
 
 
 % Measure computational time of eigendecomposition
