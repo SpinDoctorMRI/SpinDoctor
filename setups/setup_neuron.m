@@ -129,6 +129,7 @@ setup.mf.ninterval = 100;                               % Number of intervals to
 % setup.analytical.eigstep = 1e-8;                      % Minimum distance between eigenvalues
 
 %% Karger model parameters (comment block to skip experiment)
+% setup.karger.ndirection = 50;                         % Number of directions to compute diffusion tensor
 % setup.karger.ode_solver = @ode45;                     % ODE solver for BTPDE
 % setup.karger.reltol = 1e-4;                           % Relative tolerance for ODE solver
 % setup.karger.abstol = 1e-6;                           % Absolute tolerance for ODE solver

@@ -1,5 +1,5 @@
 function results = solve_karger(femesh, setup)
-%SOLVE_KARGER Solve the finite pulse Karger model.
+%SOLVE_KARGER Solve the finite pulse Karger model (FPK).
 %
 %   femesh: struct
 %   setup: struct
@@ -7,8 +7,7 @@ function results = solve_karger(femesh, setup)
 %   results: struct with fields
 %       signal: [ncompartment x namplitude x nsequence x ndirection]
 %       signal_allcmpts: [namplitude x nsequence x ndirection]
-%       difftensors: [3 x 3 x ncompartment x nsequence x ndirection]
-%       difftensors_allcmpts: [3 x 3 x nsequence x ndirection]
+%       difftensors: [3 x 3 x ncompartment]
 %       itertimes: [namplitude x nsequence x ndirection]
 %       totaltime: [1 x 1]
 
@@ -16,16 +15,10 @@ function results = solve_karger(femesh, setup)
 % Measure function evaluation time
 starttime = tic;
 
-% Only works for strait cylinders for now
-assert(setup.geometry.cell_shape == "cylinder");
-assert(~any(setup.geometry.deformation));
-
 % Extract domain parameters
-diffusivity = setup.pde.diffusivity;
 relaxation = setup.pde.relaxation;
 initial_density = setup.pde.initial_density;
 permeability = setup.pde.permeability;
-boundary_markers = setup.pde.boundary_markers;
 
 % Extract gradient sequences
 qvalues = setup.gradient.qvalues;
@@ -38,9 +31,7 @@ dir_inds = setup.gradient.directions.indices;
 opposite = setup.gradient.directions.opposite;
 
 % Extract experiment parameters
-qvalues = setup.gradient.qvalues;
-bvalues = setup.gradient.bvalues;
-sequences = setup.gradient.sequences;
+ndirection_karger = setup.karger.ndirection;
 reltol = setup.karger.reltol;
 abstol = setup.karger.abstol;
 solve_ode = setup.karger.ode_solver;
@@ -83,52 +74,28 @@ for iboundary = 1:nboundary
     end
 end
 tau_inv = tau_inv ./ volumes;
-A = tau_inv - diag(sum(volumes .* tau_inv, 2) ./ volumes');
+A = tau_inv - diag((tau_inv * volumes') ./ volumes');
 
-% Compute effective diffusion tensors in compartments
-Deff_cmpts = zeros(3, 3, ncompartment);
-for icmpt = 1:ncompartment
-%     % Finite elements
-%     points = femesh.points{icmpt};
-%     facets = femesh.facets(icmpt, :);
-%     elements = femesh.elements{icmpt};
-%     [~, fe_volumes] = get_volume_mesh(points, elements);
-% 
-%     % Assemble flux, stiffness and mass matrices in compartment
-%     M = mass_matrixP1_3D(elements', fe_volumes');
-%     K = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
-%     % Q = assemble_flux_matrix(points, facets, permeability);
-
-    % Deff_cmpts(3, 3, icmpt) = diffusivity(3, 3, icmpt);
-end
-
-% Compute apparent diffusion coefficient with HADC model
+% Compute apparent diffusion coefficients with HADC model
 setup_hadc = setup;
 setup_hadc.hadc.ode_solver = @ode15s;
 setup_hadc.hadc.reltol = 1e-4;
 setup_hadc.hadc.abstol = 1e-4;
 setup_hadc.gradient.sequences = setup_hadc.gradient.sequences(1);
-setup_hadc.gradient.directions.points = [
-    1 0 0 1 1 0
-    0 1 0 1 0 1
-    0 0 1 0 1 1
-];
-setup_hadc.gradient.ndirection = 6;
-setup_hadc.gradient.directions.indices = 1:6;
-setup_hadc.gradient.directions.opposite = cell(1, 6);
+setup_hadc.gradient.ndirection = ndirection_karger;
+setup_hadc.gradient.directions = create_directions(ndirection_karger, false, false);
 hadc = solve_hadc(femesh, setup_hadc);
 
-% Deduce effective diffusion tensor in each compartment
-a = permute(hadc.adc(:, 1, :), [1 3 2]);
-Deff_cmpts(1, 1, :) = a(:, 1);
-Deff_cmpts(2, 2, :) = a(:, 2);
-Deff_cmpts(3, 3, :) = a(:, 3);
-Deff_cmpts(1, 2, :) = (a(:, 4) - a(:, 1) - a(:, 2)) / 2;
-Deff_cmpts(2, 1, :) = (a(:, 4) - a(:, 1) - a(:, 2)) / 2;
-Deff_cmpts(1, 3, :) = (a(:, 4) - a(:, 1) - a(:, 3)) / 2;
-Deff_cmpts(3, 1, :) = (a(:, 4) - a(:, 1) - a(:, 3)) / 2;
-Deff_cmpts(2, 3, :) = (a(:, 4) - a(:, 2) - a(:, 3)) / 2;
-Deff_cmpts(3, 2, :) = (a(:, 4) - a(:, 2) - a(:, 3)) / 2;
+% Fit effective diffusion tensors
+g = setup_hadc.gradient.directions.points;
+adc = permute(hadc.adc(:, 1, :), [1 3 2]);
+D = fit_tensor(g, adc);
+
+% Relaxation tensor
+R = diag(1 ./ relaxation);
+
+% Initial signal
+S0 = (volumes .* initial_density).';
 
 % Prepare output structures
 signal = zeros(ncompartment, namplitude, nsequence, ndirection);
@@ -171,11 +138,10 @@ for iall = 1:prod(allinds)
     
     ADC_diag = sparse(ncompartment, ncompartment);
     for icmpt = 1:ncompartment
-        ADC_diag(icmpt, icmpt) = g' * Deff_cmpts(:, :, icmpt) * g;
-        % ADC_diag(icmpt, icmpt) = g' * diffusivity(:, :, icmpt) * g;
+        ADC_diag(icmpt, icmpt) = g' * D(:, :, icmpt) * g;
     end
     
-    odejac = @(t, y) A - seq.integral(t) * q^2 * ADC_diag;
+    odejac = @(t, y) A - seq.integral(t)^2 * q^2 * ADC_diag - R;
     odefunc = @(t, y) odejac(t, y) * y;
     
     % Set parameters for ODE solver
@@ -185,9 +151,6 @@ for iall = 1:prod(allinds)
         "Vectorized", "on", ...
         "Jacobian", odejac, ...
         "Stats", "off");
-    
-    % Initial signal
-    S0 = (volumes .* initial_density).';
     
     [~, S] = solve_ode(odefunc, time_list_interval, S0, options);
 
@@ -200,6 +163,7 @@ signal_allcmpts(:) = sum(signal, 1);
 % Create output structure
 results.signal = signal;
 results.signal_allcmpts = signal_allcmpts;
+results.difftensors = D;
 results.itertimes = itertimes;
 results.totaltime = toc(starttime);
 

@@ -101,9 +101,10 @@ setup.mf.ninterval = 500;                               % Number of intervals to
 % setup.analytical.eigstep = 1e-8;                      % Minimum distance between eigenvalues
 
 %% Karger model parameters (comment block to skip experiment)
-% setup.karger.ode_solver = @ode45;                     % ODE solver for BTPDE
-% setup.karger.reltol = 1e-4;                           % Relative tolerance for ODE solver
-% setup.karger.abstol = 1e-6;                           % Absolute tolerance for ODE solver
+setup.karger.ndirection = 20;                           % Number of directions to compute diffusion tensor
+setup.karger.ode_solver = @ode45;                       % ODE solver for BTPDE
+setup.karger.reltol = 1e-4;                             % Relative tolerance for ODE solver
+setup.karger.abstol = 1e-6;                             % Absolute tolerance for ODE solver
 
 %% Custom time profile for magnetic field gradient pulse
 function f = timeprofile(t, delta, Delta)
