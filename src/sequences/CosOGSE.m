@@ -71,8 +71,8 @@ classdef CosOGSE < Sequence
             end
         end
 
-        function s = seq2str(obj)
-            %SEQ2STR Convert sequence to string.
+        function s = string(obj)
+            %STRING Convert sequence to string.
             s = sprintf("%s(delta=%g, Delta=%g, nperiod=%g)", class(obj), ...
                 obj.delta, obj.Delta, obj.nperiod);
         end

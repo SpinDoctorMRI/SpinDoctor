@@ -124,7 +124,7 @@ for iseq = 1:nsequence
         hold on
 
         % Label
-        experiment_str = seq2str(seq);
+        experiment_str = string(seq);
 
         legend("H=0.5, MF", "H=0.5, BTPDE", "H=0.2, MF", "H=0.2, BTPDE", "location", "northwest");
         xlabel("Minimum length scale");

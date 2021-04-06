@@ -52,8 +52,8 @@ classdef (Abstract) Sequence
                 "AbsTol", 1e-6, "RelTol", 1e-3);
         end
         
-        function s = seq2str(obj)
-            %SEQ2STR Convert sequence to string.
+        function s = string(obj)
+            %STRING Convert sequence to string.
             %   If there are other parameters than `delta` and `Delta`, this
             %   method should be overwritten.
             % s = sprintf("%s(delta = %g, Delta = %g)", class(obj), obj.delta, obj.Delta);

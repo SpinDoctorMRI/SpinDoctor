@@ -198,7 +198,7 @@ for iseq = 1:nsequence
         bvalue = setup.gradient.bvalues(iamp, iseq);
 
         % Label
-%         labels(end + 1) = sprintf("b=%g, %s", bvalue, seq2str(seq));
+%         labels(end + 1) = sprintf("b=%g, %s", bvalue, seq);
         labels(end + 1) = sprintf("b=%g", bvalue);
 
         signal_allcmpts = real(signal_allcmpts);

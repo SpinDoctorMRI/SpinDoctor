@@ -39,10 +39,14 @@ classdef CustomSequence < Sequence
             timeprofile_str = "custom time profile";
         end
         
-        function s = seq2str(obj)
-        %SEQ2STR Convert sequence to string.
-        s = sprintf("%s(delta=%g, Delta=%g, timeprofile=%s)", class(obj), ...
-            obj.delta, obj.Delta, func2str(obj.timeprofile));
+        function s = string(obj)
+            %STRING Convert custom sequence to string.
+            f = functions(obj.timeprofile).function;
+            if ~startsWith(f, "@")
+                f = "@" + f;
+            end
+            s = sprintf("%s(%g, %g, %s)", class(obj), ...
+                obj.delta, obj.Delta, f);
         end
     end
 end
