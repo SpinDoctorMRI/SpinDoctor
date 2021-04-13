@@ -61,9 +61,7 @@ for icmpt = 1:ncompartment
     K{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
 
     % Compute surface integrals
-    for dim = 1:3
-        G{icmpt} = zeros(npoint_cmpts(icmpt), 3);
-    end
+    G{icmpt} = zeros(npoint_cmpts(icmpt), 3);
     for iboundary = 1:femesh.nboundary
         facets = femesh.facets{icmpt, iboundary};
         if ~isempty(facets)
