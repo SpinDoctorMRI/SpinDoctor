@@ -59,6 +59,12 @@ classdef (Abstract) Sequence
             % s = sprintf("%s(delta = %g, Delta = %g)", class(obj), obj.delta, obj.Delta);
             s = sprintf("%s(%g, %g)", class(obj), obj.delta, obj.Delta);
         end
+        
+        function s = char(obj)
+            %CHAR Convert sequence to character array.
+            %   This is a wrapper for the STRING function.
+            s = char(obj.string);
+        end
     end
 end
 
