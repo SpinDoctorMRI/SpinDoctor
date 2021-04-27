@@ -30,9 +30,7 @@ end
 
 % Extract domain parameters
 diffusivity = pde.diffusivity;
-permeability = pde.permeability;
 relaxation = pde.relaxation;
-boundary_markers = pde.boundary_markers;
 
 % Sizes
 ncompartment = femesh.ncompartment;
@@ -41,11 +39,8 @@ ncompartment = femesh.ncompartment;
 disp("Setting up FEM matrices");
 M_cmpts = cell(1, ncompartment);
 K_cmpts = cell(1, ncompartment);
-Jx_cmpts = cell(1, 3);
-MT2_cmpts = cell(1, ncompartment);
-for idim = 1:3
-    Jx_cmpts{idim} = cell(1, ncompartment);
-end
+R_cmpts = cell(1, ncompartment);
+Jx_cmpts = repmat({cell(1, ncompartment)}, 1, 3);
 for icmpt = 1:ncompartment
     % Finite elements
     points = femesh.points{icmpt};
@@ -53,34 +48,23 @@ for icmpt = 1:ncompartment
     elements = femesh.elements{icmpt};
     [~, volumes] = get_volume_mesh(points, elements);
 
-    % Assemble flux, stiffness and mass matrices in compartment
+    % Assemble mass, stiffness, and T2-relaxation matrices in compartment
     M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
     K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
-
+    R_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
+    
     % Assemble moment matrices (coordinate weighted mass matrices)
     for idim = 1:3
         Jx_cmpts{idim}{icmpt} = mass_matrixP1_3D(elements', volumes', points(idim, :)');
     end
-
-    % Add T2-relaxation term if it is finite and nonnegative. This term is added
-    % directly to the stiffness matrix, as it has the effect of adding a
-    % decay operator to the diffusion operator
-    if isfinite(relaxation(icmpt)) && relaxation(icmpt) > 0
-        fprintf("Adding T2-relaxation matrix in compartment %d of %d: %g\n", icmpt, ncompartment, relaxation(icmpt));
-        % K_cmpts{icmpt} = K_cmpts{icmpt} + 1 / relaxation(icmpt) * M_cmpts{icmpt};
-        MT2_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
-    else
-        n = size(M_cmpts{icmpt}, 1);
-        MT2_cmpts{icmpt} = sparse(n, n);
-    end
 end
 
-% Create global mass, stiffness, flux and moment matrices (sparse)
+% Create global mass, stiffness, relaxation, flux, and moment matrices (sparse)
 disp("Coupling FEM matrices");
 M = blkdiag(M_cmpts{:});
 K = blkdiag(K_cmpts{:});
+R = blkdiag(R_cmpts{:});
 Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
-MT2 = blkdiag(MT2_cmpts{:});
 Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
 Q = couple_flux_matrix(femesh, pde, Q_blocks, false);
 
@@ -146,18 +130,14 @@ disp("Normalizing eigenfunctions");
 funcs = funcs ./ sqrt(dot(funcs, M * funcs));
 
 % Compute first order moments of of eigenfunction products
-disp("Computing first order moments of products of eigenfunction pairs");
 tic
+disp("Computing first order moments of products of eigenfunction pairs");
 moments = zeros(neig, neig, 3);
 for idim = 1:3
     moments(:, :, idim) = funcs' * Jx{idim} * funcs;
 end
 disp("Computing T2-weighted Laplace mass matrix");
-if nnz(MT2)
-    massrelax = funcs' * MT2 * funcs;
-else
-    massrelax = sparse(neig, neig);
-end
+massrelax = funcs' * R * funcs;
 toc
 
 % Create output structure

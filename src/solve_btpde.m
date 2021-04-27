@@ -30,8 +30,6 @@ opposite = setup.gradient.directions.opposite;
 diffusivity = setup.pde.diffusivity;
 relaxation = setup.pde.relaxation;
 initial_density = setup.pde.initial_density;
-permeability = setup.pde.permeability;
-boundary_markers = setup.pde.boundary_markers;
 
 % Extract experiment parameters
 qvalues = setup.gradient.qvalues;
@@ -62,10 +60,8 @@ itertimes = zeros(namplitude, nsequence, ndirection);
 disp("Setting up FEM matrices");
 M_cmpts = cell(1, ncompartment);
 K_cmpts = cell(1, ncompartment);
-Jx_cmpts = cell(1, 3);
-for idim = 1:3
-    Jx_cmpts{idim} = cell(1, ncompartment);
-end
+R_cmpts = cell(1, ncompartment);
+Jx_cmpts = repmat({cell(1, ncompartment)}, 1, 3);
 rho_cmpts = cell(1, ncompartment);
 for icmpt = 1:ncompartment
     % Finite elements
@@ -74,31 +70,25 @@ for icmpt = 1:ncompartment
     elements = femesh.elements{icmpt};
     [~, volumes] = get_volume_mesh(points, elements);
 
-    % Assemble flux, stiffness and mass matrices in compartment
+    % Assemble mass, stiffness, and T2-relaxation matrices in compartment
     M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
     K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
-
+    R_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
+    
     % Assemble moment matrices (coordinate weighted mass matrices)
     for idim = 1:3
         Jx_cmpts{idim}{icmpt} = mass_matrixP1_3D(elements', volumes', points(idim, :)');
     end
-
-    % Add T2-relaxation term if it is finite and nonnegative. This term is added
-    % directly to the stiffness matrix, as it has the effect of adding a
-    % decay operator to the diffusion operator
-    if isfinite(relaxation(icmpt)) && relaxation(icmpt) > 0
-        fprintf("Adding T2-relaxation matrix in compartment %d of %d: %g\n", icmpt, ncompartment, relaxation(icmpt));
-        K_cmpts{icmpt} = K_cmpts{icmpt} + 1 / relaxation(icmpt) * M_cmpts{icmpt};
-    end
-
+    
     % Create initial conditions (enforce complex values)
     rho_cmpts{icmpt} = complex(initial_density(icmpt)) * ones(npoint_cmpts(icmpt), 1);
 end
 
-% Create global mass, stiffness, flux and moment matrices (sparse)
+% Create global mass, stiffness, relaxation, flux, and moment matrices (sparse)
 disp("Coupling FEM matrices");
 M = blkdiag(M_cmpts{:});
 K = blkdiag(K_cmpts{:});
+R = blkdiag(R_cmpts{:});
 Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
 Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
 Q = couple_flux_matrix(femesh, setup.pde, Q_blocks, false);
@@ -128,7 +118,7 @@ parfor iall = 1:prod(allinds)
     % Do not bother solving if opposite direction has already been computed
     if idir <= ndirection_unique
 
-        % Extract parameters for iteration
+        % Extract iteration inputs
         q = qvalues(iamp, iseq);
         b = bvalues(iamp, iseq);
         seq = sequences{iseq};
@@ -174,7 +164,8 @@ parfor iall = 1:prod(allinds)
                 iint, ninterval, interval_str(iint), timeprofile_str(iint));
 
             % Create new ODE functions on given interval
-            [ode_function, Jacobian] = btpde_functions_interval(K, Q, J, q, seq, interval_midpoint);
+            [ode_function, Jacobian] = btpde_functions_interval( ...
+                K, Q, R, J, q, seq, interval_midpoint);
 
             % Update options with new Jacobian, which is either a
             % function handle or a constant matrix, depending on the
