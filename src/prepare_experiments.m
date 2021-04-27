@@ -61,10 +61,10 @@ if isfield(setup, "btpde")
     if ~isfield(setup.btpde, "ode_solver")
         % Set default
         setup.btpde.ode_solver = @ode15s;
-    elseif ischar(setup.btpde.ode_solver)
+    elseif ischar(setup.btpde.ode_solver) || isstring(setup.btpde.ode_solver)
         setup.btpde.ode_solver = str2func(setup.btpde.ode_solver);
     elseif ~isa(setup.btpde.ode_solver, "function_handle")
-        error("The BTPDE ODE solver must be a function handle or a character vector");
+        error("The BTPDE ODE solver must be a function handle or a string");
     end
 end
 
@@ -73,10 +73,10 @@ if isfield(setup, "hadc")
     if ~isfield(setup.hadc, "ode_solver")
         % Set default
         setup.hadc.ode_solver = @ode15s;
-    elseif ischar(setup.hadc.ode_solver)
+    elseif ischar(setup.hadc.ode_solver) || isstring(setup.hadc.ode_solver)
         setup.hadc.ode_solver = str2func(setup.hadc.ode_solver);
     elseif ~isa(setup.hadc.ode_solver, "function_handle")
-        error("The HADC ODE solver must be a function handle or a character vector");
+        error("The HADC ODE solver must be a function handle or a string");
     end
 end
 
@@ -91,4 +91,16 @@ end
 if isfield(setup, "analytical")
     assert(setup.analytical.length_scale >= 0)
     assert(setup.analytical.eigstep > 0)
+end
+
+% Check Karger experiment
+if isfield(setup, "karger")
+    if ~isfield(setup.karger, "ode_solver")
+        % Set default
+        setup.karger.ode_solver = @ode43;
+    elseif ischar(setup.karger.ode_solver) || isstring(setup.karger.ode_solver)
+        setup.karger.ode_solver = str2func(setup.karger.ode_solver);
+    elseif ~isa(setup.karger.ode_solver, "function_handle")
+        error("The Karger ODE solver must be a function handle or a string");
+    end
 end
