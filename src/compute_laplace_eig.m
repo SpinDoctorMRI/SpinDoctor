@@ -120,11 +120,9 @@ funcs = funcs(:, indices);
 
 if any(values < 0)
     i = find(values < 0);
-    iformat = join(repmat("%d", 1, length(i)));
-    vformat = join(repmat("%g", 1, length(i)));
-    warning("Found negative eigenvalues: indices " + iformat + ", values " ...
-        + vformat + ". Setting them to zero.", ...
-        i, values(i));
+    i_str = sprintf(join(repmat("%d", 1, length(i))), i);
+    v_str = sprintf(join(repmat("%g", 1, length(i))), values(i));
+    warning("Found negative eigenvalues: indices " + i_str + ", values " + v_str + ". Setting them to zero.");
     values(i) = 0;
 end
 
