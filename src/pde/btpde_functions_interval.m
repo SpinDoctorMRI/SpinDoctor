@@ -52,5 +52,5 @@ if constant_timeprofile
 else
     % The time profile is not constant on this interval, use full form
     ode_func = @(t, y) -(K * y + Q * y + R * y + 1i * q * seq.call(t) * (J * y));
-    Jacobian = @(t, y) -(K + Q + 1i * q * seq.call(t) * J);
+    Jacobian = @(t, y) -(K + Q + R + 1i * q * seq.call(t) * J);
 end
