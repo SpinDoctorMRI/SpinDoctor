@@ -61,7 +61,7 @@ classdef DoublePGSE < Sequence
         
         function t = diffusion_time(obj)
         %DIFFUSION_TIME Get diffusion time of the DoublePGSE sequence.
-            t = p + 2 * (obj.Delta - obj.delta / 3);
+            t = obj.tpause + 2 * (obj.Delta - obj.delta / 3);
         end
         
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
