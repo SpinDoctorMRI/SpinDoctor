@@ -274,10 +274,10 @@ end
 if isfield(setup, "mf")
     % Compute the JN value that relates the eigenmodes to their contribution
     % to the Matrix Formalism signal for a diffusion-encoding sequence
-    mf_jn = compute_mf_jn(lap_eig.values, mean_diffusivity, setup);
+    mf_jn = compute_mf_jn(lap_eig.values, setup);
 
     % Compute the Matrix Formalism effective diffusion tensor
-    diffusion_tensor = compute_mf_diffusion_tensor(lap_eig, mf_jn, mean_diffusivity);
+    diffusion_tensor = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
 end
 
 

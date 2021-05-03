@@ -1,8 +1,7 @@
-function mf_jn = compute_mf_jn(eigvals, diffusivity, setup)
+function mf_jn = compute_mf_jn(eigvals, setup)
 %COMPUTE_MF_JN Compute the quantity J(lambda_n, f).
 %
 %   eigvals
-%   diffusivity
 %   setup: struct
 %
 %   mf_jn
@@ -37,7 +36,6 @@ for iseq = 1:nsequence
     dtime = echotime / ntime;
 
     for ieig = 1:neig
-        % c = diffusivity * eigvals(ieig);
         c = eigvals(ieig);
         if abs(c) < 1e-15
             tmp = 0;
@@ -79,6 +77,6 @@ for iseq = 1:nsequence
             tmp = c * seq.integral(time) .* arrayfun(tmp, time);
             tmp = dtime * trapz(tmp);
         end
-        mf_jn(iseq, ieig) = tmp / seq.bvalue_no_q / diffusivity;
+        mf_jn(iseq, ieig) = tmp / seq.bvalue_no_q;
     end
 end
