@@ -1,4 +1,4 @@
-function results = solve_karger(femesh, setup)
+function results = solve_karger(femesh, setup, effective_difftensors)
 %SOLVE_KARGER Solve the finite pulse Karger model (FPK).
 %
 %   femesh: struct
@@ -76,20 +76,26 @@ end
 tau_inv = tau_inv ./ volumes;
 A = tau_inv - diag((tau_inv * volumes') ./ volumes');
 
-% Compute apparent diffusion coefficients with HADC model
-setup_hadc = setup;
-setup_hadc.hadc.ode_solver = @ode15s;
-setup_hadc.hadc.reltol = 1e-4;
-setup_hadc.hadc.abstol = 1e-4;
-setup_hadc.gradient.sequences = setup_hadc.gradient.sequences(1);
-setup_hadc.gradient.ndirection = ndirection_karger;
-setup_hadc.gradient.directions = create_directions(ndirection_karger, false, false);
-hadc = solve_hadc(femesh, setup_hadc);
+% Check if user has provided effective diffusion tensors
+if nargin == nargin(@solve_karger)
+    D = effective_difftensors;
+else
+    % Compute apparent diffusion coefficients with HADC model
+    disp("Copmuting diffusion tensors using HADC model");
+    setup_hadc = setup;
+    setup_hadc.hadc.ode_solver = @ode15s;
+    setup_hadc.hadc.reltol = 1e-4;
+    setup_hadc.hadc.abstol = 1e-4;
+    setup_hadc.gradient.sequences = setup_hadc.gradient.sequences(1);
+    setup_hadc.gradient.ndirection = ndirection_karger;
+    setup_hadc.gradient.directions = create_directions(ndirection_karger, false, false);
+    hadc = solve_hadc(femesh, setup_hadc);
 
-% Fit effective diffusion tensors
-g = setup_hadc.gradient.directions.points;
-adc = permute(hadc.adc(:, 1, :), [1 3 2]);
-D = fit_tensor(g, adc);
+    % Fit effective diffusion tensors
+    g = setup_hadc.gradient.directions.points;
+    adc = permute(hadc.adc(:, 1, :), [1 3 2]);
+    D = fit_tensor(g, adc);
+end
 
 % Relaxation tensor
 R = diag(1 ./ relaxation);
@@ -155,6 +161,7 @@ for iall = 1:prod(allinds)
     [~, S] = solve_ode(odefunc, time_list_interval, S0, options);
 
     signal(:, iall) = S(end, :);
+    itertimes(iall) = toc(itertime);
 end
 
 % Total parameters
