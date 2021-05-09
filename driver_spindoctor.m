@@ -157,7 +157,7 @@ plot_femesh(femesh, setup.pde.compartments);
 % plot_femesh_everywhere(femesh, "");
 
 % Plot information about the geometry
-plot_geometry_info(setup, volumes, surface_areas);
+plot_geometry_info(setup, femesh);
 
 % Plot BTPDE magnetization in some directions
 if isfield(setup, "btpde")

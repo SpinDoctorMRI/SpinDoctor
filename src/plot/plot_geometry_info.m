@@ -1,4 +1,4 @@
-function plot_geometry_info(setup, volumes, surface_areas)
+function plot_geometry_info(setup, femesh, volumes, surface_areas)
 %PLOT_GEOMETRY_INFO Plot information of the geometry.
 %
 %   setup: struct
@@ -10,11 +10,14 @@ function plot_geometry_info(setup, volumes, surface_areas)
 %   1 figure with title of "Surface Area"
 
 compartments = setup.pde.compartments;
-boundary_markers = setup.pde.boundary_markers;
 
 cmpts_in = compartments == "in";
 cmpts_out = compartments == "out";
 cmpts_ecs = compartments == "ecs";
+
+% Get volume and surface area quantities from mesh
+[volumes, surface_areas] = get_vol_sa(femesh);
+boundary_markers = ~cellfun(@isempty, femesh.facets);
 
 ncompartment = length(volumes);
 nboundary = size(boundary_markers, 2);

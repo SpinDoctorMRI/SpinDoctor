@@ -133,4 +133,3 @@ pde.initial_density = initial_density;
 pde.permeability = permeability;
 pde.compartments = compartments;
 pde.boundaries = boundaries;
-pde.boundary_markers = boundary_markers;
