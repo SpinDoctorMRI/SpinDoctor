@@ -19,18 +19,26 @@
 %               CosOGSE(delta, Delta, nperiod)
 %               SinOGSE(delta, Delta, nperiod)
 %               CustomSequence(delta, Delta, @timeprofile)
+%           The directions can be provided manually, or created by the functions
+%           `unitsphere`, `unitcircle`, or `unitsemicercle`.
 %
 %   The precense of any of the following substructures triggers the corresponding experiment:
 %
-%       btpde:      Solve Bloch-Torrey PDE with P1-FEM
+%       btpde:          Solve Bloch-Torrey PDE with P1-FEM and provided ODE
+%                       solver
 %
-%       hadc:       Solve the equation for the homogenized apparent
-%                   diffusion coefficient using P1-FEM
+%       btpde_midpoint: Solve Bloch-Torrey PDE with P1-FEM and Crank-Nicolson
+%                       solver
 %
-%       mf:         Compute the matrix formalism signal
+%       hadc:           Solve the equation for the homogenized apparent
+%                       diffusion coefficient using P1-FEM
 %
-%       analytical: Compute analytical signal one analyticaled sphere or
-%                   cylinder using truncated radial matrix formalism
+%       mf:             Compute the matrix formalism signal
+%
+%       analytical:     Compute analytical signal one analyticaled sphere or
+%                       cylinder using truncated radial matrix formalism
+%
+%       karger:         Solve for the finite pulse Karger model
 
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
@@ -80,6 +88,10 @@ setup.gradient.directions = [1.0; 0.0; 0.0];            % Gradient directions [3
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
+
+%% BTPDE midpoint experiment parameters (comment block to skip experiment)
+% setup.btpde_midpoint.implicitness = 0.5;              % Theta-parameter: 0.5 for Crank-Nicolson
+% setup.btpde_midpoint.timestep = 5;                    % Time step dt
 
 %% HADC experiment parameters (comment block to skip experiment)
 setup.hadc.ode_solver = @ode15s;                        % ODE solver for HADC

@@ -101,6 +101,20 @@ if isfield(setup, "btpde")
 end
 
 
+%% Perform BTPDE midpoint experiments
+if isfield(setup, "btpde_midpoint")
+    % Solve BTPDE
+    btpde_midpoint = solve_btpde_midpoint(femesh, setup);
+
+    % Fit ADC from signal
+    btpde_midpoint_fit = fit_signal(btpde_midpoint.signal, ...
+        btpde_midpoint.signal_allcmpts, setup.gradient.bvalues);
+
+    % BTPDE direction averaged magnetization
+    btpde_midpoint.magnetization_avg = average_magnetization(btpde_midpoint.magnetization);
+end
+
+
 %% Perform HADC experiment
 if isfield(setup, "hadc")
     % Solve HADC model

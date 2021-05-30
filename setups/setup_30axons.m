@@ -1,4 +1,4 @@
-%SETUP_200AXONS Define setup structure for SpinDoctor.
+%SETUP_30AXONS Define setup structure for SpinDoctor.
 %
 %   The setup structure may contain the following substructures:
 %
@@ -19,18 +19,26 @@
 %               CosOGSE(delta, Delta, nperiod)
 %               SinOGSE(delta, Delta, nperiod)
 %               CustomSequence(delta, Delta, @timeprofile)
+%           The directions can be provided manually, or created by the functions
+%           `unitsphere`, `unitcircle`, or `unitsemicercle`.
 %
 %   The precense of any of the following substructures triggers the corresponding experiment:
 %
-%       btpde:      Solve Bloch-Torrey PDE with P1-FEM
+%       btpde:          Solve Bloch-Torrey PDE with P1-FEM and provided ODE
+%                       solver
 %
-%       hadc:       Solve the equation for the homogenized apparent
-%                   diffusion coefficient using P1-FEM
+%       btpde_midpoint: Solve Bloch-Torrey PDE with P1-FEM and Crank-Nicolson
+%                       solver
 %
-%       mf:         Compute the matrix formalism signal
+%       hadc:           Solve the equation for the homogenized apparent
+%                       diffusion coefficient using P1-FEM
 %
-%       analytical: Compute analytical signal one analyticaled sphere or
-%                   cylinder using truncated radial matrix formalism
+%       mf:             Compute the matrix formalism signal
+%
+%       analytical:     Compute analytical signal one analyticaled sphere or
+%                       cylinder using truncated radial matrix formalism
+%
+%       karger:         Solve for the finite pulse Karger model
 
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
@@ -61,13 +69,14 @@ setup.pde.relaxation_ecs = Inf;                         % T2-relaxtion ECS. No r
 setup.pde.initial_density_in = 1.0;                     % Initial density in IN
 setup.pde.initial_density_out = 1.0;                    % Initial density in OUT
 setup.pde.initial_density_ecs = 1.0;                    % Initial density in ECS
-setup.pde.permeability_in_out = 1e-4;                   % Permeability IN-OUT interface
-setup.pde.permeability_out_ecs = 1e-4;                  % Permeability OUT-ECS interface
+setup.pde.permeability_in_out = 1e-5;                   % Permeability IN-OUT interface
+setup.pde.permeability_out_ecs = 1e-5;                  % Permeability OUT-ECS interface
 setup.pde.permeability_in = 0;                          % Permeability IN boundary
 setup.pde.permeability_out = 0;                         % Permeability OUT boundary
 setup.pde.permeability_ecs = 0;                         % Permeability ECS boundary
 
 %% Gradient sequences
+% setup.gradient.values = linspace(0, 4000, 50);        % g-, q-, or b-values [1 x namplitude]
 setup.gradient.values = (1:3:10) * 1000;                % g-, q-, or b-values [1 x namplitude]
 setup.gradient.values_type = "b";                       % Type of values: "g", "q", or "b"
 setup.gradient.sequences = {                            % Gradient sequences {1 x nsequence}
@@ -80,6 +89,10 @@ setup.gradient.directions = unitsphere(7);              % Gradient directions [3
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
+
+%% BTPDE midpoint experiment parameters (comment block to skip experiment)
+% setup.btpde_midpoint.implicitness = 0.5;              % Theta-parameter: 0.5 for Crank-Nicolson
+% setup.btpde_midpoint.timestep = 5;                    % Time step dt
 
 %% HADC experiment parameters (comment block to skip experiment)
 % setup.hadc.ode_solver = @ode15s;                      % ODE solver for HADC
@@ -96,8 +109,8 @@ setup.mf.ninterval = 500;                               % Number of intervals to
 % setup.analytical.eigstep = 1e-8;                      % Minimum distance between eigenvalues
 
 %% Karger model parameters (comment block to skip experiment)
-setup.karger.ndirection = 20;                           % Number of directions to compute diffusion tensor
-setup.karger.ode_solver = @ode45;                       % ODE solver for Karger model
+setup.karger.ndirection = 50;                           % Number of directions to compute diffusion tensor
+setup.karger.ode_solver = @ode23t;                      % ODE solver for Karger model
 setup.karger.reltol = 1e-4;                             % Relative tolerance for ODE solver
 setup.karger.abstol = 1e-6;                             % Absolute tolerance for ODE solver
 
