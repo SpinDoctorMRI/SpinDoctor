@@ -42,19 +42,9 @@ for iseq = 1:nsequence
     end
 end
 
-% Create gradient directions
-ndirection = setup.gradient.ndirection;
-if ndirection == 1
-    % Create structure for storing the one diffusion-encoding direction
-    setup.gradient.directions = create_directions_onedir(setup.gradient.direction);
-else
-    % Obtain multiple diffusion-encoding directions uniformly distributed
-    % in the unit circle or the unit sphere
-    setup.gradient.directions = create_directions(ndirection, ...
-        setup.gradient.flat_dirs, setup.gradient.remove_opposite);
-end
-assert(isequal(setup.gradient.directions.indices, 1:length(setup.gradient.directions.indices)), ...
-    "directions.indices must be montonically increasing integers, starting from 1");
+% Normalize gradient directions
+setup.gradient.directions ...
+    = setup.gradient.directions ./ vecnorm(setup.gradient.directions);
 
 % Check BTPDE experiment
 if isfield(setup, "btpde")

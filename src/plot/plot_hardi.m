@@ -7,7 +7,7 @@ function plot_hardi(directions, signal, fig_title)
 
 
 % Check if all HARDI points lie in the plane (x-y plane)
-is_flat = ~any(directions.points(3, :));
+is_flat = ~any(directions(3, :));
 
 % Plot HARDI points in the plane or in 3D-space
 if is_flat

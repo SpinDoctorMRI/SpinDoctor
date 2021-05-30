@@ -100,14 +100,14 @@ setup.pde.permeability_out = 0;                         % Permeability OUT bound
 setup.pde.permeability_ecs = 0;                         % Permeability ECS boundary
 
 %% Gradient sequences
-setup.gradient.ndirection = 1;                          % Number of gradient directions to simulate
-setup.gradient.flat_dirs = false;                       % Choose between 3d or 2d distributed gradient directions
-setup.gradient.remove_opposite = false;                 % Choose whether to not compute opposite directions
-setup.gradient.direction = [1.0; 0.0; 0.0];             % Gradient direction; [g1; g2; g3] (ignored if ndirection>1)
 setup.gradient.values = [50 100 500 1000 4000 10000];   % g-, q-, or b-values [1 x namplitude]
-setup.gradient.values_type = "b";                       % Type of values; "g", "q" or "b"
-setup.gradient.sequences{1} = PGSE(2500, 15000);        % Gradient sequences {1 x nsequence}
-setup.gradient.sequences{2} = PGSE(5000, 15000);        % Gradient sequences {1 x nsequence}
+setup.gradient.values_type = "b";                       % Type of values: "g", "q", or "b"
+setup.gradient.sequences = {                            % Gradient sequences {1 x nsequence}
+    PGSE(2500, 4000)
+    PGSE(5000, 15000)
+    % CosOGSE(2500, 4000, 4)
+}';
+setup.gradient.directions = [1.0; 0.0; 0.0];            % Gradient directions [3 x ndirection]
 
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE

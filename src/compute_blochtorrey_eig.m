@@ -20,13 +20,8 @@ function results = compute_blochtorrey_eig(q, lap_eig, directions)
 % Measure computational time
 starttime = tic;
 
-% Extract HARDI points
-dir_points = directions.points;
-dir_inds = directions.indices;
-% dir_opposite = directions.opposite;
-
 % Sizes
-ndirection = size(dir_points, 2);
+ndirection = size(directions, 2);
 
 % Initialize output arguments
 Vsort = cell(1, ndirection);
@@ -36,8 +31,8 @@ invVsortC1 = cell(1, ndirection);
 
 % Perform eigendecomposition for each compartment and direction
 L_mat = diag(lap_eig.values);
-for idir = dir_inds
-    gdir = dir_points(:, idir);
+for idir = 1:ndirection
+    gdir = directions(:, idir);
     W_mat = sum(lap_eig.moments .* shiftdim(gdir, -2), 3);
     K_mat = L_mat + 1i * W_mat * q;
     [V, D] = eig(K_mat);

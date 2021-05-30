@@ -5,7 +5,7 @@ function [adc, adc_allcmpts] = compute_adc_sta(femesh, setup)
 %   setup: struct
 %
 %   adc: double(ncompartment, nsequence, ndirection)
-%     adc_allcmpts: double(nsequence, ndirection)
+%   adc_allcmpts: double(nsequence, ndirection)
 
 
 % Extract domain parameters
@@ -14,14 +14,12 @@ initial_density = setup.pde.initial_density;
 
 % Exeriment paramters
 sequences = setup.gradient.sequences;
-
-% Gradient directions
-dir_points = setup.gradient.directions.points;
+directions = setup.gradient.directions;
 
 % Sizes
 nsequence = length(sequences);
 ncompartment = femesh.ncompartment;
-ndirection = setup.gradient.ndirection;
+ndirection = size(directions, 2);
 
 % Prepare output structures
 adc = zeros(ncompartment, nsequence, ndirection);
@@ -41,7 +39,7 @@ for icmpt = 1:ncompartment
 
     for idir = 1:ndirection
         
-        g = dir_points(:, idir);
+        g = directions(:, idir);
         
         D0 = g' * diffusivity(:, :, icmpt) * g;
 

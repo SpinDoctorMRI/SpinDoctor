@@ -150,7 +150,7 @@ qval = setup.gradient.qvalues(iamp, iseq);
 experiment_str = sprintf("\\delta=%g, \\Delta=%g", seq.delta, seq.Delta);
 bvalue_str = sprintf("q-value=%g", qval);
 if length(dirs_use) == 1
-    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions.points(:, dirs_use));
+    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions(:, dirs_use));
 else
     dir_str = sprintf(["dirs [" + join(repmat("%d", 1, length(dirs_use))) + "]"], dirs_use);
 end
@@ -187,6 +187,6 @@ for idir = 1
 
     plot(real(eigvals), imag(eigvals), "d");
 end
-title(sprintf("BT eigenvalues, gdir=[%.2f; %.2f; %.2f]", directions.points(:, idir)));
+title(sprintf("BT eigenvalues, gdir=[%.2f; %.2f; %.2f]", directions(:, idir)));
 xlabel("Real part");
 ylabel("Imaginary part");

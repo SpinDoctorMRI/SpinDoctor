@@ -12,9 +12,6 @@ if ~isreal(data)
     data = real(data);
 end
 
-% Extract HARDI points
-points = directions.points;
-
 % Sizes
 if length(size(data)) == 2
     data = shiftdim(data, -1);
@@ -22,7 +19,7 @@ end
 [namplitude, nsequence, ndirection] = size(data);
 
 % Create surface triangulation
-DT = delaunayTriangulation(points');
+DT = delaunayTriangulation(directions');
 [c_sphere, ~] = convexHull(DT);
 
 for iseq = 1:nsequence
@@ -49,7 +46,7 @@ for iseq = 1:nsequence
     for iamp = 1:namplitude
         % Scale unit sphere by data
         sig = shiftdim(data(iamp, iseq, :), 2);
-        sigpoints = points' .* sig;
+        sigpoints = directions' .* sig;
 
         % Make surface plot
         % h = trisurf(c_sphere, sigpoints(:, 1), sigpoints(:, 2), sigpoints(:, 3));

@@ -45,7 +45,7 @@ setup = prepare_experiments(setup);
 ncompartment = length(setup.pde.compartments);
 namplitude = length(setup.gradient.values);
 nsequence = length(setup.gradient.sequences);
-ndirection = setup.gradient.ndirection;
+ndirection = size(setup.gradient.directions, 2);
 
 % Create or load finite element mesh
 [femesh, surfaces, cells] = create_geometry(setup);

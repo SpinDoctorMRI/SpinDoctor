@@ -46,7 +46,7 @@ for iseq = 1:nsequence
                 solpde = btpde.magnetization(:, iamp, iseq, idir);
                 soleig = mf.magnetization(:, iamp, iseq, idir);
                 title_str = sprintf("magnetization, dir=[%.2f; %.2f; %.2f]", ...
-                    setup.gradient.directions.points(:, idir));
+                    setup.gradient.directions(:, idir));
             end
 
             % % Title string
@@ -92,7 +92,7 @@ for iseq = 1:nsequence
                 set(gca, "fontsize", 14);
                 if idir
                     % Plot gradient direction
-                    plot_gdir_arrow(setup.gradient.directions.points(:, idir));
+                    plot_gdir_arrow(setup.gradient.directions(:, idir));
                 end
             end
 
@@ -105,7 +105,7 @@ for iseq = 1:nsequence
                 % set(gca, "fontsize", 14);
                 if idir
                     % Plot gradient direction
-                    plot_gdir_arrow(setup.gradient.directions.points(:, idir));
+                    plot_gdir_arrow(setup.gradient.directions(:, idir));
                 end
             end
 
@@ -118,7 +118,7 @@ for iseq = 1:nsequence
                 set(gca, "fontsize", 14);
                 if idir
                     % Plot gradient direction
-                    plot_gdir_arrow(setup.gradient.directions.points(:, idir));
+                    plot_gdir_arrow(setup.gradient.directions(:, idir));
                 end
             end
             % colorbar("off");
@@ -165,7 +165,7 @@ else
     % Directionalized signal
     signal = signal(:, :, :, idir);
     signal_allcmpts = signal_allcmpts(:, :, idir);
-    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions.points(:, idir));
+    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions(:, idir));
 end
 
 % Normalize by volume

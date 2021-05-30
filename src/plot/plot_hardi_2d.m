@@ -14,13 +14,13 @@ if ~isreal(signal)
 end
 
 % Check that the directions lie in the plane
-if any(directions.points(3, :))
+if any(directions(3, :))
     warning("z components of gradient directions are not all zero." ...
         + " Projecting directions into the x-y plane.");
 end
 
 % Extract x and y components of gradient directions
-points = directions.points(1:2, :);
+points = directions(1:2, :);
 
 % Sizes
 if length(size(signal)) == 2

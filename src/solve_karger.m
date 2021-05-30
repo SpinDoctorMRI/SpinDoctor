@@ -24,11 +24,7 @@ permeability = setup.pde.permeability;
 qvalues = setup.gradient.qvalues;
 bvalues = setup.gradient.bvalues;
 sequences = setup.gradient.sequences;
-
-% Extract HARDI directions
-dir_points = setup.gradient.directions.points;
-dir_inds = setup.gradient.directions.indices;
-opposite = setup.gradient.directions.opposite;
+directions = setup.gradient.directions;
 
 % Extract experiment parameters
 ndirection_karger = setup.karger.ndirection;
@@ -42,8 +38,7 @@ ncompartment = femesh.ncompartment;
 nboundary = femesh.nboundary;
 namplitude = size(qvalues, 1);
 nsequence = length(sequences);
-ndirection = setup.gradient.ndirection;
-ndirection_unique = length(dir_inds);
+ndirection = size(directions, 2);
 
 % Compute volumes and surface areas
 volumes = zeros(1, ncompartment);
@@ -81,18 +76,17 @@ if nargin == nargin(@solve_karger)
     D = effective_difftensors;
 else
     % Compute apparent diffusion coefficients with HADC model
-    disp("Copmuting diffusion tensors using HADC model");
+    disp("Computing diffusion tensors using HADC model");
     setup_hadc = setup;
     setup_hadc.hadc.ode_solver = @ode15s;
     setup_hadc.hadc.reltol = 1e-4;
-    setup_hadc.hadc.abstol = 1e-4;
-    setup_hadc.gradient.sequences = setup_hadc.gradient.sequences(1);
-    setup_hadc.gradient.ndirection = ndirection_karger;
-    setup_hadc.gradient.directions = create_directions(ndirection_karger, false, false);
+    setup_hadc.hadc.abstol = 1e-6;
+    setup_hadc.gradient.sequences = setup_hadc.gradient.sequences(end);
+    setup_hadc.gradient.directions = unitsphere(ndirection_karger);
     hadc = solve_hadc(femesh, setup_hadc);
 
     % Fit effective diffusion tensors
-    g = setup_hadc.gradient.directions.points;
+    g = setup_hadc.gradient.directions;
     adc = permute(hadc.adc(:, 1, :), [1 3 2]);
     D = fit_tensor(g, adc);
 end
@@ -127,7 +121,7 @@ for iall = 1:prod(allinds)
     q = qvalues(iamp, iseq);
     b = bvalues(iamp, iseq);
     seq = sequences{iseq};
-    g = dir_points(:, idir);
+    g = directions(:, idir);
     
     % Display state of iterations
     fprintf("Computing Karger signal using %s\n" ...

@@ -23,9 +23,7 @@ initial_density = setup.pde.initial_density;
 qvalues = setup.gradient.qvalues;
 bvalues = setup.gradient.bvalues;
 sequences = setup.gradient.sequences;
-dir_points = setup.gradient.directions.points;
-dir_inds = setup.gradient.directions.indices;
-opposite = setup.gradient.directions.opposite;
+directions = setup.gradient.directions;
 eigfuncs = lap_eig.funcs;
 moments = lap_eig.moments;
 T2 = lap_eig.massrelax;
@@ -35,8 +33,7 @@ L = diag(lap_eig.values);
 ncompartment = femesh.ncompartment;
 namplitude = length(setup.gradient.values);
 nsequence = length(sequences);
-ndirection = setup.gradient.ndirection;
-ndirection_unique = length(dir_inds);
+ndirection = size(directions, 2);
 neig = length(lap_eig.values);
 ninterval = setup.mf.ninterval;
 
@@ -88,86 +85,70 @@ parfor iall = 1:prod(allinds)
     % Extract indices
     [iamp, iseq, idir] = ind2sub(allinds, iall);
 
-    % Do not bother solving if opposite direction has already been computed
-    if idir <= ndirection_unique
+    % Experiment parameters
+    q = qvalues(iamp, iseq);
+    b = bvalues(iamp, iseq);
+    seq = sequences{iseq};
+    g = directions(:, idir);
 
-        % Experiment parameters
-        q = qvalues(iamp, iseq);
-        b = bvalues(iamp, iseq);
-        seq = sequences{iseq};
-        g = dir_points(:, idir);
+    % Create time intervals for time profile approximation
+    time = linspace(0, seq.echotime, ninterval + 1);
 
-        % Create time intervals for time profile approximation
-        time = linspace(0, seq.echotime, ninterval + 1);
+    % Display state of iterations
+    fprintf("Computing MF magnetization using %d eigenvalues\n" ...
+        + "  Direction %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
+        + "  Sequence  %d of %d: f = %s\n" ...
+        + "  Amplitude %d of %d: q = %g, b = %g\n", ...
+        neig, ...
+        idir, ndirection, g, ...
+        iseq, nsequence, seq, ...
+        iamp, namplitude, q, b);
 
-        % Display state of iterations
-        fprintf("Computing MF magnetization using %d eigenvalues\n" ...
-            + "  Direction %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
-            + "  Sequence  %d of %d: f = %s\n" ...
-            + "  Amplitude %d of %d: q = %g, b = %g\n", ...
-            neig, ...
-            idir, ndirection, g, ...
-            iseq, nsequence, seq, ...
-            iamp, namplitude, q, b);
+    % Components of BT operator matrix
+    A = sum(moments .* shiftdim(g, -2), 3);
 
-        % Components of BT operator matrix
-        A = sum(moments .* shiftdim(g, -2), 3);
+    % Compute final magnetization (in Laplace basis)
+    % If PGSE, use three intervals, otherwise many intervals
+    if isa(seq, "PGSE")
+        % Constant BT operator in Laplace basis
+        K = L + T2 + 1i * q * A;
+        edK = expm(-seq.delta * K);
+        edL = expm(-(seq.Delta - seq.delta) * (L + T2));
 
-        % Compute final magnetization (in Laplace basis)
-        % If PGSE, use three intervals, otherwise many intervals
-        if isa(seq, "PGSE")
-            % Constant BT operator in Laplace basis
-            K = L + T2 + 1i * q * A;
-            edK = expm(-seq.delta * K);
-            edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+        % Laplace coefficients of final magnetization
+        nu = edK' * (edL * (edK * nu0));
+    else
+        % BT operator in Laplace basis for a given time profile value
+        K = @(ft) L + T2 + 1i * q * ft * A;
 
-            % Laplace coefficients of final magnetization
-            nu = edK' * (edL * (edK * nu0));
-        else
-            % BT operator in Laplace basis for a given time profile value
-            K = @(ft) L + T2 + 1i * q * ft * A;
+        % Transform Laplace coefficients using piecewise constant
+        % approximation of time profile
+        nu = nu0;
+        for i = 1:ninterval
+            % Time step and time profile on given interval
+            dt = time(i + 1) - time(i);
+            ft = (seq.call(time(i + 1)) + seq.call(time(i))) / 2;
 
-            % Transform Laplace coefficients using piecewise constant
-            % approximation of time profile
-            nu = nu0;
-            for i = 1:ninterval
-                % Time step and time profile on given interval
-                dt = time(i + 1) - time(i);
-                ft = (seq.call(time(i + 1)) + seq.call(time(i))) / 2;
-
-                % Laplace coefficients of magnetization at end of interval
-                nu = expm(-dt * K(ft)) * nu;
-            end
+            % Laplace coefficients of magnetization at end of interval
+            nu = expm(-dt * K(ft)) * nu;
         end
+    end
 
-        % Final magnetization coefficients in finite element nodal basis
-        mag = eigfuncs * nu;
+    % Final magnetization coefficients in finite element nodal basis
+    mag = eigfuncs * nu;
 
-        % Split magnetization into compartments
-        mag = mat2cell(mag, npoint_cmpts);
-        % magnetization(:, iall) = mag;  % does not work in parfor before R2020b
-        for icmpt = 1:ncompartment
-            magnetization{icmpt, iall} = mag{icmpt};
-        end
-        signal(:, iall) = cellfun(@(M, m) sum(M * m), M_cmpts', mag);
-
-    end % unique direction case
+    % Split magnetization into compartments
+    mag = mat2cell(mag, npoint_cmpts);
+    % magnetization(:, iall) = mag;  % does not work in parfor before R2020b
+    for icmpt = 1:ncompartment
+        magnetization{icmpt, iall} = mag{icmpt};
+    end
+    signal(:, iall) = cellfun(@(M, m) sum(M * m), M_cmpts', mag);
 
     % Store timing
     itertimes(iall) = toc(itertime);
 
 end % iterations
-
-
-% Copy result to opposite directions
-for idir = dir_inds
-    if ~isempty(opposite{idir})
-        fprintf("Copying complex conjugate results from direction %d to opposite direction (%d)\n", idir, opposite{idir});
-        magnetization(:, :, :, opposite{idir}) = cellfun(@conj, magnetization(:, :, :, idir), ...
-            "UniformOutput", false);
-        signal(:, :, :, opposite{idir}) = conj(signal(:, :, :, idir));
-    end
-end
 
 % Compute total signal (sum over compartments)
 signal_allcmpts(:) = sum(signal, 1);

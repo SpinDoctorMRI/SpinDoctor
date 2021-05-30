@@ -89,7 +89,7 @@ labels = strings(1, 0);
 
 dir = 0;
 if dir
-    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions.points(dir, :));
+    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions(:, dir));
 else
     dir_str = "direction averaged";
 end

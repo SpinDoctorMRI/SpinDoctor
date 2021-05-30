@@ -60,7 +60,7 @@ initial_signal = setup.pde.initial_density * volumes';
 ncompartment = length(setup.pde.compartments);
 namplitude = length(setup.gradient.values);
 nsequence = length(setup.gradient.sequences);
-ndirection = setup.gradient.ndirection;
+ndirection = size(setup.gradient.directions, 2);
 
 
 %% Perform small experiments

@@ -75,7 +75,7 @@ for iseq = 1%:nsequence
             bt_eig_funcs_sep = mat2cell(bt_eig_funcs, npoint_cmpts);
             
             bvalue_str = sprintf("q-value=%g", qval);
-            dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", setup.gradient.directions.points(:, idir));
+            dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", setup.gradient.directions(:, idir));
             
             % Plot selected eigenfunctions
             for ieig = eigindex_use_btpde
@@ -180,7 +180,7 @@ for iseq = experi_use
             bt_eig_funcs_sum_sep = mat2cell(bt_eig_funcs_sum, npoint_cmpts);
             
             % Title
-            % gdir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions.points(:, idir));
+            % gdir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions(:, idir));
             gdir_str = sprintf("dir %d/%d", idir, ndirection);
             eig_str = sprintf("eigenindex [" ...
                 + join(repmat("%d", 1, length(eigindex_use_btpde))) + "]", ...
@@ -198,7 +198,7 @@ for iseq = experi_use
             if plot_gdir
                 color = "r";
                 p = [24 29 0];
-                dir = 10 * setup.gradient.directions.points(:, idir);
+                dir = 10 * setup.gradient.directions(:, idir);
                 q = quiver3(p(1), p(2), p(3), dir(1), dir(2), dir(3), 0);
                 q.LineWidth = 1.5;
                 q.Color = color;

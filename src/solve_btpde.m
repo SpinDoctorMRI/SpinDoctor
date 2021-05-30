@@ -21,11 +21,6 @@ function results = solve_btpde(femesh, setup)
 % Measure function evaluation time
 starttime = tic;
 
-% Extract HARDI directions
-dir_points = setup.gradient.directions.points;
-dir_inds = setup.gradient.directions.indices;
-opposite = setup.gradient.directions.opposite;
-
 % Extract domain parameters
 diffusivity = setup.pde.diffusivity;
 relaxation = setup.pde.relaxation;
@@ -35,17 +30,17 @@ initial_density = setup.pde.initial_density;
 qvalues = setup.gradient.qvalues;
 bvalues = setup.gradient.bvalues;
 sequences = setup.gradient.sequences;
+directions = setup.gradient.directions;
 reltol = setup.btpde.reltol;
 abstol = setup.btpde.abstol;
 solve_ode = setup.btpde.ode_solver;
 solver_str = func2str(solve_ode);
 
 % Sizes
-ncompartment = length(setup.pde.compartments);
+ncompartment = femesh.ncompartment;
 namplitude = size(qvalues, 1);
 nsequence = length(sequences);
-ndirection = setup.gradient.ndirection;
-ndirection_unique = length(dir_inds);
+ndirection = size(directions, 2);
 
 % Number of points in each compartment
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
@@ -66,7 +61,6 @@ rho_cmpts = cell(1, ncompartment);
 for icmpt = 1:ncompartment
     % Finite elements
     points = femesh.points{icmpt};
-    facets = femesh.facets(icmpt, :);
     elements = femesh.elements{icmpt};
     [~, volumes] = get_volume_mesh(points, elements);
 
@@ -97,8 +91,14 @@ Q = couple_flux_matrix(femesh, setup.pde, Q_blocks, false);
 rho = vertcat(rho_cmpts{:});
 
 % Set parameters for ODE solver
-options_template = odeset("Mass", M, "AbsTol", abstol, "RelTol", reltol, ...
-    "Vectorized", "on", "Stats", "off", "MassSingular", "no");
+options_template = odeset( ...
+    "Mass", M, ...
+    "AbsTol", abstol, ...
+    "RelTol", reltol, ...
+    "Vectorized", "on", ...
+    "Stats", "off", ...
+    "MassSingular", "no" ...
+);
 
 % Cartesian indices (for parallel looping with linear indices)
 allinds = [namplitude nsequence ndirection];
@@ -115,96 +115,79 @@ parfor iall = 1:prod(allinds)
     % Extract Cartesian indices
     [iamp, iseq, idir] = ind2sub(allinds, iall);
 
-    % Do not bother solving if opposite direction has already been computed
-    if idir <= ndirection_unique
+    % Extract iteration inputs
+    q = qvalues(iamp, iseq);
+    b = bvalues(iamp, iseq);
+    seq = sequences{iseq};
+    g = directions(:, idir);
 
-        % Extract iteration inputs
-        q = qvalues(iamp, iseq);
-        b = bvalues(iamp, iseq);
-        seq = sequences{iseq};
-        g = dir_points(:, idir);
+    % Get intervals based on the properties of the time profile
+    [timelist, interval_str, timeprofile_str] = seq.intervals;
 
-        % Get intervals based on the properties of the time profile
-        [timelist, interval_str, timeprofile_str] = seq.intervals;
+    % Number of intervals
+    ninterval = length(timelist) - 1;
 
-        % Number of intervals
-        ninterval = length(timelist) - 1;
+    % Assemble gradient direction dependent finite element matrix
+    J = g(1) * Jx{1} + g(2) * Jx{2} + g(3) * Jx{3};
 
-        % Assemble gradient direction dependent finite element matrix
-        J = g(1) * Jx{1} + g(2) * Jx{2} + g(3) * Jx{3};
+    % Initial magnetization
+    mag = rho;
 
-        % Initial magnetization
-        mag = rho;
+    % Base information about current iteration
+    iteration_str = sprintf("Solving BTPDE of size %d using %s\n" ...
+        + "  Direction %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
+        + "  Sequence  %d of %d: f = %s\n" ...
+        + "  Amplitude %d of %d: q = %g, b = %g", ...
+        sum(npoint_cmpts), solver_str, ...
+        idir, ndirection, g, ...
+        iseq, nsequence, seq, ...
+        iamp, namplitude, q, b);
 
-        % Base information about current iteration
-        iteration_str = sprintf("Solving BTPDE of size %d using %s\n" ...
-            + "  Direction %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
-            + "  Sequence  %d of %d: f = %s\n" ...
-            + "  Amplitude %d of %d: q = %g, b = %g", ...
-            sum(npoint_cmpts), solver_str, ...
-            idir, ndirection, g, ...
-            iseq, nsequence, seq, ...
-            iamp, namplitude, q, b);
+    % Solve for each interval consecutively
+    for iint = 1:ninterval
 
-        % Solve for each interval consecutively
-        for iint = 1:ninterval
+        % Add a third point to the interval, so that the ODE solver does not
+        % store the magnetization for all time steps during the solve. If
+        % there were only two points in the interval, the ODE solver would
+        % store all time steps. This would require a lot of memory,
+        % especially during parfor iterations
+        interval_midpoint = (timelist(iint) + timelist(iint + 1)) / 2;
+        time_list_interval = [timelist(iint), interval_midpoint, timelist(iint + 1)];
 
-            % Add a third point to the interval, so that the ODE solver does not
-            % store the magnetization for all time steps during the solve. If
-            % there were only two points in the interval, the ODE solver would
-            % store all time steps. This would require a lot of memory,
-            % especially during parfor iterations
-            interval_midpoint = (timelist(iint) + timelist(iint + 1)) / 2;
-            time_list_interval = [timelist(iint), interval_midpoint, timelist(iint + 1)];
+        % Display state of iterations
+        fprintf("%s\n" ...
+            + "  Interval %d of %d: I = %s, %s\n", ...
+            iteration_str, ...
+            iint, ninterval, interval_str(iint), timeprofile_str(iint));
 
-            % Display state of iterations
-            fprintf("%s\n" ...
-                + "  Interval %d of %d: I = %s, %s\n", ...
-                iteration_str, ...
-                iint, ninterval, interval_str(iint), timeprofile_str(iint));
+        % Create new ODE functions on given interval
+        [ode_function, Jacobian] = btpde_functions_interval( ...
+            K, Q, R, J, q, seq, interval_midpoint);
 
-            % Create new ODE functions on given interval
-            [ode_function, Jacobian] = btpde_functions_interval( ...
-                K, Q, R, J, q, seq, interval_midpoint);
+        % Update options with new Jacobian, which is either a
+        % function handle or a constant matrix, depending on the
+        % time profile
+        options = odeset(options_template, "Jacobian", Jacobian);
 
-            % Update options with new Jacobian, which is either a
-            % function handle or a constant matrix, depending on the
-            % time profile
-            options = odeset(options_template, "Jacobian", Jacobian);
+        % Solve ODE on domain, starting from the magnetization at
+        % the end of the previous interval (mag)
+        [~, y] = solve_ode(ode_function, time_list_interval, mag, options);
 
-            % Solve ODE on domain, starting from the magnetization at
-            % the end of the previous interval (mag)
-            [~, y] = solve_ode(ode_function, time_list_interval, mag, options);
+        % Magnetization at end of interval
+        mag = y(end, :).';
+    end
 
-            % Magnetization at end of interval
-            mag = y(end, :).';
-        end
-
-        % Split global solution into compartments
-        mag = mat2cell(mag, npoint_cmpts).';
-        % magnetization(:, iall) = mag;  % does not work in parfor before R2020b
-        for icmpt = 1:ncompartment
-            magnetization{icmpt, iall} = mag{icmpt};
-        end
-        % [magnetization{:, iall}] = deal(mag{:});
-        signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
-
-    end % unique direction case
+    % Split global solution into compartments
+    mag = mat2cell(mag, npoint_cmpts).';
+    for icmpt = 1:ncompartment
+        magnetization{icmpt, iall} = mag{icmpt};
+    end
+    signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
 
     % Store timing
     itertimes(iall) = toc(itertime);
 
 end % iterations
-
-% Copy results to opposite directions
-for idir = 1:ndirection_unique
-    if ~isempty(opposite{idir})
-        fprintf("Copying complex conjugate results from direction %d to opposite direction (%d)\n", idir, opposite{idir});
-        magnetization(:, :, :, opposite{idir}) = cellfun(@conj, magnetization(:, :, :, idir), ...
-            "UniformOutput", false);
-        signal(:, :, :, opposite{idir}) = conj(signal(:, :, :, idir));
-    end
-end
 
 % Total magnetization (sum over compartments)
 signal_allcmpts(:) = sum(signal, 1);

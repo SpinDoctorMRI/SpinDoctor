@@ -15,6 +15,7 @@ function results = solve_hadc(femesh, setup)
 starttime = tic;
 
 % Extract experiment parameters
+directions = setup.gradient.directions;
 sequences = setup.gradient.sequences;
 reltol = setup.hadc.reltol;
 abstol = setup.hadc.abstol;
@@ -26,16 +27,10 @@ diffusivity = setup.pde.diffusivity;
 initial_density = setup.pde.initial_density;
 compartments = setup.pde.compartments;
 
-% Extract HARDI points
-dir_points = setup.gradient.directions.points;
-dir_inds = setup.gradient.directions.indices;
-opposite = setup.gradient.directions.opposite;
-
 % Sizes
 ncompartment = length(compartments);
 nsequence = length(sequences);
-ndirection = setup.gradient.ndirection;
-ndirection_unique = length(dir_inds);
+ndirection = size(directions, 2);
 
 % Number of points in each compartment
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
@@ -95,69 +90,63 @@ parfor iall = 1:prod(allinds)
     % Extract indices
     [icmpt, iseq, idir] = ind2sub(allinds, iall);
 
-    % Do not bother solving if opposite direction has already been computed
-    if idir <= ndirection_unique
+    % Extract parameters for iteration
+    seq = sequences{iseq};
+    g = directions(:, idir);
 
-        % Extract parameters for iteration
-        seq = sequences{iseq};
-        g = dir_points(:, idir);
-        
-        % Free diffusivity in direction g
-        D0 = g' * diffusivity(:, :, icmpt) * g;
+    % Free diffusivity in direction g
+    D0 = g' * diffusivity(:, :, icmpt) * g;
 
-        % Compute surface integrals in gradient direction
-        surfint = G{icmpt} * (diffusivity(:, :, icmpt) * g);
+    % Compute surface integrals in gradient direction
+    surfint = G{icmpt} * (diffusivity(:, :, icmpt) * g);
 
-        % Display state of iterations
-        fprintf("Solving HADC equation using %s\n" ...
-            + "  Direction   %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
-            + "  Sequence    %d of %d: f = %s\n" ...
-            + "  Compartment %d of %d: %s\n", ...
-            solver_str, ...
-            idir, ndirection, g, ...
-            iseq, nsequence, seq, ...
-            icmpt, ncompartment, compartments(icmpt));
+    % Display state of iterations
+    fprintf("Solving HADC equation using %s\n" ...
+        + "  Direction   %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
+        + "  Sequence    %d of %d: f = %s\n" ...
+        + "  Compartment %d of %d: %s\n", ...
+        solver_str, ...
+        idir, ndirection, g, ...
+        iseq, nsequence, seq, ...
+        icmpt, ncompartment, compartments(icmpt));
 
-        % We only keep two points in tlist to output solution at all time
-        % steps
-        tlist = [0 seq.echotime];
+    % We only keep two points in tlist to output solution at all time
+    % steps
+    tlist = [0 seq.echotime];
 
-        % Create ODE function and Jacobian from matrices
-        [ode_function, Jacobian] = hadc_functions(K{icmpt}, surfint, seq);
+    % Create ODE function and Jacobian from matrices
+    [ode_function, Jacobian] = hadc_functions(K{icmpt}, surfint, seq);
 
-        % Set parameters for ODE solver
-        options = odeset("Mass", M{icmpt}, "AbsTol", abstol, "RelTol", reltol, ...
-            "Vectorized", "on", "Stats", "off", "Jacobian", Jacobian);
+    % Set parameters for ODE solver
+    options = odeset( ...
+        "Mass", M{icmpt}, ...
+        "AbsTol", abstol, ...
+        "RelTol", reltol, ...
+        "Vectorized", "on", ...
+        "Stats", "off", ...
+        "Jacobian", Jacobian ...
+    );
 
-        % Solve ODE, keep all time steps (for integral)
-        [tvec, y] = solve_ode(ode_function, tlist, rho{icmpt}, options);
-        tvec = tvec';
-        y = y';
+    % Solve ODE, keep all time steps (for integral)
+    [tvec, y] = solve_ode(ode_function, tlist, rho{icmpt}, options);
+    tvec = tvec';
+    y = y';
 
-        % Integral over compartment boundary
-        hvec = surfint' * y / volumes(icmpt);
+    % Integral over compartment boundary
+    hvec = surfint' * y / volumes(icmpt);
 
-        % HADC (free diffusivity minus correction)
-        a = trapz(tvec, seq.integral(tvec) .* hvec) / seq.bvalue_no_q;
-        adc(iall) = D0 - a;
-    end
+    % HADC (free diffusivity minus correction)
+    a = trapz(tvec, seq.integral(tvec) .* hvec) / seq.bvalue_no_q;
+    adc(iall) = D0 - a;
 
     % Computational time
     itertimes(iall) = toc(itertime);
 end
 
-% Copy results to opposite directions
-for idir = dir_inds
-    if ~isempty(opposite{idir})
-        fprintf("Copying result from direction %d to opposite direction (%d)\n", idir, opposite{idir});
-        adc(:, :, opposite{idir}) = adc(:, :, idir);
-    end
-end
-
 % Compute total HADC (weighted sum over compartments)
-weights = initial_density .* volumes; % compartment weights
-weights = weights / sum(weights); % normalize
-adc_allcmpts(:) = sum(weights' .* adc, 1); % weighted sum
+weights = initial_density .* volumes;
+weights = weights / sum(weights);
+adc_allcmpts(:) = sum(weights' .* adc, 1);
 
 % Create output structure
 results.adc = adc;

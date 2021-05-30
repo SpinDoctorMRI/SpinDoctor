@@ -92,7 +92,7 @@ grid on;
 if length(dir_vec) > 1
     dir_str = sprintf("dir [" + join(repmat("%d", 1, length(dir_vec))) + "]", dir_vec);
 else
-    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", setup.gradient.directions.points(:, dir_vec));
+    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", setup.gradient.directions(:, dir_vec));
 end
 
 % xlabel(sprintf("Real part (%s)", units.eigval));
@@ -400,7 +400,7 @@ for idir = dir_vec
     figure;
     hold on;
     iplot = 0;
-    gdir = setup.gradient.directions.points(:, idir);
+    gdir = setup.gradient.directions(:, idir);
     for iamp = b_vec
         W_mat = sum(lap_eig.moments .* shiftdim(gdir, -2), 3);
         L_mat = diag(lap_eig.values);

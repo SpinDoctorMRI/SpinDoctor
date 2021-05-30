@@ -73,13 +73,10 @@ q = 10 * 1e-5;
 d = (3/2 * b ./ q^2).^(1/3); % PGSE (q,d,b) relation
 % d = [5 10 20] * 1e+03;
 sequences = arrayfun(@(d) PGSE(d, d), d, "UniformOutput", false);
-setup.gradient.ndirection = 64;                         % Number of gradient directions to simulate
-setup.gradient.flat_dirs = true;                        % Choose between 3d or 2d distributed gradient directions
-setup.gradient.remove_opposite = false;                 % Choose whether to not compute opposite directions
-setup.gradient.direction = [1.0; 1.0; 1.0];             % Gradient direction; [g1; g2; g3] (if ndirection=1)
 setup.gradient.values = q;                              % g-, q-, or b-values [1 x namplitude]
-setup.gradient.values_type = "q";                       % Type of values; "g", "q" or "b"
+setup.gradient.values_type = "q";                       % Type of values: "g", "q", or "b"
 setup.gradient.sequences = sequences;                   % Gradient sequences {1 x nsequence}
+setup.gradient.directions = unitsemicircle(64);         % Gradient directions [3 x ndirection]
 
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode23t;                       % ODE solver for BTPDE

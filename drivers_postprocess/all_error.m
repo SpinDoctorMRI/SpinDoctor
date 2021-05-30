@@ -78,7 +78,7 @@ maxkappa = max(abs(setup.pde.permeability));
 dir = 0;
 if dir
     % Directionalized
-    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions.points(dir, :));
+    dir_str = sprintf("dir=[%.2f; %.2f; %.2f]", directions(:, dir));
     signal_mf_h0p5 = cellfun(@(x) x(:, :, dir), signal_mf_h0p5, "UniformOutput", false);
     signal_mf_h0p2 = cellfun(@(x) x(:, :, dir), signal_mf_h0p5, "UniformOutput", false);
     signal_btpde_h0p5 = signal_btpde_h0p5(:, :, dir, :);
