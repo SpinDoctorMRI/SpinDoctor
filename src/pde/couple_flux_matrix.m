@@ -3,11 +3,11 @@ function Q = couple_flux_matrix(femesh, pde, Q_blocks, symmetrical)
 %
 %   femesh: struct with fields
 %       ncompartment: [1 x 1]
-%     	point_map: {1 x 4}
+%       point_map: {1 x 4}
 %   pde: struct with fields
 %       initial_density: [1 x ncompartment]
-%       permaeability: [1 x nboundary]
-%  	Q_blocks: {ncompartment x nboundary}[npoint x npoint]
+%       permeability: [1 x nboundary]
+%   Q_blocks: {ncompartment x nboundary}[npoint x npoint]
 %
 %   Q: [ndof_total x ndof_total]
 
@@ -65,6 +65,7 @@ for iboundary = 1:nboundary
             indinds1 = 1:length(inds1);
             indinds2 = 1:length(inds2);
         else
+            % Find coupled nodes
             [indinds1, indinds2] = find(point_map{cmpt1}(inds1) == point_map{cmpt2}(inds2)');
         end
         
@@ -95,11 +96,11 @@ for iboundary = 1:nboundary
         inds1 = get_inds(cmpt1);
         inds2 = get_inds(cmpt2);
         
-        % Add interface contribution to global flux matrix for compartment 1
+        % Add interface contribution to compartment 1 in global flux matrix
         Q(inds1, inds1) = Q(inds1, inds1) + k1 * Q11;
         Q(inds1, inds2) = Q(inds1, inds2) - k2 * Q12;
         
-        % Add interface contribution to global flux matrix for compartment 2
+        % Add interface contribution to compartment 2 in global flux matrix
         Q(inds2, inds1) = Q(inds2, inds1) - k1 * Q21;
         Q(inds2, inds2) = Q(inds2, inds2) + k2 * Q22;
         

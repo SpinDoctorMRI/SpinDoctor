@@ -2,9 +2,10 @@ function amb = amsm(ama, smx)
 %AMSM Matrix array times scalar matrix.
 %   Copyright (c) 2013, Talal Rahman, Jan Valdman
 %
-%   ama: ama(1:nx, 1:ny, 1:nz)
-%   smx: smx(1:ny, 1:nk)
-%   amb: amb(1:nx, 1:nk, 1:nz)
+%   ama: [nx x ny x nz]
+%   smx: [ny x nk]
+%
+%   amb: [nx x nk x nz]
 
 [nx, ~, nz] = size(ama);
 [~, nk] = size(smx);

@@ -2,9 +2,19 @@ function [alpha, n] = compute_eigenvalues(alpha_max, params, dalpha)
 %COMPUTE_EIGENVALUES Compute radial and angular eigenvalues.
 %   Find all radial eigenvalues smaller than alpha_max^2, with radial and angular indices.
 %
-% dalpha – smallest distance between two alphas
-% alpha  - sqrt lambda (radial eigenvalue)
-% n      - angular parameter: n = 0 (1D), n^2 = nu (2D), or n(n+1) = nu (3D)
+% This function is based on the following articles and corresponding code:
+%   [1] D. S. Grebenkov, NMR Survey of Reflected Brownian Motion,
+%       Rev. Mod.Phys. 79, 1077 (2007)
+%   [2] D. S. Grebenkov, Pulsed-gradient spin-echo monitoring of restricted 
+%       diffusion inmultilayered structures,
+%       J. Magn. Reson. 205, 181-195 (2010).
+%
+%   alpha_max
+%   params
+%   dalpha – smallest distance between two alphas
+%
+%   alpha  - sqrt lambda (radial eigenvalue)
+%   n      - angular parameter: n = 0 (1D), n^2 = nu (2D), or n(n+1) = nu (3D)
 
 
 alpha = [];

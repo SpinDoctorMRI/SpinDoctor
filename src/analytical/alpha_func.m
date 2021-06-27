@@ -1,11 +1,19 @@
 function f = alpha_func(alpha, n, params)
 %ALPHA_FUNC Compute the quantity Fn(alpha), for which the roots are the radial eigenvalues.
 %
+% This function is based on the following articles and corresponding code:
+%   [1] D. S. Grebenkov, NMR Survey of Reflected Brownian Motion,
+%       Rev. Mod.Phys. 79, 1077 (2007)
+%   [2] D. S. Grebenkov, Pulsed-gradient spin-echo monitoring of restricted 
+%       diffusion inmultilayered structures,
+%       J. Magn. Reson. 205, 181-195 (2010).
+%
 %   alpha
 %   n
 %   params
 %
 %   f
+
 
 r = params.r;
 D = params.D;

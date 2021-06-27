@@ -9,7 +9,7 @@
 %   
 %       pde:
 %           Domain parameters. Contains PDE parameters (material properties)
-%       	defined for the domains "IN", "OUT", "ECS" and their boundaries
+%           defined for the domains "IN", "OUT", "ECS" and their boundaries
 %   
 %       gradient:
 %           Gradient sequence parameters. It determines the three properties

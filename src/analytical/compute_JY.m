@@ -1,5 +1,22 @@
 function [J, Y, dJ, dY] = compute_JY(z, n, d)
 %COMPUTE_JY Compute the Bessel functions J and Y.
+%
+% This function is based on the following articles and corresponding code:
+%   [1] D. S. Grebenkov, NMR Survey of Reflected Brownian Motion,
+%       Rev. Mod.Phys. 79, 1077 (2007)
+%   [2] D. S. Grebenkov, Pulsed-gradient spin-echo monitoring of restricted 
+%       diffusion inmultilayered structures,
+%       J. Magn. Reson. 205, 181-195 (2010).
+%
+%   z
+%   n
+%   d
+%
+%   J
+%   Y
+%   dJ
+%   dY
+
 
 switch d
     case 2

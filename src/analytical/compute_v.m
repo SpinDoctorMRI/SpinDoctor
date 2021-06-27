@@ -1,5 +1,22 @@
 function [v, dv] = compute_v(alpha, n, x, params, bc)
 %COMPUTE_V Compute the eigenfunction v and its derivative.
+%
+% This function is based on the following articles and corresponding code:
+%   [1] D. S. Grebenkov, NMR Survey of Reflected Brownian Motion,
+%       Rev. Mod.Phys. 79, 1077 (2007)
+%   [2] D. S. Grebenkov, Pulsed-gradient spin-echo monitoring of restricted 
+%       diffusion inmultilayered structures,
+%       J. Magn. Reson. 205, 181-195 (2010).
+%
+%   alpha
+%   n
+%   x
+%   params
+%   bc
+%
+%   v
+%   dv
+
 
 r = params.r;
 D = params.D;

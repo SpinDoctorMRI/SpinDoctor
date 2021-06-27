@@ -2,9 +2,11 @@ function amb = smamt(smx, ama)
 %SMAMT Scalar matrix times array of matrices transposed.
 %   Copyright (c) 2013, Talal Rahman, Jan Valdman
 %
-%   ama: ama(1:ny, 1:nx, 1:nz)
-%   smx: smx(1:nk, 1:nx)
-%   amb: amb(1:nk, 1:ny, 1:nz)
+%   smx: [nk x nx]
+%   ama: [ny x nx x nz]
+%
+%   amb: [nk x ny x nz]
+
 
 [ny, ~, nz] = size(ama);
 [nk, ~] = size(smx);

@@ -2,9 +2,10 @@ function avb = svamt(svx, ama)
 %SVAMT Scalar vector times array of matrices transposed.
 %   Copyright (c) 2013, Talal Rahman, Jan Valdman
 %
-%   ama: ama(1:ny,1:nx,1:nz)
-%   svx: svx(1,1:nx)
-%   avb: avb(1,1:ny,1:nz)
+%   svx: [1 x nx]
+%   ama: [ny x nx x nz]
+%
+%   avb: [1 x ny x nz]
 
 
 [ny, ~, nz] = size(ama);

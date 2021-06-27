@@ -12,8 +12,7 @@ function tensors = fit_tensor(directions, adc)
 % Sizes
 [ncompartment, ndirection] = size(adc);
 
-% Get vectors of gradient interactions (basis vectors for symmetrical diffusion
-% tensors)
+% Get vectors of gradient interactions
 g = directions;
 G = zeros(ndirection, 6);
 G(:, 1) = g(1, :).^2;
@@ -38,4 +37,3 @@ tensors(1, 3, :) = Dvec(5, :);
 tensors(3, 1, :) = Dvec(5, :);
 tensors(2, 3, :) = Dvec(6, :);
 tensors(3, 2, :) = Dvec(6, :);
-

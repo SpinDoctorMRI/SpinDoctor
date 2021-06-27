@@ -2,9 +2,10 @@ function avb = amsv(ama, svx)
 %AMSV Matrix array times scalar vector.
 %   Copyright (c) 2013,  Talal Rahman,  Jan Valdman
 %
-% ama: ama(1:nx, 1:ny, 1:nz)
-% svx: svx(1:ny, 1)
-% avb: avb(1:nx, 1, 1:nz)
+%   ama: [nx x ny x nz]
+%   svx: [ny x 1]
+%
+%   avb: [nx x 1 x nz]
 
 [nx, ~, nz] = size(ama);
 

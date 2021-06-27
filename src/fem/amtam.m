@@ -2,9 +2,10 @@ function amb = amtam(amx, ama)
 %AMTAM Matrix array transpose times matrix array.
 %   Copyright (c) 2013,  Talal Rahman,  Jan Valdman
 %
-%   ama: ama(1:nx, 1:ny, 1:nz)
-%   amx: amx(1:nx, 1:nk, 1:nz)
-%   amb: amb(1:nk, 1:ny, 1:nz)
+%   amx: [nx x nk x nz]
+%   ama: [nx x ny x nz]
+%
+%   amb: [nk x ny x nz]
 
 [~, ny, nz] = size(ama);
 [~, nk, ~] = size(amx);

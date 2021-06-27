@@ -2,9 +2,10 @@ function avb = avtam(avx, ama)
 %AVTAM Vector array transpose times matrix array.
 %   Copyright (c) 2013, Talal Rahman, Jan Valdman
 %
-%   ama: ama(1:nx, 1:ny, 1:nz)
-%   avx: avx(1:nx, 1:nz)
-%   avb: avb(1, 1:ny, 1:nz)
+%   avx: [nx x nz]
+%   ama: [nx x ny x nz]
+%
+%   avb: [1 x ny xnz]
 
 [~, ny, ~] = size(ama);
 

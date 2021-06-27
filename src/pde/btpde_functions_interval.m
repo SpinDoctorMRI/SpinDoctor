@@ -14,13 +14,13 @@ function [ode_func, Jacobian] = btpde_functions_interval(K, Q, R, J, q, seq, int
 % The matrix M refers to the mass matrix.
 %
 % Args:
-%   K: [npoint x npoint]       - Stiffness matrix
-%   Q: [npoint x npoint]       - Flux matrix
-%   R: [npoint x npoint]       - Relaxation matrix
-%   J: [npoint x npoint]       - Moment matrix in gradient direction
-%   q: [1 x 1]                 - Q-value
-%   seq: Sequence              - Gradient sequence
-%   interval_midpoint: [1 x 1] - Midpoint of interval
+%   K: [npoint x npoint]      - Stiffness matrix
+%   Q: [npoint x npoint]      - Flux matrix
+%   R: [npoint x npoint]      - Relaxation matrix
+%   J: [npoint x npoint]      - Moment matrix in gradient direction
+%   q: [1 x 1]                - Q-value
+%   seq: Sequence             - Gradient sequence
+%   interval_midpoint [1 x 1] - Midpoint of interval
 %
 %   ode_func: ODE function at time t and state y
 %   Jacobian: Jacobian of ODE function with respect to the state y

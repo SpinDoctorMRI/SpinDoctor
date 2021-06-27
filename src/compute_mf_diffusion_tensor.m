@@ -22,6 +22,7 @@ diffusion_tensor = zeros(3, 3, nsequence);
 M_cmpts = cell(1, ncompartment);
 volumes = zeros(1, ncompartment);
 for icmpt = 1:ncompartment
+    % Finite elements
     points = femesh.points{icmpt};
     elements = femesh.elements{icmpt};
     [volumes(icmpt), fevolumes] = get_volume_mesh(points, elements);
@@ -29,8 +30,6 @@ for icmpt = 1:ncompartment
 end
 M = blkdiag(M_cmpts{:});
 points = [femesh.points{:}];
-
-% Compute first order eigenfunction moments
 a = points * M * eigfuncs;
 
 % Compute diffusion tensor

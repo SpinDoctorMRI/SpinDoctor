@@ -1,5 +1,19 @@
 function bc = compute_bc(alpha, n, params)
 %COMPUTE_BC Compute the coefficients b and c.
+%
+% This function is based on the following articles and corresponding code:
+%   [1] D. S. Grebenkov, NMR Survey of Reflected Brownian Motion,
+%       Rev. Mod.Phys. 79, 1077 (2007)
+%   [2] D. S. Grebenkov, Pulsed-gradient spin-echo monitoring of restricted 
+%       diffusion inmultilayered structures,
+%       J. Magn. Reson. 205, 181-195 (2010).
+%
+%   alpha
+%   n
+%   params
+%
+%   bc
+
 
 r = params.r;
 D = params.D;

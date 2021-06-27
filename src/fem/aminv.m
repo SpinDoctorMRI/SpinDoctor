@@ -2,8 +2,10 @@ function [amb, dem] = aminv(ama)
 %AMINV Inverse of matrix array.
 %   Copyright (c) 2013, Talal Rahman, Jan Valdman
 %
-%   ama: ama(1:nx, 1:nx, 1:nz)
-%   amb: amb(1:nx, 1:nx, 1:nz)
+%   ama: [nx x nx x nz]
+%
+%   dem: [1 x nz]
+%   amb: [nx x nx x nz]
 
 [~, nx, nz] = size(ama);
 

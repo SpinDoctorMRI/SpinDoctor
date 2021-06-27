@@ -12,12 +12,12 @@ function [ode_func, Jacobian] = btpde_functions(K, Q, R, J, q, seq)
 % The matrix M refers to the mass matrix.
 %
 % Args:
-%   K: [npoint x npoint]       - Stiffness matrix
-%   Q: [npoint x npoint]       - Flux matrix
-%   R: [npoint x npoint]       - Relaxation matrix
-%   J: [npoint x npoint]       - Moment matrix in gradient direction
-%   q: [1 x 1]                 - Q-value
-%   seq: Sequence              - Gradient sequence
+%   K: [npoint x npoint] - Stiffness matrix
+%   Q: [npoint x npoint] - Flux matrix
+%   R: [npoint x npoint] - Relaxation matrix
+%   J: [npoint x npoint] - Moment matrix in gradient direction
+%   q: [1 x 1]           - Q-value
+%   seq: Sequence        - Gradient sequence
 %
 %   ode_func: ODE function at time t and state y
 %   Jacobian: Jacobian of ODE function with respect to the state y

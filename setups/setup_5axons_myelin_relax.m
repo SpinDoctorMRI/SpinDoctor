@@ -9,7 +9,7 @@
 %   
 %       pde:
 %           Domain parameters. Contains PDE parameters (material properties)
-%       	defined for the domains "IN", "OUT", "ECS" and their boundaries
+%           defined for the domains "IN", "OUT", "ECS" and their boundaries
 %   
 %       gradient:
 %           Gradient sequence parameters. It determines the three properties
@@ -81,7 +81,7 @@ setup.gradient.values_type = "q";                       % Type of values: "g", "
 setup.gradient.sequences = {                            % Gradient sequences {1 x nsequence}
     PGSE(5000, 5000)         
     PGSE(5000, 10000)
-	PGSE(10000, 20000)
+    PGSE(10000, 20000)
 }';
 setup.gradient.directions = [1.0; 1.0; 1.0];            % Gradient directions [3 x ndirection]
 

@@ -2,10 +2,19 @@ function alpha = find_alpha_n(alpha_max, n, params, dalpha)
 %FIND_ALPHA_N Find all radial eigenvalues for a given angular mode n.
 %   This function sweeps over the interval [0, alpha_max].
 %
+% This function is based on the following articles and corresponding code:
+%   [1] D. S. Grebenkov, NMR Survey of Reflected Brownian Motion,
+%       Rev. Mod.Phys. 79, 1077 (2007)
+%   [2] D. S. Grebenkov, Pulsed-gradient spin-echo monitoring of restricted 
+%       diffusion inmultilayered structures,
+%       J. Magn. Reson. 205, 181-195 (2010).
+%
 %   alpha_max: [1 x 1]
 %   n
 %   params
 %   dalpha
+%
+%   alpha
 
 
 alpha = [];

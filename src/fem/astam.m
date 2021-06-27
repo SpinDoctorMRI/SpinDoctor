@@ -1,8 +1,10 @@
 function amb = astam(asx, ama)
 % Copyright (c) 2015, Talal Rahman, Jan Valdman
-% ama: ama(1:nx, 1:ny, 1:nz)
-% asx: avx(1, 1:nz)
-% amb: avb(1:nx, 1:ny, 1:nz)
+%
+%   ama: [nx x ny x nz]
+%   asx: [1 x nz]
+%
+%   amb: [nx x ny x nz]
 
 [nx, ny, nz] = size(ama);
 
