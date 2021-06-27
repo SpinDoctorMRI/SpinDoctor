@@ -29,6 +29,9 @@ addpath setups
 setup_30axons;
 % setup_200axons;
 
+% Choose whether to save magnetization field
+save_magnetization = false;
+
 % Choose to see some of the typical plots or not
 do_plots = true;
 
@@ -86,143 +89,26 @@ end
 %% Solve BTPDE
 if isfield(setup, "btpde")
     disp("Computing or loading the BTPDE signals");
-
-    % Inialize BTPDE output arguments
-    btpde.magnetization = cell(ncompartment, namplitude, nsequence, ndirection);
-    btpde.signal = zeros(ncompartment, namplitude, nsequence, ndirection);
-    btpde.signal_allcmpts = zeros(namplitude, nsequence, ndirection);
-    btpde.itertimes = zeros(namplitude, nsequence, ndirection);
-    btpde.totaltime = 0;
-    
-    % Solve or load BTPDE, one experiment and b-value at the time
-    for iseq = 1:nsequence
-        for iamp = 1:namplitude
-            
-            % Extract experiment parameters
-            seq = setup.gradient.sequences{iseq};
-            bvalue = setup.gradient.bvalues(iamp, iseq);
-            qvalue = setup.gradient.qvalues(iamp, iseq);
-
-            % Create the filename string for the saving data
-            if seq.delta == seq.Delta
-                experi_str = sprintf("%s_dD%g", class(seq), seq.delta);
-            else
-                experi_str = sprintf("%s_d%g_D%g", class(seq), seq.delta, seq.Delta);
-            end
-            if setup.gradient.values_type == "q"
-                bvalue_str = sprintf("q%g", qvalue);
-            else
-                bvalue_str = sprintf("b%g", bvalue);
-            end
-            fname = sprintf("btpde_%s_%s_%s_abstol%g_reltol%g.mat", dir_str, ...
-                experi_str, bvalue_str, setup.btpde.abstol, setup.btpde.reltol);
-            fname = save_dir_path_spindoctor + "/" + fname;
-            
-            % Choose whether to load or compute results
-            if isfile(fname)
-                % Load BTPDE results for one experiment and b-value
-                disp("load " + fname);
-                load(fname);
-            else
-                % Create temporary experiment structure only containing the
-                % current gradient sequence and b-value
-                setup_tmp = setup;
-                setup_tmp.gradient.qvalues = setup.gradient.qvalues(iamp, iseq);
-                setup_tmp.gradient.bvalues = setup.gradient.bvalues(iamp, iseq);
-                setup_tmp.gradient.sequences = setup.gradient.sequences(iseq);
-
-                % Solve the BTPDE for one experiment and bvalue
-                btpde_tmp = solve_btpde(femesh, setup_tmp);
-
-                % Extract results
-                magnetization = btpde_tmp.magnetization;
-                signal = btpde_tmp.signal;
-                signal_allcmpts = btpde_tmp.signal_allcmpts;
-                itertimes = btpde_tmp.itertimes;
-                totaltime = btpde_tmp.totaltime;
-
-                % Save BTPDE results
-                file = save_dir_path_spindoctor + "/" + fname;
-                disp("save " + fname + " -v7.3 -struct btpde_tmp");
-                save(fname, "-v7.3", "-struct", "btpde_tmp");
-            end
-
-            % Store results
-            btpde.magnetization(:, iamp, iseq, :) = magnetization;
-            btpde.signal(:, iamp, iseq, :) = signal;
-            btpde.signal_allcmpts(iamp, iseq, :) = signal_allcmpts;
-            btpde.itertimes(iamp, iseq, :) = itertimes;
-            btpde.totaltime = btpde.totaltime + totaltime;
-        end
-    end
-
-    % BTPDE direction averaged magnetization
+    btpde = solve_btpde(femesh, setup, save_dir_path_spindoctor, save_magnetization);
     btpde.magnetization_avg = average_magnetization(btpde.magnetization);
+end
 
-    % Clear temporary variables
-    clear setup_tmp
-    clear seq
-    clear btpde_tmp
-    clear magnetization signal signal_allcmpts itertimes totaltime
-    clear fname
+
+%% Solve BTPDE using midpoint method
+if isfield(setup, "btpde")
+    disp("Computing or loading the BTPDE midpoint signals");
+    btpde_midpoint = solve_btpde_midpoint( ...
+        femesh, setup, save_dir_path_spindoctor, save_magnetization ...
+    );
+    btpde_midpoint.magnetization_avg ...
+        = average_magnetization(btpde_midpoint.magnetization);
 end
 
 
 %% Solve HADC model
 if isfield(setup, "hadc")
     disp("Computing or loading the homogenized apparent diffusion coefficient");
-
-    % Initialize data structures
-    hadc.adc = zeros(ncompartment, nsequence, ndirection);
-    hadc.adc_allcmpts = zeros(nsequence, ndirection);
-    hadc.itertimes = zeros(ncompartment, nsequence, ndirection);
-    hadc.totaltime = 0;
-
-    for iseq = 1:nsequence
-        seq = setup.gradient.sequences{iseq};
-        
-        % File name
-        fname = sprintf("hadc_%s_%s_d%g_D%g_abstol%g_reltol%g.mat", dir_str, ...
-            class(seq), seq.delta, seq.Delta, setup.hadc.abstol, setup.hadc.reltol);
-        fname = save_dir_path_spindoctor + "/" + fname;
-
-        % Save or load
-        if isfile(fname)
-            % Load HADC results
-            disp("load " + fname);
-            load(fname);
-        else
-            % Create temporary setup structure for given index
-            setup_tmp = setup;
-            setup_tmp.gradient.sequences = setup.gradient.sequences(iseq);
-
-            % Solve HADC model
-            hadc_tmp = solve_hadc(femesh, setup_tmp);
-
-            % Extract results
-            adc = hadc_tmp.adc;
-            adc_allcmpts = hadc_tmp.adc_allcmpts;
-            itertimes = hadc_tmp.itertimes;
-            totaltime = hadc_tmp.totaltime;
-
-            % Save results
-            disp("save " + fname + " -v7.3 -struct hadc_tmp");
-            save(fname, "-v7.3", "-struct", "hadc_tmp");
-        end
-
-        % Store results
-        hadc.adc(:, iseq, :) = adc;
-        hadc.adc_allcmpts(iseq, :) = adc_allcmpts;
-        hadc.itertimes(:, iseq, :) = itertimes;
-        hadc.totaltime = hadc.totaltime + totaltime;
-    end
-
-    % Clear temporary variables
-    clear setup_tmp
-    clear seq
-    clear hadc_tmp
-    clear adc adc_allcmpts itertimes totaltime
-    clear fname
+    hadc = solve_hadc(femesh, setup, save_dir_path_spindoctor);
 end
 
 
