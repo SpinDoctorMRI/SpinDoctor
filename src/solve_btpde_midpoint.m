@@ -60,7 +60,7 @@ sequences = setup.gradient.sequences;
 directions = setup.gradient.directions;
 theta = setup.btpde_midpoint.implicitness;
 dt = setup.btpde_midpoint.timestep;
-solver_str = sprintf("theta rule (theta = %g)", theta);
+solver_str = sprintf("theta rule (theta = %g, dt = %g)", theta, dt);
 
 % Check that sequences are compatible
 assert(all(cellfun(@(f) isa(f, "PGSE") || isa(f, "DoublePGSE"), sequences)), ...
