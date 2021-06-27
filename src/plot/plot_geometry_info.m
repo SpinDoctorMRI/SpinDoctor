@@ -1,4 +1,4 @@
-function plot_geometry_info(setup, femesh, volumes, surface_areas)
+function plot_geometry_info(setup, femesh)
 %PLOT_GEOMETRY_INFO Plot information of the geometry.
 %
 %   setup: struct
