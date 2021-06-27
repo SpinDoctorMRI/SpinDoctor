@@ -75,12 +75,7 @@ end
 save_dir_path_spindoctor = "saved_simul/" + tmp + refinement_str;
 couple_str = sprintf("kappa%g_%g", setup.pde.permeability_in_out, ...
     setup.pde.permeability_out_ecs);
-if setup.gradient.flat_dirs
-    flat_str = "_flat";
-else
-    flat_str = "";
-end
-dir_str = sprintf("ndir%d%s", ndirection, flat_str);
+dir_str = sprintf("ndir%d", ndirection);
 save_dir_path_spindoctor = save_dir_path_spindoctor + "/" + couple_str;
 
 if ~isfolder(save_dir_path_spindoctor)
