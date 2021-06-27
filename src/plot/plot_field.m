@@ -21,16 +21,7 @@ if nargin < nargin(@plot_field)
     ifield = 1;
 end
 
-include_in = any(compartments == "in");
-include_ecs = any(compartments == "ecs");
-
-labels = "out";
-if include_in
-    labels = ["in" labels];
-end
-if include_ecs
-    labels = [labels "ecs"];
-end
+labels = unique(compartments);
 
 % Determine limits of domain
 pmin = min([femesh.points{:}], [], 2);

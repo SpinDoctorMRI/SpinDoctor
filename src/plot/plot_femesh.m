@@ -6,16 +6,7 @@ function plot_femesh(femesh, compartments)
 colors = ["r" "b" "g" "y" "k" "c" "w"];
 
 ncompartment = length(compartments);
-include_in = any(compartments == "in");
-include_ecs = any(compartments == "ecs");
-
-labels = "out";
-if include_in
-    labels = ["in" labels];
-end
-if include_ecs
-    labels = [labels "ecs"];
-end
+labels = unique(compartments);
 
 % Determine limits of domain
 pmin = min([femesh.points{:}], [], 2);
