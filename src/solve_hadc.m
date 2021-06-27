@@ -1,8 +1,16 @@
-function results = solve_hadc(femesh, setup)
+function results = solve_hadc(femesh, setup, savepath)
 %SOLVE_HADC Compute the ADC from HADC model.
+%
+%   SOLVE_HADC(FEMESH, SETUP) solves the HADC and returns results.
+%
+%   SOLVE_HADC(FEMESH, SETUP, SAVEPATH) saves the results of each iteration at
+%   "<SAVEPATH>/HADC_<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT". If an
+%   iteration file is already present, the solver loads the results instead of
+%   solving for that iteration.
 %
 %   femesh: struct
 %   setup: struct
+%   savepath (optional): string
 %
 %   results: struct with fields
 %       adc: double(ncompartment, nsequence, ndirection)
@@ -10,6 +18,9 @@ function results = solve_hadc(femesh, setup)
 %       itertimes: double(ncompartment, nsequence, ndirection)
 %       totaltime: double(ncompartment, nsequence, ndirection)
 
+
+% Check if a save path has been provided (this toggers saving)
+do_save = nargin == nargin(@solve_hadc);
 
 % Measure function evaluation time
 starttime = tic;
@@ -35,10 +46,24 @@ ndirection = size(directions, 2);
 % Number of points in each compartment
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
 
+if do_save
+    % Folder for saving
+    savepath = sprintf( ...
+        "%s/hadc_abstol%g_reltol%g", ...
+        savepath, abstol, reltol ...
+    );
+    if ~isfolder(savepath)
+        mkdir(savepath)
+    end
+else
+    savepath = "";
+end
+
 % Initialize output arguments
 adc = zeros(ncompartment, nsequence, ndirection);
 adc_allcmpts = zeros(nsequence, ndirection);
 itertimes = zeros(ncompartment, nsequence, ndirection);
+totaltime_addition = 0;
 
 % Assemble finite element matrices
 M = cell(1, ncompartment);
@@ -94,53 +119,79 @@ parfor iall = 1:prod(allinds)
     seq = sequences{iseq};
     g = directions(:, idir);
 
-    % Free diffusivity in direction g
-    D0 = g' * diffusivity(:, :, icmpt) * g;
+    % File name for saving or loading iteration results
+    filename = sprintf("%s/%s.mat", savepath, adc_string(icmpt, seq, g));
+    
+    % Check if results are already available
+    if do_save && isfile(filename)
+        % Load results
+        fprintf("Load %s\n", filename);
+        mfile = matfile(filename, "Writable", false);
+        adc(iall) = mfile.adc;
+        itertimes(iall) = mfile.itertime;
+        totaltime_addition = totaltime_addition + mfile.itertime;
+    else
+        % Free diffusivity in direction g
+        D0 = g' * diffusivity(:, :, icmpt) * g;
 
-    % Compute surface integrals in gradient direction
-    surfint = G{icmpt} * (diffusivity(:, :, icmpt) * g);
+        % Compute surface integrals in gradient direction
+        surfint = G{icmpt} * (diffusivity(:, :, icmpt) * g);
 
-    % Display state of iterations
-    fprintf("Solving HADC equation using %s\n" ...
-        + "  Direction   %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
-        + "  Sequence    %d of %d: f = %s\n" ...
-        + "  Compartment %d of %d: %s\n", ...
-        solver_str, ...
-        idir, ndirection, g, ...
-        iseq, nsequence, seq, ...
-        icmpt, ncompartment, compartments(icmpt));
+        % Display state of iterations
+        fprintf( ...
+            join([
+                "Solving HADC model of size %d using %s:"
+                "  Direction %d of %d: g = [%.2f; %.2f; %.2f]"
+                "  Sequence  %d of %d: f = %s"
+                "  Compartment %d of %d: %s\n"
+            ], newline), ...
+            sum(npoint_cmpts), solver_str, ...
+            idir, ndirection, g, ...
+            iseq, nsequence, seq, ...
+            icmpt, ncompartment, compartments(icmpt) ...
+        );
+        
+        
+        % We only keep two points in tlist to output solution at all time
+        % steps
+        tlist = [0 seq.echotime];
 
-    % We only keep two points in tlist to output solution at all time
-    % steps
-    tlist = [0 seq.echotime];
+        % Create ODE function and Jacobian from matrices
+        [ode_function, Jacobian] = hadc_functions(K{icmpt}, surfint, seq);
 
-    % Create ODE function and Jacobian from matrices
-    [ode_function, Jacobian] = hadc_functions(K{icmpt}, surfint, seq);
+        % Set parameters for ODE solver
+        options = odeset( ...
+            "Mass", M{icmpt}, ...
+            "AbsTol", abstol, ...
+            "RelTol", reltol, ...
+            "Vectorized", "on", ...
+            "Stats", "off", ...
+            "Jacobian", Jacobian ...
+        );
 
-    % Set parameters for ODE solver
-    options = odeset( ...
-        "Mass", M{icmpt}, ...
-        "AbsTol", abstol, ...
-        "RelTol", reltol, ...
-        "Vectorized", "on", ...
-        "Stats", "off", ...
-        "Jacobian", Jacobian ...
-    );
+        % Solve ODE, keep all time steps (for integral)
+        [tvec, y] = solve_ode(ode_function, tlist, rho{icmpt}, options);
+        tvec = tvec';
+        y = y';
 
-    % Solve ODE, keep all time steps (for integral)
-    [tvec, y] = solve_ode(ode_function, tlist, rho{icmpt}, options);
-    tvec = tvec';
-    y = y';
+        % Integral over compartment boundary
+        hvec = surfint' * y / volumes(icmpt);
 
-    % Integral over compartment boundary
-    hvec = surfint' * y / volumes(icmpt);
+        % HADC (free diffusivity minus correction)
+        a = trapz(tvec, seq.integral(tvec) .* hvec) / seq.bvalue_no_q;
+        adc(iall) = D0 - a;
 
-    % HADC (free diffusivity minus correction)
-    a = trapz(tvec, seq.integral(tvec) .* hvec) / seq.bvalue_no_q;
-    adc(iall) = D0 - a;
-
-    % Computational time
-    itertimes(iall) = toc(itertime);
+        % Computational time
+        itertimes(iall) = toc(itertime);
+        
+        if do_save
+            % Save iteration results
+            fprintf("Save %s\n", filename);
+            mfile = matfile(filename, "Writable", true);
+            mfile.adc = adc(iall);
+            mfile.itertime = itertimes(iall);
+        end
+    end % save or load results
 end
 
 % Compute total HADC (weighted sum over compartments)
@@ -152,7 +203,7 @@ adc_allcmpts(:) = sum(weights' .* adc, 1);
 results.adc = adc;
 results.adc_allcmpts = adc_allcmpts;
 results.itertimes = itertimes;
-results.totaltime = toc(starttime);
+results.totaltime = toc(starttime) + totaltime_addition;
 
 % Display function evaluation time
 toc(starttime);

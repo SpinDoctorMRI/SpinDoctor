@@ -199,7 +199,7 @@ parfor iall = 1:prod(allinds)
             % Display state of iterations
             fprintf( ...
                 join([
-                    "Solving BTPDE of size %d using %s"
+                    "Solving BTPDE of size %d using %s:"
                     "  Direction %d of %d: g = [%.2f; %.2f; %.2f]"
                     "  Sequence  %d of %d: f = %s"
                     "  Amplitude %d of %d: q = %g, b = %g"

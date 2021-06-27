@@ -2,13 +2,13 @@ function results = load_btpde(setup, savepath, load_magnetization)
 %LOAD_BTPDE Load the results saved by SOLVE_BTPDE.
 %
 %   LOAD_BTDPE(SETUP, SAVEPATH) loads the results of each iteration from
-%   "<SAVEPATH>/BTPDE_<SOLVEROPTIONS>/<ITERATIONINFO>.MAT".
+%   "<SAVEPATH>/BTPDE_<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT".
 %
 %   LOAD_BTDPE(SETUP, SAVEPATH, LOAD_MAGNETIZATION) also omits loading
 %   the magnetization field if LOAD_MAGNETIZATION is set to FALSE.
 %
 %   setup: struct
-%   savepath (optional): string
+%   savepath: string
 %   load_magnetization (optional): logical. Defaults to true.
 %   
 %   results: struct with fields
