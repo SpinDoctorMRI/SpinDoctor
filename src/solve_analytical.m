@@ -84,7 +84,7 @@ else
     W_ecs = [];
     T_ecs = [];
     
-    if d == 3
+    if dim == 3
         % Add surface relaxivity for the outermost sphere ("out")
         W_out = setup.pde.permeability_out;
     end
