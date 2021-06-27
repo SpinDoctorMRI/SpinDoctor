@@ -1,9 +1,21 @@
-function results = solve_btpde(femesh, setup)
+function results = solve_btpde(femesh, setup, savepath, save_magnetization)
 %SOLVE_BTPDE Solve the Bloch-Torrey partial differential equation.
+%
+%   SOLVE_BTPDE(FEMESH, SETUP) solves the BTPDE and returns results.
+%
+%   SOLVE_BTPDE(FEMESH, SETUP, SAVEPATH) saves the results of each iteration at
+%   "<SAVEPATH>/BTPDE_<SOLVEROPTIONS>/<ITERATIONINFO>.MAT". If an
+%   iteration file is already present, the solver loads the results instead of
+%   solving for that iteration.
+%
+%   SOLVE_BTPDE(FEMESH, SETUP, SAVEPATH, SAVE_MAGNETIZATION) also omits saving
+%   or loading the magnetization field if SAVE_MAGNETIZATION is set to FALSE.
 %
 %   femesh: struct
 %   setup: struct
-%
+%   savepath (optional): string
+%   save_magnetization (optional): logical. Defaults to true.
+%   
 %   results: struct with fields
 %       magnetization: {ncompartment x namplitude x nsequence x
 %                       ndirection}[npoint x 1]
@@ -21,12 +33,22 @@ function results = solve_btpde(femesh, setup)
 % Measure function evaluation time
 starttime = tic;
 
+% Check if a save path has been provided (this toggers saving)
+do_save = nargin >= nargin(@solve_btpde) - 1;
+
+% Provide default value
+if nargin < nargin(@solve_btpde)
+    save_magnetization = true;
+end
+
 % Extract domain parameters
 diffusivity = setup.pde.diffusivity;
 relaxation = setup.pde.relaxation;
 initial_density = setup.pde.initial_density;
 
 % Extract experiment parameters
+values = setup.gradient.values;
+amptype = setup.gradient.values_type;
 qvalues = setup.gradient.qvalues;
 bvalues = setup.gradient.bvalues;
 sequences = setup.gradient.sequences;
@@ -45,11 +67,25 @@ ndirection = size(directions, 2);
 % Number of points in each compartment
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
 
+if do_save
+    % Folder for saving
+    savepath = sprintf( ...
+        "%s/btpde_abstol%g_reltol%g_magnetization%d", ...
+        savepath, abstol, reltol, save_magnetization ...
+    );
+    if ~isfolder(savepath)
+        mkdir(savepath)
+    end
+else
+    savepath = "";
+end
+
 % Initialize output arguments
 magnetization = cell(ncompartment, namplitude, nsequence, ndirection);
 signal = zeros(ncompartment, namplitude, nsequence, ndirection);
 signal_allcmpts = zeros(namplitude, nsequence, ndirection);
 itertimes = zeros(namplitude, nsequence, ndirection);
+totaltime_addition = 0;
 
 % Assemble finite element matrices
 disp("Setting up FEM matrices");
@@ -116,77 +152,109 @@ parfor iall = 1:prod(allinds)
     [iamp, iseq, idir] = ind2sub(allinds, iall);
 
     % Extract iteration inputs
+    amp = values(iamp);
     q = qvalues(iamp, iseq);
     b = bvalues(iamp, iseq);
     seq = sequences{iseq};
     g = directions(:, idir);
+    
+    % File name for saving or loading iteration results
+    filename = sprintf("%s/%s.mat", savepath, gradient_string(amp, amptype, seq, g));
+    
+    % Check if results are already available
+    if do_save && isfile(filename)
+        % Load results
+        fprintf("Load %s\n", filename);
+        mfile = matfile(filename, "Writable", false);
+        signal(:, iall) = mfile.signal;
+        itertimes(iall) = mfile.itertime;
+        totaltime_addition = totaltime_addition + mfile.itertime;
+        if save_magnetization
+            mag = mfile.magnetization;
+        end
+    else
+        % Get intervals based on the properties of the time profile
+        [timelist, interval_str, timeprofile_str] = seq.intervals;
 
-    % Get intervals based on the properties of the time profile
-    [timelist, interval_str, timeprofile_str] = seq.intervals;
+        % Number of intervals
+        ninterval = length(timelist) - 1;
 
-    % Number of intervals
-    ninterval = length(timelist) - 1;
+        % Assemble gradient direction dependent finite element matrix
+        J = g(1) * Jx{1} + g(2) * Jx{2} + g(3) * Jx{3};
 
-    % Assemble gradient direction dependent finite element matrix
-    J = g(1) * Jx{1} + g(2) * Jx{2} + g(3) * Jx{3};
+        % Initial magnetization
+        mag = rho;
 
-    % Initial magnetization
-    mag = rho;
+        % Solve for each interval consecutively
+        for iint = 1:ninterval
 
-    % Base information about current iteration
-    iteration_str = sprintf("Solving BTPDE of size %d using %s\n" ...
-        + "  Direction %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
-        + "  Sequence  %d of %d: f = %s\n" ...
-        + "  Amplitude %d of %d: q = %g, b = %g", ...
-        sum(npoint_cmpts), solver_str, ...
-        idir, ndirection, g, ...
-        iseq, nsequence, seq, ...
-        iamp, namplitude, q, b);
+            % Add a third point to the interval, so that the ODE solver does not
+            % store the magnetization for all time steps during the solve. If
+            % there were only two points in the interval, the ODE solver would
+            % store all time steps. This would require a lot of memory,
+            % especially during parfor iterations
+            interval_midpoint = (timelist(iint) + timelist(iint + 1)) / 2;
+            time_list_interval = [timelist(iint), interval_midpoint, timelist(iint + 1)];
 
-    % Solve for each interval consecutively
-    for iint = 1:ninterval
+            % Display state of iterations
+            fprintf( ...
+                join([
+                    "Solving BTPDE of size %d using %s"
+                    "  Direction %d of %d: g = [%.2f; %.2f; %.2f]"
+                    "  Sequence  %d of %d: f = %s"
+                    "  Amplitude %d of %d: q = %g, b = %g"
+                    "  Interval  %d of %d: I = %s, %s\n"
+                ], newline), ...
+                sum(npoint_cmpts), solver_str, ...
+                idir, ndirection, g, ...
+                iseq, nsequence, seq, ...
+                iamp, namplitude, q, b, ...
+                iint, ninterval, interval_str(iint), timeprofile_str(iint) ...
+            );
+            
+            % Create new ODE functions on given interval
+            [ode_function, Jacobian] = btpde_functions_interval( ...
+                K, Q, R, J, q, seq, interval_midpoint);
 
-        % Add a third point to the interval, so that the ODE solver does not
-        % store the magnetization for all time steps during the solve. If
-        % there were only two points in the interval, the ODE solver would
-        % store all time steps. This would require a lot of memory,
-        % especially during parfor iterations
-        interval_midpoint = (timelist(iint) + timelist(iint + 1)) / 2;
-        time_list_interval = [timelist(iint), interval_midpoint, timelist(iint + 1)];
+            % Update options with new Jacobian, which is either a
+            % function handle or a constant matrix, depending on the
+            % time profile
+            options = odeset(options_template, "Jacobian", Jacobian);
 
-        % Display state of iterations
-        fprintf("%s\n" ...
-            + "  Interval %d of %d: I = %s, %s\n", ...
-            iteration_str, ...
-            iint, ninterval, interval_str(iint), timeprofile_str(iint));
+            % Solve ODE on domain, starting from the magnetization at
+            % the end of the previous interval (mag)
+            [~, y] = solve_ode(ode_function, time_list_interval, mag, options);
 
-        % Create new ODE functions on given interval
-        [ode_function, Jacobian] = btpde_functions_interval( ...
-            K, Q, R, J, q, seq, interval_midpoint);
+            % Magnetization at end of interval
+            mag = y(end, :).';
+        end
 
-        % Update options with new Jacobian, which is either a
-        % function handle or a constant matrix, depending on the
-        % time profile
-        options = odeset(options_template, "Jacobian", Jacobian);
+        % Split global solution into compartments
+        mag = mat2cell(mag, npoint_cmpts).';
+        signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
 
-        % Solve ODE on domain, starting from the magnetization at
-        % the end of the previous interval (mag)
-        [~, y] = solve_ode(ode_function, time_list_interval, mag, options);
-
-        % Magnetization at end of interval
-        mag = y(end, :).';
+        % Store timing
+        itertimes(iall) = toc(itertime);
+        
+        if do_save
+            % Save iteration results
+            fprintf("Save %s\n", filename);
+            mfile = matfile(filename, "Writable", true);
+            mfile.signal = signal(:, iall);
+            mfile.itertime = itertimes(iall);
+            if save_magnetization
+                mfile.magnetization = mag;
+            end
+        end
+        
+    end % load or save variables
+    
+    % Store magnetization
+    if save_magnetization
+        for icmpt = 1:ncompartment
+            magnetization{icmpt, iall} = mag{icmpt};
+        end
     end
-
-    % Split global solution into compartments
-    mag = mat2cell(mag, npoint_cmpts).';
-    for icmpt = 1:ncompartment
-        magnetization{icmpt, iall} = mag{icmpt};
-    end
-    signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
-
-    % Store timing
-    itertimes(iall) = toc(itertime);
-
 end % iterations
 
 % Total magnetization (sum over compartments)
@@ -197,7 +265,7 @@ results.magnetization = magnetization;
 results.signal = signal;
 results.signal_allcmpts = signal_allcmpts;
 results.itertimes = itertimes;
-results.totaltime = toc(starttime);
+results.totaltime = toc(starttime) + totaltime_addition;
 
 % Display function evaluation time
 toc(starttime);

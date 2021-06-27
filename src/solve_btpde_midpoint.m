@@ -1,7 +1,18 @@
-function results = solve_btpde_midpoint(femesh, setup)
+function results = solve_btpde_midpoint(femesh, setup, savepath, save_magnetization)
 %SOLVE_BTPDE_MIDPOINT Solve the Bloch-Torrey partial differential equation.
 %   This solver uses a theta timestepping method (generalized midpoint), and
 %   only works for interval-wise constant time profiles (PGSE, DoublePGSE).
+%
+%   SOLVE_BTPDE_MIDPOINT(FEMESH, SETUP) solves the BTPDE and returns results.
+%
+%   SOLVE_BTPDE_MIDPOINT(FEMESH, SETUP, SAVEPATH) saves the results of each
+%   iteration at "<SAVEPATH>/BTPDE_<SOLVEROPTIONS>/<ITERATIONINFO>.MAT". If an
+%   iteration file is already present, the solver loads the results instead of
+%   solving for that iteration.
+%
+%   SOLVE_BTPDE_MIDPOINT(FEMESH, SETUP, SAVEPATH, SAVE_MAGNETIZATION) also omits
+%   saving or loading the magnetization field if SAVE_MAGNETIZATION is set to
+%   FALSE.
 %
 %   The ODE is defined by
 %
@@ -27,9 +38,10 @@ function results = solve_btpde_midpoint(femesh, setup)
 %   refactorizations. ODE15S does however manage to reuse the LU-factorization
 %   quite a few steps, by not changing the step sizes to often.
 %
-%
 %   femesh: struct
 %   setup: struct
+%   savepath (optional): string
+%   save_magnetization (optional): logical. Defaults to true.
 %
 %   results: struct with fields
 %       magnetization: {ncompartment x namplitude x nsequence x
@@ -48,12 +60,22 @@ function results = solve_btpde_midpoint(femesh, setup)
 % Measure function evaluation time
 starttime = tic;
 
+% Check if a save path has been provided (this toggers saving)
+do_save = nargin >= nargin(@solve_btpde_midpoint) - 1;
+
+% Provide default value
+if nargin < nargin(@solve_btpde_midpoint)
+    save_magnetization = true;
+end
+
 % Extract domain parameters
 diffusivity = setup.pde.diffusivity;
 relaxation = setup.pde.relaxation;
 initial_density = setup.pde.initial_density;
 
 % Extract experiment parameters
+values = setup.gradient.values;
+amptype = setup.gradient.values_type;
 qvalues = setup.gradient.qvalues;
 bvalues = setup.gradient.bvalues;
 sequences = setup.gradient.sequences;
@@ -75,11 +97,25 @@ ndirection = size(directions, 2);
 % Number of points in each compartment
 npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
 
+if do_save
+    % Folder for saving
+    savepath = sprintf( ...
+        "%s/btpde_midpoint_theta%g_dt%g_magnetization%d", ...
+        savepath, theta, dt, save_magnetization ...
+    );
+    if ~isfolder(savepath)
+        mkdir(savepath)
+    end
+else
+    savepath = "";
+end
+
 % Initialize output arguments
 magnetization = cell(ncompartment, namplitude, nsequence, ndirection);
 signal = zeros(ncompartment, namplitude, nsequence, ndirection);
 signal_allcmpts = zeros(namplitude, nsequence, ndirection);
 itertimes = zeros(namplitude, nsequence, ndirection);
+totaltime_addition = 0;
 
 % Assemble finite element matrices
 disp("Setting up FEM matrices");
@@ -136,82 +172,114 @@ parfor iall = 1:prod(allinds)
     [iamp, iseq, idir] = ind2sub(allinds, iall);
 
     % Extract iteration inputs
+    amp = values(iamp);
     q = qvalues(iamp, iseq);
     b = bvalues(iamp, iseq);
     seq = sequences{iseq};
     g = directions(:, idir);
+    
+    % File name for saving or loading iteration results
+    filename = sprintf("%s/%s.mat", savepath, gradient_string(amp, amptype, seq, g));
+    
+    % Check if results are already available
+    if do_save && isfile(filename)
+        % Load results
+        fprintf("Load %s\n", filename);
+        mfile = matfile(filename, "Writable", false);
+        signal(:, iall) = mfile.signal;
+        itertimes(iall) = mfile.itertime;
+        totaltime_addition = totaltime_addition + mfile.itertime;
+        if save_magnetization
+            mag = mfile.magnetization;
+        end
+    else
+        % Get intervals based on the properties of the time profile
+        [timelist, interval_str, timeprofile_str] = seq.intervals;
 
-    % Get intervals based on the properties of the time profile
-    [timelist, interval_str, timeprofile_str] = seq.intervals;
+        % Number of intervals
+        ninterval = length(timelist) - 1;
 
-    % Number of intervals
-    ninterval = length(timelist) - 1;
+        % Assemble gradient direction dependent finite element matrix
+        A = g(1) * Jx{1} + g(2) * Jx{2} + g(3) * Jx{3};
 
-    % Assemble gradient direction dependent finite element matrix
-    A = g(1) * Jx{1} + g(2) * Jx{2} + g(3) * Jx{3};
+        % Initial conditions
+        t = 0;
+        y = rho;
 
-    % Base information about current iteration
-    iteration_str = sprintf("Solving BTPDE of size %d using %s\n" ...
-        + "  Direction %d of %d: g = [%.2f; %.2f; %.2f]\n" ...
-        + "  Sequence  %d of %d: f = %s\n" ...
-        + "  Amplitude %d of %d: q = %g, b = %g", ...
-        sum(npoint_cmpts), solver_str, ...
-        idir, ndirection, g, ...
-        iseq, nsequence, seq, ...
-        iamp, namplitude, q, b);
+        % Solve for each interval consecutively
+        for iint = 1:ninterval
+        
+            % Display state of iterations
+            fprintf( ...
+                join([
+                    "Solving BTPDE of size %d using %s"
+                    "  Direction %d of %d: g = [%.2f; %.2f; %.2f]"
+                    "  Sequence  %d of %d: f = %s"
+                    "  Amplitude %d of %d: q = %g, b = %g"
+                    "  Interval  %d of %d: I = %s, %s\n"
+                ], newline), ...
+                sum(npoint_cmpts), solver_str, ...
+                idir, ndirection, g, ...
+                iseq, nsequence, seq, ...
+                iamp, namplitude, q, b, ...
+                iint, ninterval, interval_str(iint), timeprofile_str(iint) ...
+            );
+            
+            % Midpoint of interval
+            interval_midpoint = (timelist(iint) + timelist(iint + 1)) / 2;
 
-    % Initial conditions
-    t = 0;
-    y = rho;
+            % Right hand side Jacobian
+            J = -(K + Q + R + 1i * seq.call(interval_midpoint) * q * A);
 
-    % Solve for each interval consecutively
-    for iint = 1:ninterval
+            % Factorize left hand side matrix
+            [L, U, P, QQ, D] = lu(M - dt * theta * J);
 
-        % Display state of iterations
-        fprintf("%s\n" ...
-            + "  Interval %d of %d: I = %s, %s\n", ...
-            iteration_str, ...
-            iint, ninterval, interval_str(iint), timeprofile_str(iint));
+            % Right hand side matrix
+            E = M + dt * (1 - theta) * J;
 
-        % Midpoint of interval
-        interval_midpoint = (timelist(iint) + timelist(iint + 1)) / 2;
+            % Time step loop
+            while t + dt < timelist(iint + 1)
+                % Advance by dt
+                % t
+                y = QQ * (U \ (L \ (P * (D \ (E * y)))));
+                t = t + dt;
+            end
 
-        % Right hand side Jacobian
-        J = -(K + Q + R + 1i * seq.call(interval_midpoint) * q * A);
-
-        % Factorize left hand side matrix
-        [L, U, P, QQ, D] = lu(M - dt * theta * J);
-
-        % Right hand side matrix
-        E = M + dt * (1 - theta) * J;
-
-        % Time step loop
-        while t + dt < timelist(iint + 1)
-            % Advance by dt
-            % t
+            % Adapt time step to advance to end of interval. This requires a new
+            % LU decomposition
+            dt_last = timelist(iint + 1) - t;
+            E = M + dt_last * (1 - theta) * J;
+            [L, U, P, QQ, D] = lu(M - dt_last * theta * J);
             y = QQ * (U \ (L \ (P * (D \ (E * y)))));
-            t = t + dt;
+            t = t + dt_last;
         end
 
-        % Adapt time step to advance to end of interval. This requires a new
-        % LU decomposition
-        dt_last = timelist(iint + 1) - t;
-        E = M + dt_last * (1 - theta) * J;
-        [L, U, P, QQ, D] = lu(M - dt_last * theta * J);
-        y = QQ * (U \ (L \ (P * (D \ (E * y)))));
-        t = t + dt_last;
+        % Split global solution into compartments
+        mag = mat2cell(y, npoint_cmpts).';
+        signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
+
+        % Store timing
+        itertimes(iall) = toc(itertime);
+        
+        if do_save
+            % Save iteration results
+            fprintf("Save %s\n", filename);
+            mfile = matfile(filename, "Writable", true);
+            mfile.signal = signal(:, iall);
+            mfile.itertime = itertimes(iall);
+            if save_magnetization
+                mfile.magnetization = mag;
+            end
+        end
+        
+    end % load or save variables
+    
+    % Store magnetization
+    if save_magnetization
+        for icmpt = 1:ncompartment
+            magnetization{icmpt, iall} = mag{icmpt};
+        end
     end
-
-    % Split global solution into compartments
-    mag = mat2cell(y, npoint_cmpts).';
-    for icmpt = 1:ncompartment
-        magnetization{icmpt, iall} = mag{icmpt};
-    end
-    signal(:, iall) = cellfun(@(M, y) sum(M * y, 1), M_cmpts, mag);
-
-    % Store timing
-    itertimes(iall) = toc(itertime);
-
 end % gradient sequence iterations
 
 % Total magnetization (sum over compartments)
@@ -222,7 +290,7 @@ results.magnetization = magnetization;
 results.signal = signal;
 results.signal_allcmpts = signal_allcmpts;
 results.itertimes = itertimes;
-results.totaltime = toc(starttime);
+results.totaltime = toc(starttime) + totaltime_addition;
 
 % Display function evaluation time
 toc(starttime);
