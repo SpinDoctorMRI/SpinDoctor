@@ -18,9 +18,9 @@ G = zeros(ndirection, 6);
 G(:, 1) = g(1, :).^2;
 G(:, 2) = g(2, :).^2;
 G(:, 3) = g(3, :).^2;
-G(:, 4) = g(1, :) .*  g(2, :);
-G(:, 5) = g(1, :) .*  g(3, :);
-G(:, 6) = g(2, :) .*  g(3, :);
+G(:, 4) = 2 * g(1, :) .*  g(2, :);
+G(:, 5) = 2 * g(1, :) .*  g(3, :);
+G(:, 6) = 2 * g(2, :) .*  g(3, :);
 
 % Deduce vector of effective diffusion tensor components in each compartment by
 % least squares fit of the directions to the computed ADCs
