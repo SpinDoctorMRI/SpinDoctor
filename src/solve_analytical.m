@@ -25,6 +25,7 @@ function signal = solve_analytical(setup, volumes)
 %
 %   signal: [namplitude x nsequence x ndirection]
 
+
 % Extract parameters
 qvalues = setup.gradient.qvalues;
 sequences = setup.gradient.sequences;

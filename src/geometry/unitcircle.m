@@ -9,7 +9,7 @@ function points = unitcircle(npoint, normal)
 %   NORMAL.
 %
 %   npoint: [1 x 1]
-%   normal: [3 x 1]
+%   normal (optional): [3 x 1]
 %
 %   points: [3 x npoint]
 
