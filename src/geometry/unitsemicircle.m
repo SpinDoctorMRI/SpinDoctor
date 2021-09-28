@@ -15,7 +15,7 @@ function points = unitsemicircle(npoint, normal)
 
 
 % Angles
-angles = linspace(0, pi, ndirection + 1)';
+angles = linspace(0, pi, npoint + 1)';
 
 % Create points on the unit circle in the x-y plane
 points = zeros(3, npoint);
