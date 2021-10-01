@@ -14,6 +14,12 @@ if ispc
 elseif ismac
     tetgen_cmd = "src/tetgen/mac64/tetgen";
 elseif isunix
+    out = system("chmod 775 src/tetgen/lin64/tetgen");
+    if out ~= 0
+        error_msg = join(["permission denied: src/tetgen/lin64/tetgen,",...
+        " please grant 'src/tetgen/lin64/tetgen' executable permission."]);
+        error(error_msg)
+    end
     tetgen_cmd = "src/tetgen/lin64/tetgen";
 else
     warning("Using Linux Tetgen command.")
