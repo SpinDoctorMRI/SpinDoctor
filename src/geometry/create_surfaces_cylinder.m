@@ -188,8 +188,19 @@ for ifacet = 1:nfacet
         facetmarkers(ifacet) = ncell_in + include_ecs * ncell + b(1);
     else
         % Triangle lies in the ECS
-        facetmarkers(ifacet) = nboundary;%ncell_in + ncell;
+        if include_ecs
+            facetmarkers(ifacet) = nboundary;
+        else
+            facetmarkers(ifacet) = NaN;
+        end
     end
+end
+
+if ~include_ecs
+    % remove ECS facets, if no_ecs
+    facets = facets(:, ~isnan(facetmarkers));
+    facetmarkers = facetmarkers(~isnan(facetmarkers));
+    nfacet = size(facets, 2);
 end
 
 % Copy points, edges and markers two the two 3D planes top and bottom
