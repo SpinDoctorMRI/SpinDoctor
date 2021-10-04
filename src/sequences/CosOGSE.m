@@ -12,7 +12,11 @@ classdef CosOGSE < Sequence
             %CosOGSE Construct an instance of this class.
             %   The constructor stores the parameters.
             obj@Sequence(delta, Delta)
-            obj.nperiod = nperiod;
+            if (nperiod == round(nperiod)) && nperiod>0
+                obj.nperiod = nperiod;
+            else
+                error('CosOGSE (Sequence): nperiod must be a positive integer.')
+            end
         end
 
         function f = call(obj, t)

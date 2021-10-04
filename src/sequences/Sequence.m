@@ -28,8 +28,12 @@ classdef (Abstract) Sequence
             %   Here it is assumed that the sequence is parametrized by the two
             %   parameters `delta` and `Delta` only. Subclasses may have more
             %   parameters.
-            obj.delta = delta;
-            obj.Delta = Delta;
+            if Delta<delta
+                error('Sequence: delta should be less than or equal to Delta.') 
+            else
+                obj.delta = delta;
+                obj.Delta = Delta;
+            end
         end
         
         function TE = echotime(obj)
