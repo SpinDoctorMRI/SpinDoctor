@@ -79,7 +79,6 @@ nfacet_out = cellfun(@(x) size(x, 2), facets_out);
 if include_ecs
     radii_ecs = radii + ecs_ratio * rmean;
     npoint_ecs = create_npoint(radii_ecs);
-    % npoint_ecs = repelem(nref_ecs, 1, ncell);
     points_ecs = cell(1, ncell);
     for icell = 1:ncell
         p = centers(:, icell) + radii_ecs(icell) .* fibonacci(npoint_ecs(icell));

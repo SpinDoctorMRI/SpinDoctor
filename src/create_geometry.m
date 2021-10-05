@@ -49,10 +49,6 @@ if cell_shape == "neuron"
     end
 end
 assert(ismember(setup.geometry.ecs_shape, ["no_ecs" "box" "convex_hull" "tight_wrap"]))
-% assert(~ismember(cell_shape, ["sphere" "cylinder"]) ...
-%     || setup.geometry.ecs_shape ~= "no_ecs" ...
-%     || setup.geometry.ncell == 1, ...
-%     "Geometry must include ECS if more than one cell");
 
 % Check that folder exists
 parts = split(filename, "/");
@@ -62,7 +58,6 @@ if length(parts) >= 2
         mkdir(folder);
     end
 end
-
 
 % File name to save or load cell description
 cellfilename = filename + "_cells";

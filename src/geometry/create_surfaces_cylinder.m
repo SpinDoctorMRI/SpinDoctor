@@ -31,7 +31,7 @@ ecs_shape = setup.geometry.ecs_shape;
 ecs_ratio = setup.geometry.ecs_ratio;
 
 include_ecs = ecs_shape ~= "no_ecs";
-nboundary = (2 * include_in + 1 + include_ecs) * ncell + include_ecs;
+nboundary = (include_in + 1) * 2 * ncell + include_ecs;
 
 rmean = (rmin + rmax) / 2;
 
@@ -130,12 +130,9 @@ else
     nedge_ecs = [];
 end
 
-
 npoint_in = size(points_in, 2);
 npoint_out = size(points_out, 2);
 npoint_ecs = size(points_ecs, 2);
-
-
 
 points = [points_in points_out points_ecs];
 edges = [edges_in edges_out+npoint_in edges_ecs+npoint_in+npoint_out];
@@ -163,7 +160,6 @@ end
 
 nfacet = size(facets, 2);
 
-
 boundary_bounds = cumsum([0 nside_in nside_out nedge_ecs]);
 
 ncell_in = include_in * ncell;
@@ -178,14 +174,14 @@ for ifacet = 1:nfacet
     b_out = ncell_in < b & b <= ncell_in + ncell;
     if all(b_in)
         % Inside IN compartment
-        facetmarkers(ifacet) = ncell_in + include_ecs * ncell + b(1);
+        facetmarkers(ifacet) = ncell_in + ncell + b(1);
     elseif any(b_in)
         % Triangle touches IN compartment, but is not inside. It is thus the corresponding OUT compartment.
         tmp = b(~b_in);
-        facetmarkers(ifacet) = ncell_in + include_ecs * ncell + tmp(1);
+        facetmarkers(ifacet) = ncell_in + ncell + tmp(1);
     elseif all(b_out) && b(1) == b(2) && b(1) == b(3)
         % Triangle lies fully within the same OUT comparment
-        facetmarkers(ifacet) = ncell_in + include_ecs * ncell + b(1);
+        facetmarkers(ifacet) = ncell_in + ncell + b(1);
     else
         % Triangle lies in the ECS
         if include_ecs
@@ -222,7 +218,7 @@ sidefacetmarkers_in = arrayfun(@(m, n) repmat([m m], 1, n), sidefacetmarkers_in,
     nside_in, "UniformOutput", false);
 sidefacetmarkers_in = [sidefacetmarkers_in{:}];
 
-sidefacetmarkers_out = (1 + ~include_ecs)*ncell_in+1:(1 + ~include_ecs)*ncell_in+ncell;
+sidefacetmarkers_out = ncell_in+1:ncell_in+ncell;
 sidefacetmarkers_out = arrayfun(@(m, n) repmat([m m], 1, n), sidefacetmarkers_out, ...
     nside_out, "UniformOutput", false);
 sidefacetmarkers_out = [sidefacetmarkers_out{:}];

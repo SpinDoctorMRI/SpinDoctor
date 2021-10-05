@@ -26,7 +26,7 @@ ncompartment = (1 + include_in) * ncell + include_ecs;
 switch cell_shape
     case "cylinder"
         % An axon has a side interface, and a top-bottom boundary
-        nboundary = (2 * include_in + 1 + include_ecs) * ncell + include_ecs;
+        nboundary = (include_in + 1) * 2 * ncell + include_ecs;
     case "sphere"
         % For a sphere, there is one interface
         nboundary = (include_in + 1) * ncell + include_ecs;
@@ -35,21 +35,16 @@ switch cell_shape
         nboundary = 1 + include_ecs;
 end
 
-boundary_markers = false(ncompartment, nboundary);
-sz = size(boundary_markers);
+% the list `boundaries` must have the same order as surfaces.facetmarkers
+% cylinder: `boundaries` = [('in,out'), ('out,ecs')/('out'), ('in'), 'out', ('ecs')]
+% sphere, neuron: `boundaries` = [('in,out'), ('out,ecs')/('out'), ('ecs')]
+compartments = [];
+boundaries = [];
 
 if include_in
     % Add in-compartments and in-out-interfaces
     compartments = repmat("in", 1, ncell);
     boundaries = repmat("in,out", 1, ncell);
-    boundary_markers(sub2ind(sz, 1:2*ncell, repmat(1:ncell, 1, 2))) = true;
-    ncompartment_old = ncell;
-    nboundary_old = ncell;
-else
-    compartments = [];
-    boundaries = [];
-    ncompartment_old = 0;
-    nboundary_old = 0;
 end
 
 % Add out-compartments
@@ -59,41 +54,27 @@ if include_ecs
     % Add ecs-compartment and out-ecs interfaces
     compartments = [compartments "ecs"];
     boundaries = [boundaries repmat("out,ecs", 1, ncell)];
-    boundary_markers(sub2ind(sz, ...
-        [ncompartment_old+1:ncompartment_old+ncell, repelem(ncompartment, 1, ncell)], ...
-        repmat(nboundary_old+1:nboundary_old+ncell, 1, 2))) = true;
-    nboundary_old = nboundary_old + ncell;
+else
+    % Add outer cylinder side wall or sphere/neuron out boundaries
+    boundaries = [boundaries repmat("out", 1, ncell)];
 end
 
 if cell_shape == "cylinder"
     if include_in
-        % Add in boundary
+        % Add inner cylinder top and bottom boundary
         boundaries = [boundaries repmat("in", 1, ncell)];
-        ncompartment_old = ncell;
-        boundary_markers(sub2ind(sz, 1:ncell, nboundary_old+1:nboundary_old+ncell)) = true;
-        nboundary_old = nboundary_old + ncell;
-    else
-        ncompartment_old = 0;
     end
-    
-    % Add out boundary
+    % Add outer cylinder top and bottom boundary
     boundaries = [boundaries repmat("out", 1, ncell)];
-    boundary_markers(sub2ind(sz, ncompartment_old+1:ncompartment_old+ncell, ...
-        nboundary_old+1:nboundary_old+ncell)) = true;
-
+    % Add ecs boundary
     if include_ecs
-        % Add ecs boundary
         boundaries = [boundaries "ecs"];
-        boundary_markers(end, end) = true;
     end
-elseif include_ecs
+end
+
+if ismember(cell_shape, ["sphere", "neuron"]) && include_ecs
     % Add ecs boundary
     boundaries = [boundaries "ecs"];
-    boundary_markers(end, end) = true;
-else
-    % Add out boundary
-    boundaries = [boundaries "out"];
-    boundary_markers(end, end) = true;
 end
 
 % Diffusion coefficients (tensorize if scalars)
