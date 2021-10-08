@@ -64,6 +64,18 @@ classdef DoublePGSE < Sequence
             t = obj.tpause + 2 * (obj.Delta - obj.delta / 3);
         end
         
+        function t = diffusion_time_sta(obj)
+            %DIFFUSION_TIME_STA Get STA diffusion time of the DoublePGSE sequence.
+            tm = obj.delta + obj.tpause;
+            out = (2/35).*((2.*obj.Delta+tm-obj.delta).^(7/2)-2.*(obj.Delta+tm-obj.delta).^(7/2)+...
+                         (obj.delta+2.*obj.Delta+tm).^(7/2)+2.*(obj.Delta-obj.delta).^(7/2)+...
+                         (tm-obj.delta).^(7/2)-2.*(2.*obj.Delta+tm).^(7/2)-2*...
+                         (obj.delta+obj.Delta+tm).^(7/2)+2*(obj.delta+obj.Delta).^(7/2)+4*...
+                         (obj.Delta+tm).^(7/2)+(obj.delta+tm).^(7/2)-2*tm.^(7/2)-4*...
+                         obj.delta.^(7/2)-4*obj.Delta.^(7/2))./(obj.delta.^2.*(obj.Delta-obj.delta/3));
+            t = out.^2;
+        end
+        
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
             %INTERVALS Get intervals of the sequence.
             %   This function returns a list of important time steps (including

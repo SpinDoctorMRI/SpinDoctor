@@ -52,10 +52,32 @@ classdef CosOGSE < Sequence
         end
 
         function t = diffusion_time(obj)
-        %DIFFUSION_TIME Get diffusion time of the PGSE sequence.
+        %DIFFUSION_TIME Get diffusion time of the CosOGSE sequence.
             t = 1 / 8 * obj.delta / obj.nperiod;
         end
+        
+        function t = diffusion_time_sta(obj)
+        %DIFFUSION_TIME_STA Get STA diffusion time of the CosOGSE sequence.
+        %Matlab's fresnel functions requires Symbolic Math Toolbox. We use
+        %a free version of fresnel functions instead.
+            n = obj.nperiod;
+            S = sin(2*pi*n*obj.Delta./obj.delta);
+            C = cos(2*pi*n*obj.Delta./obj.delta);
+            FS1 = fresnelS(2*sqrt(n));
+            FS2 = fresnelS(2*sqrt(obj.Delta*n./obj.delta));
+            FS3 = fresnelS(2*sqrt((obj.Delta+obj.delta)*n./obj.delta));
+            FS4 = fresnelS(2*sqrt((obj.Delta-obj.delta)*n./obj.delta));
+            FC1 = fresnelC(2*sqrt(n));
+            FC2 = fresnelC(2*sqrt(obj.Delta*n./obj.delta));
+            FC3 = fresnelC(2*sqrt((obj.Delta+obj.delta)*n./obj.delta));
+            FC4 = fresnelC(2*sqrt((obj.Delta-obj.delta)*n./obj.delta));
 
+            out = (3/4)*( (C.*((8.*FC2-4.*FC3-4.*FC4).*obj.Delta./(8*sqrt(obj.delta)) + (-4.*FC3+4.*FC4).*sqrt(obj.delta)/8)...
+                + S.*((8.*FS2-4.*FS3-4.*FS4).*obj.Delta./(8*sqrt(obj.delta)) + (-4.*FS3+4.*FS4).*sqrt(obj.delta)/8) + FC1.*sqrt(obj.delta))/sqrt(n)...
+                + (C.*sqrt(obj.delta).*(6.*FS2-3.*FS3-3.*FS4)/8 + S.*sqrt(obj.delta).*(-6.*FC2+3.*FC3+3.*FC4)/8 + 3*FS1.*sqrt(obj.delta)/4)./(n^(3/2)*pi) );
+            t = out.^2;
+        end
+        
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
             %INTERVALS Get intervals of the sequence.
             %   This function returns a list of important time steps (including

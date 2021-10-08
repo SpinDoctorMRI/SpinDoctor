@@ -25,10 +25,17 @@ classdef PGSE < Sequence
         end
         
         function t = diffusion_time(obj)
-        %DIFFUSION_TIME Get diffusion time of the PGSE sequence.
+            %DIFFUSION_TIME Get diffusion time of the PGSE sequence.
             t = obj.Delta - obj.delta / 3;
         end
-    
+        
+        function t = diffusion_time_sta(obj)
+            %DIFFUSION_TIME_STA Get STA diffusion time of the PGSE sequence.
+            out = (4/35).*((obj.Delta-obj.delta).^(7/2)+(obj.Delta+obj.delta).^(7/2)...
+                -2.*(obj.delta.^(7/2)+obj.Delta.^(7/2)))./(obj.delta.^2.*(obj.Delta-obj.delta/3));
+            t = out.^2;
+        end
+        
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
             %INTERVALS Get intervals of the sequence.
             %   This function returns a list of important time steps (including

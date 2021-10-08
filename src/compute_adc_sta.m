@@ -38,9 +38,7 @@ for icmpt = 1:ncompartment
     [~, areas, ~, normals] = get_surface_mesh(points, facets);
 
     for idir = 1:ndirection
-        
         g = directions(:, idir);
-        
         D0 = g' * diffusivity(:, :, icmpt) * g;
 
         % Project surface areas onto plane orthogonal to gradient direction
@@ -48,20 +46,18 @@ for icmpt = 1:ncompartment
 
         for iseq = 1:nsequence
             seq = sequences{iseq};
-            delta = seq.delta;
-            Delta = seq.Delta;
-            if isa(seq, "PGSE")
-                D = D0 - D0^(3/2) * SAu / volumes(icmpt) * 16 / 35 / sqrt(pi) ...
-                    / delta^2 / (3 * Delta - delta) * ( ...
-                      (Delta - delta)^(7/2) ...
-                    + (Delta + delta)^(7/2) ...
-                    - 2 * (delta^(7/2) + Delta^(7/2)));
-            else
-                diffusion_time = seq.diffusion_time;
-                D = D0 * (1 - 4 / 3 * sqrt(D0 / pi) * SAu / volumes(icmpt) * sqrt(diffusion_time));
-            end
+            diffusion_time_sta = seq.diffusion_time_sta;
+            D = D0 * (1 - 4 / 3 * sqrt(D0 / pi) * SAu / volumes(icmpt) * sqrt(diffusion_time_sta));
             adc(icmpt, iseq, idir) = D;
         end
+    end
+end
+
+adc_flag = any(adc<0, [1,3]);
+for iflag = 1:nsequence
+    if adc_flag(iflag)
+        seq = ['Sequence ', num2str(iflag), ': '];
+        warning([seq,'get negative STA ADC, short diffusion time approximation does not hold.'])
     end
 end
 

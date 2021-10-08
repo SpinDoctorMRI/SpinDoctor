@@ -56,8 +56,39 @@ classdef SinOGSE < Sequence
         end
         
         function t = diffusion_time(obj)
-        %DIFFUSION_TIME Get diffusion time of the PGSE sequence.
+        %DIFFUSION_TIME Get diffusion time of the SinOGSE sequence.
             t = 3 / 8 * obj.delta / obj.nperiod;
+        end
+        
+        function t = diffusion_time_sta(obj)
+            %DIFFUSION_TIME_STA Get STA diffusion time of the SinOGSE sequence.
+            %Matlab's fresnel functions requires Symbolic Math Toolbox. We use
+            %a free version of fresnel functions instead.
+            n = obj.nperiod;
+            S = sin(2*pi*n*obj.Delta./obj.delta);
+            C = cos(2*pi*n*obj.Delta./obj.delta);
+            FS1 = fresnelS(2*sqrt(n));
+            FS2 = fresnelS(2*sqrt(obj.Delta*n./obj.delta));
+            FS3 = fresnelS(2*sqrt((obj.Delta+obj.delta)*n./obj.delta));
+            FS4 = fresnelS(2*sqrt((obj.Delta-obj.delta)*n./obj.delta));
+            FC1 = fresnelC(2*sqrt(n));
+            FC2 = fresnelC(2*sqrt(obj.Delta*n./obj.delta));
+            FC3 = fresnelC(2*sqrt((obj.Delta+obj.delta)*n./obj.delta));
+            FC4 = fresnelC(2*sqrt((obj.Delta-obj.delta)*n./obj.delta));
+            out = (-32*pi*n^(3/2).*sqrt(obj.Delta+obj.delta).*obj.delta ...
+                + 32*pi*n^(3/2).*sqrt(obj.Delta-obj.delta).*obj.delta + 24*pi*n*obj.delta.^(3/2).*FC1...
+                - 32*pi*n^(3/2).*sqrt(obj.Delta-obj.delta).*obj.Delta - 32*pi*n^(3/2).*sqrt(obj.Delta+obj.delta).*obj.Delta...
+                - 12.*obj.delta.^(3/2).*FC3.*n.*pi.*C - 12.*obj.delta.^(3/2).*FS3.*n.*pi.*S...
+                + 12.*obj.delta.^(3/2).*FS4.*n.*pi.*S + 12.*obj.delta.^(3/2).*FC4.*n.*pi.*C...
+                + 42.*obj.delta.^(3/2).*FS2.*C - 21*obj.delta.^(3/2).*FS3.*C...
+                - 21.*obj.delta.^(3/2).*FS4.*C + 21.*obj.delta.^(3/2).*FC4.*S...
+                - 42.*obj.delta.^(3/2).*FC2.*S + 21.*obj.delta.^(3/2).*FC3.*S...
+                + 64.*obj.delta.^(3/2).*pi.*n.^(3/2) + 64.*obj.Delta.^(3/2).*pi.*n^(3/2)...
+                + 42.*obj.delta.^(3/2).*FS1 - 12.*FC4.*n.*obj.Delta.*pi.*sqrt(obj.delta).*C...
+                + 24.*FC2.*n.*obj.Delta.*pi.*sqrt(obj.delta).*C - 12.*FC3.*n.*obj.Delta.*pi.*sqrt(obj.delta).*C...
+                - 12.*FS3.*n.*obj.Delta.*pi.*sqrt(obj.delta).*S + 24.*FS2.*n.*obj.Delta.*pi.*sqrt(obj.delta).*S...
+                - 12.*FS4.*n.*obj.Delta.*pi.*sqrt(obj.delta).*S)./(96*pi*n^(3/2).*obj.delta);
+            t = out.^2;
         end
         
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
