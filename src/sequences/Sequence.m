@@ -71,4 +71,3 @@ classdef (Abstract) Sequence
         end
     end
 end
-

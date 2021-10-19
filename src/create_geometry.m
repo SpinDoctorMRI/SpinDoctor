@@ -35,7 +35,6 @@ cell_shape = setup.geometry.cell_shape;
 ncompartment = length(setup.pde.compartments);
 nboundary = length(setup.pde.boundaries);
 
-
 % Check correct input format
 assert(ismember(cell_shape, ["sphere" "cylinder" "neuron"]))
 if cell_shape == "neuron"
@@ -76,30 +75,35 @@ else
     cells = struct;
 end
 
-
 % Make directory for storing finite elements mesh
 is_stl = endsWith(filename, ".stl");
 if is_stl
-    % ECS is currently only available for surface meshes
-    assert(setup.geometry.ecs_shape == "no_ecs");
     parts = split(filename, ".stl");
-    filename = parts(1);
+    filename = parts(1) + "_stl";
 end
 save_meshdir_path = filename + "_dir";
 if ~isfolder(save_meshdir_path)
     mkdir(save_meshdir_path);
 end
+if is_stl
+    parts_tmp = split(parts(1), "/");
+    filename_stl = save_meshdir_path + "/" + parts_tmp(end) + ".stl";
+    if ~isfile(filename_stl)
+        copyfile(parts(1) + ".stl", save_meshdir_path);
+        call_tetgen(filename_stl, 1);
+    end
+    fname_stl = replace(filename_stl,'.stl','.1');
+end
 
-
-% Use an existing finite elements mesh or create a new finite
-% elements mesh. The name of the finite elements mesh is stored in the string
-% fname_tetgen_femesh
+% Use an existing finite elements mesh. 
+% The name of the finite elements mesh is stored in the string fname_tetgen_femesh
 refinement_str = "";
 if isfield(setup.geometry, "refinement")
     refinement_str = sprintf("_refinement%g", setup.geometry.refinement);
 end
+ecs_str = sprintf("_%s%g", setup.geometry.ecs_shape, setup.geometry.ecs_ratio);
 parts = split(filename, "/");
-fname_tetgen = save_meshdir_path + "/" + parts(end) + refinement_str + "_mesh";
+fname_tetgen = save_meshdir_path + "/" + parts(end) + ecs_str + refinement_str + "_mesh";
 
 % Read or create surface triangulation
 if isfile(fname_tetgen + ".node") && isfile(fname_tetgen + ".poly")
@@ -114,16 +118,12 @@ else
             surfaces = create_surfaces_cylinder(cells, setup);
         case "neuron"
             if is_stl
-                surfaces = struct;
+                surfaces = create_surfaces_neuron(fname_stl, setup);
             else
                 surfaces = create_surfaces_neuron(filename, setup);
             end
     end
-
-    if ~is_stl
-        % plot_surface_triangulation(surfaces);
-        save_surfaces(fname_tetgen, surfaces);
-    end
+    save_surfaces(fname_tetgen, surfaces);
 end
 
 % Add ".1" suffix to output file name, since this is what Tetgen does
@@ -131,27 +131,30 @@ fname_tetgen_femesh = fname_tetgen + ".1";
 
 if isfield(setup.geometry, "refinement")
     tetgen_params = {setup.geometry.refinement};
+elseif isfield(setup.geometry, "tetgen_options")
+    tetgen_params = {setup.geometry.tetgen_options};
 else
     tetgen_params = {};
 end
 
-if isfile(fname_tetgen_femesh + ".node")
-elseif is_stl
-    call_tetgen(filename + ".stl", tetgen_params{:});
-    fname_tetgen_femesh = filename + ".1";
-else
+if ~isfile(fname_tetgen_femesh + ".node")
     call_tetgen(fname_tetgen + ".poly", tetgen_params{:});
 end
 
-% Read global mesh from Tetgen output
-femesh_all = read_tetgen(fname_tetgen_femesh);
+try
+    % Read global mesh from Tetgen output
+    femesh_all = read_tetgen(fname_tetgen_femesh);
 
-% Check that at correct number of compartments and boundaries has been found
-compartments = unique(femesh_all.elementmarkers);
-boundaries = unique(femesh_all.facetmarkers);
-solution = "use smaller refinement or change surface triangulation.";
-assert(ncompartment == length(compartments), "Incorrect number of compartments, " + solution);
-assert(nboundary == length(boundaries), "Incorrect number of boundaries, " + solution);
+    % Check that at correct number of compartments and boundaries has been found
+    compartments = unique(femesh_all.elementmarkers);
+    boundaries = unique(femesh_all.facetmarkers);
+    solution = "use smaller refinement or change surface triangulation.";
+    assert(ncompartment == length(compartments), "Incorrect number of compartments, " + solution);
+    assert(nboundary == length(boundaries), "Incorrect number of boundaries, " + solution);
+catch ME
+    delete(fname_tetgen+"*")
+    rethrow(ME)
+end
 
 % Deform domain
 if any(setup.geometry.deformation)

@@ -1,4 +1,4 @@
-function call_tetgen(filename, refinement)
+function call_tetgen(filename, options)
 %CALL_TETGEN Call Tetgen executable from system with refinement.
 %   The tetgen executable is chosen according to the operating system. If an
 %   error occurs, you might have to manually change the rights of the Tetgen
@@ -27,11 +27,12 @@ else
 end
 
 % Options for Tetgen command
-if  nargin == nargin(@call_tetgen) && refinement > 0
+if  nargin == nargin(@call_tetgen) && isnumeric(options) && options > 0
     % Pass refinement to the 'a' flag of Tetgen. This gives a maximum
     % tetrahedron volume (not length, as in earlier versions)
-    % tetgen_options = "-pq0.5AVa" + num2str(setup.pde.refinement);
-    tetgen_options = "-pqAVa" + num2str(refinement);
+    tetgen_options = "-pqAVa" + num2str(options);
+elseif nargin == nargin(@call_tetgen) && isstring(options)
+    tetgen_options = options;
 else
     tetgen_options = "-pqAV";
 end
