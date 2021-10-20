@@ -30,11 +30,11 @@ end
 if  nargin == nargin(@call_tetgen) && isnumeric(options) && options > 0
     % Pass refinement to the 'a' flag of Tetgen. This gives a maximum
     % tetrahedron volume (not length, as in earlier versions)
-    tetgen_options = "-pqAVa" + num2str(options);
+    tetgen_options = "-pqAVCa" + num2str(options);
 elseif nargin == nargin(@call_tetgen) && isstring(options)
     tetgen_options = options;
 else
-    tetgen_options = "-pqAV";
+    tetgen_options = "-pqAVC";
 end
 
 % Call Tetgen

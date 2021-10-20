@@ -101,22 +101,36 @@ if ecs_shape ~= "no_ecs"
             shp = alphaShape(points', 'HoleThreshold', (4/3)*pi*20^3);
             shp.Alpha = 1.2*shp.criticalAlpha("one-region");
             
-%             [~, dist] = shp.nearestNeighbor(points');
+            % normal vector method to reconstruct ECS surface mesh
+            [tri, xyz] = boundaryFacets(shp);
+            TR = triangulation(tri,xyz);
+            V = vertexNormal(TR);
+            P = incenter(TR);
+            F = faceNormal(TR);
             
-            pmin = pmin - 2 * ecs_gap;
-            pmax = pmax + 2 * ecs_gap;
-            p = pmin + (pmax - pmin) .* linspace(0, 1, ndiscretize);
-            [X, Y, Z] = meshgrid(p(1, :), p(2, :), p(3, :));
-            p = [X(:) Y(:) Z(:)];
+            points_ecs = [(xyz + 0.5*ecs_gap * V)',...
+                          (xyz + ecs_gap * V)',...
+                          (P + 0.5*ecs_gap * F)',...
+                          (P + ecs_gap * F)'];
+            shp2 = alphaShape([points,points_ecs]', 'HoleThreshold', (4/3)*pi*20^3);
+            shp2.Alpha = 1.5*shp2.criticalAlpha("one-region");
+            [tri, xyz] = boundaryFacets(shp2);
+            points_ecs = xyz';
+            facets_ecs = tri';
             
-            inside = shp.inShape(p);
-            [~, dist] = shp.nearestNeighbor(p);
-            dist(inside) = -dist(inside);
-
-            V = reshape(dist, ndiscretize, ndiscretize, ndiscretize);
-            FV = isosurface(X, Y, Z, V, ecs_gap);
-            points_ecs = FV.vertices';
-            facets_ecs = FV.faces';
+%             % isosurface method to reconstruct ECS surface mesh
+%             pmin = pmin - 2 * ecs_gap;
+%             pmax = pmax + 2 * ecs_gap;
+%             p = pmin + (pmax - pmin) .* linspace(0, 1, ndiscretize);
+%             [X, Y, Z] = meshgrid(p(1, :), p(2, :), p(3, :));
+%             p = [X(:) Y(:) Z(:)];
+%             inside = shp.inShape(p);
+%             [~, dist] = shp.nearestNeighbor(p);
+%             dist(inside) = -dist(inside);
+%             V = reshape(dist, ndiscretize, ndiscretize, ndiscretize);
+%             FV = isosurface(X, Y, Z, V, ecs_gap);
+%             points_ecs = FV.vertices';
+%             facets_ecs = FV.faces';
     end
     
     facetmarkers_ecs = 2 * ones(1, size(facets_ecs, 2));

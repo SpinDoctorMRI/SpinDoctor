@@ -90,7 +90,7 @@ if is_stl
     filename_stl = save_meshdir_path + "/" + parts_tmp(end) + ".stl";
     if ~isfile(filename_stl)
         copyfile(parts(1) + ".stl", save_meshdir_path);
-        call_tetgen(filename_stl, 1);
+        call_tetgen(filename_stl);
     end
     fname_stl = replace(filename_stl,'.stl','.1');
 end
