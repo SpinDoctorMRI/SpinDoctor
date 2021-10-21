@@ -26,8 +26,6 @@ for iseq = 1:nsequence
 
     % Gradient sequences
     seq = sequences{iseq};
-    d = seq.delta;
-    D = seq.Delta;
 
     % Time
     ntime = ninterval + 1;
@@ -36,47 +34,24 @@ for iseq = 1:nsequence
     dtime = echotime / ntime;
 
     for ieig = 1:neig
-        c = eigvals(ieig);
-        if abs(c) < 1e-15
+        lambda = eigvals(ieig);
+        if abs(lambda) < 1e-16
             tmp = 0;
         elseif isa(seq, "PGSE")
-            tmp = -1 / c^2 * ( ...
-                + exp(-c * (D + d)) ...
-                + exp(-c * (D - d)) ...
-                - 2 * exp(-c * d)...
-                - 2 * exp(-c * D)...
-                + 2 * (1 - c * d));
+            tmp = J_PGSE(lambda, seq);
+        elseif isa(seq, "DoublePGSE")
+            tmp = J_DoublePGSE(lambda, seq);
         elseif isa(seq, "SinOGSE")
-            n = seq.nperiod;
-            a = 2 * pi * n / d;
-            tmp = a^2 / (a^2+c^2)^2 * ( ...
-                + 2 ...
-                + d * c...
-                + d * c^3 / a^2 ...
-                + exp(-c * (D - d)) ...
-                - 2 * exp(-c * D) ...
-                - 2 * exp(-c * d) ...
-                + exp(-c * (D + d)));
+            tmp = J_SinOGSE(lambda, seq);
         elseif isa(seq, "CosOGSE")
-            n = seq.nperiod;
-            a = 2 * pi * n / d;
-            ed = exp(-c * d);
-            eD = exp(-c * D);
-            em = exp(-c * (D - d));
-            ep = exp(-c * (D + d));
-            w2 = a * c^2;
-            tmp = (w2 * (2 * eD - em + 2 * ed - ep) ...
-                + c * a * (a^2 * d + c^2 * d - 2 * c)) ...
-                / (a * (a^2 + c^2)^2);
-            % elseif isa(seq, "DoublePGSE")
-            %     tmp = TODO;
+            tmp = J_CosOGSE(lambda, seq);
         else
             fprintf("Eigenvalue %d of %d: Numerical integration\n", ieig, neig);
-            tmp = @(t) integral(@(s) exp(c * (s - t)) .* seq.call(s), 0, t, ...
+            tmp = @(t) integral(@(s) exp(lambda * (s - t)) .* seq.call(s), 0, t, ...
                 "Waypoints", [seq.delta, seq.Delta]);% , "AbsTol", 1e-6, "RelTol", 1e-3);
-            tmp = c * seq.integral(time) .* arrayfun(tmp, time);
-            tmp = dtime * trapz(tmp);
+            tmp = lambda * seq.integral(time) .* arrayfun(tmp, time);
+            tmp = dtime * trapz(tmp) / seq.bvalue_no_q;
         end
-        mf_jn(iseq, ieig) = tmp / seq.bvalue_no_q;
+        mf_jn(iseq, ieig) = tmp;
     end
 end

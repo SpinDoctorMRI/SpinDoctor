@@ -45,14 +45,8 @@ classdef SinOGSE < Sequence
             %BVALUE_NO_Q Compute the time profile contribution to the b-value.
             %   An analytical expression is available for the SinOGSE sequence.
             d = obj.delta;
-            D = obj.Delta;
             n = obj.nperiod;
-            omega = 2 * pi * n / d;
-            b = (cos(omega*d)^2 * omega * D ...
-                - 2 * cos(omega * d) * omega * (D - d) ...
-                + omega * (D + d) ...
-                - cos(omega * d) * sin(omega * d) ...
-                - 2 * sin(omega * d)) / omega^3;
+            b = 3 * d^3 / (4 * pi^2 * n^2);
         end
         
         function t = diffusion_time(obj)
