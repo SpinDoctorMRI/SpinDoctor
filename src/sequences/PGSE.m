@@ -7,21 +7,21 @@ classdef PGSE < Sequence
         function f = call(obj, t)
             %CALL Call the PGSE time profile at time t.
             %   The function is vectorized.
-            f = (t < obj.delta) - (obj.Delta <= t);
+            f = (0 <= t & t < obj.delta) - (obj.Delta <= t & t <= obj.echotime);
         end
         
         function F = integral(obj, t)
             %INTEGRAL Compute the integral of the PGSE sequence from 0 to t.
             %   An analytical expression is available.
-            F = (t < obj.delta) .* t ...
-                + (obj.delta <= t) .* obj.delta ...
-                - (obj.Delta <= t) .* (t - obj.Delta);
+            F = (0 <= t & t < obj.delta) .* t ...
+                + (obj.delta <= t & t <= obj.echotime) .* obj.delta ...
+                - (obj.Delta <= t & t <= obj.echotime) .* (t - obj.Delta);
         end
         
-        function b = bvalue_no_q(obj)
-            %BVALUE_NO_Q Compute the time profile contribution to the b-value.
+        function int = integral_F2(obj)
+            %INTEGRAL_F2 Compute the temporal integration of F^2 (F = integral(obj, t)).
             %   An analytical expression is available for the PGSE sequence.
-            b = obj.delta^2 * (obj.Delta - obj.delta / 3);
+            int = obj.delta^2 * (obj.Delta - obj.delta / 3);
         end
         
         function t = diffusion_time(obj)
@@ -31,11 +31,42 @@ classdef PGSE < Sequence
         
         function t = diffusion_time_sta(obj)
             %DIFFUSION_TIME_STA Get STA diffusion time of the PGSE sequence.
-            out = (4/35).*((obj.Delta-obj.delta).^(7/2)+(obj.Delta+obj.delta).^(7/2)...
-                -2.*(obj.delta.^(7/2)+obj.Delta.^(7/2)))./(obj.delta.^2.*(obj.Delta-obj.delta/3));
-            t = out.^2;
+            d = obj.delta;
+            D = obj.Delta;
+            out = (4 / 35) * ( ...
+                    + (D + d)^(7 / 2) ...
+                    + (D - d)^(7 / 2) ...
+                    - 2 * D^(7 / 2) ...
+                    - 2 * d^(7 / 2) ...
+                    ) / (d^2 * (D - d/3));
+            t = out^2;
         end
-        
+
+        function jn = J(obj, lambda)
+            %J Compute the quantity J(lambda) for the sequence
+            %   An analytical expression is available for the PGSE sequence
+            d = obj.delta;
+            D = obj.Delta;
+            
+            if lambda < 1e-7
+                % Use Taylor expansion when lambda is close to 0 
+                % to improve numerical stability
+                jn = lambda ...
+                    - lambda^2 * D^2 / (2 * (D - d/3)) ...
+                    + lambda^3 * (10*D^3 + 5*D*d^2 - d^3) / (20 * (3*D - d)) ...
+                    - lambda^4 * (D^4 + D^2*d^2) / (8 * (3*D - d)) ...
+                    + lambda^5 * (21*D^5 + 35*D^3*d^2 + 7*D*d^4 - d^5) / (840 * (3*D - d));
+            else
+                jn = - 1 * ( ...
+                    + exp(-lambda * (D + d)) ...
+                    + exp(-lambda * (D - d)) ...
+                    - 2 * exp(-lambda * d) ...
+                    - 2 * exp(-lambda * D) ...
+                    + 2 * (1 - lambda * d)) / ...
+                    (lambda^2 * d^2 * (D - d/3));
+            end
+        end
+
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
             %INTERVALS Get intervals of the sequence.
             %   This function returns a list of important time steps (including
@@ -54,4 +85,3 @@ classdef PGSE < Sequence
         end
     end
 end
-

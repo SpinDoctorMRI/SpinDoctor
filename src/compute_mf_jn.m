@@ -27,30 +27,14 @@ for iseq = 1:nsequence
     % Gradient sequences
     seq = sequences{iseq};
 
-    % Time
-    ntime = ninterval + 1;
-    echotime = seq.echotime;
-    time = linspace(0, echotime, ntime);
-    dtime = echotime / ntime;
-
     for ieig = 1:neig
         lambda = eigvals(ieig);
         if abs(lambda) < 1e-16
             tmp = 0;
-        elseif isa(seq, "PGSE")
-            tmp = J_PGSE(lambda, seq);
-        elseif isa(seq, "DoublePGSE")
-            tmp = J_DoublePGSE(lambda, seq);
-        elseif isa(seq, "SinOGSE")
-            tmp = J_SinOGSE(lambda, seq);
-        elseif isa(seq, "CosOGSE")
-            tmp = J_CosOGSE(lambda, seq);
+        elseif ismember(class(seq), ["PGSE", "DoublePGSE", "CosOGSE", "SinOGSE"])
+            tmp = seq.J(lambda);
         else
-            fprintf("Eigenvalue %d of %d: Numerical integration\n", ieig, neig);
-            tmp = @(t) integral(@(s) exp(lambda * (s - t)) .* seq.call(s), 0, t, ...
-                "Waypoints", [seq.delta, seq.Delta]);% , "AbsTol", 1e-6, "RelTol", 1e-3);
-            tmp = lambda * seq.integral(time) .* arrayfun(tmp, time);
-            tmp = dtime * trapz(tmp) / seq.bvalue_no_q;
+            tmp = seq.J(lambda, ninterval);
         end
         mf_jn(iseq, ieig) = tmp;
     end
