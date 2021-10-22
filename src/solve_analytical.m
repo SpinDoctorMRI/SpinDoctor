@@ -219,5 +219,3 @@ for iseq = 1:nsequence
         signal(iamp, iseq) = E * S0;
     end
 end
-
-disp(5);

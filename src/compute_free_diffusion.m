@@ -2,9 +2,9 @@ function free = compute_free_diffusion(bvalues, diffusivity, volumes, initial_de
 %COMPUTE_FREE_DIFFUSION Compute the free signal and diffusion coefficients.
 %
 %   bvalues: double(namplitude, nsequence)
-%     diffusivity: double(3, 3, ncompartment)
-%     volumes: double(1, ncompartment)
-%      initial_density: double(1, ncompartment)
+%   diffusivity: double(3, 3, ncompartment)
+%   volumes: double(1, ncompartment)
+%   initial_density: double(1, ncompartment)
 %
 %   free: struct with fields
 %       signal: double(ncompartment, namplitude, nsequence)
