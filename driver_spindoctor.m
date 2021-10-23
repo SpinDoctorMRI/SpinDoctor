@@ -126,17 +126,17 @@ end
 if isfield(setup, "mf")
     % Perform Laplace eigendecomposition
     eiglim = length2eig(setup.mf.length_scale, mean_diffusivity);
-    lap_eig = compute_laplace_eig(femesh, setup.pde, eiglim, setup.mf.neig_max);
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf, eiglim);
 
     % Compute length scales of eigenvalues
-    lap_eig.length_scales = eig2length(lap_eig.values, mean_diffusivity);
+    lap_eig = add_eig_length(lap_eig, mean_diffusivity);
 
     % Compute the JN value that relates the eigenmodes to their contribution
     % to the Matrix Formalism signal for a diffusion-encoding sequence
-    mf_jn = compute_mf_jn(lap_eig.values, setup);
+    mf_jn = compute_mf_jn(lap_eig, setup);
 
     % Compute the Matrix Formalism effective diffusion tensor
-    diffusion_tensor = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
+    [diffusion_tensor, diffusion_tensor_all, A] = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
 
     % Compute MF magnetization
     mf = solve_mf(femesh, setup, lap_eig);
@@ -146,9 +146,9 @@ if isfield(setup, "mf")
 
     % MF direction averaged magnetization
     mf.magnetization_avg = average_magnetization(mf.magnetization);
-    
+
     % Compute MFGA signal
-    mfga = compute_mfga_signal(setup, initial_signal, diffusion_tensor);
+    mfga = compute_mfga_signal(setup, initial_signal, diffusion_tensor_all);
 end
 
 

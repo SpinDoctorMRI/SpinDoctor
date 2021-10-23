@@ -95,7 +95,7 @@ end
 
 
 %% Solve BTPDE using midpoint method
-if isfield(setup, "btpde")
+if isfield(setup, "btpde_midpoint")
     disp("Computing or loading the BTPDE midpoint signals");
     btpde_midpoint = solve_btpde_midpoint( ...
         femesh, setup, save_dir_path_spindoctor, save_magnetization ...
@@ -124,18 +124,12 @@ if isfield(setup, "mf")
     if isfile(fname)
         % Load eigendecomposition
         disp("load " + fname);
-        load(fname);
+        lap_eig = load(fname);
 
-        % Store eigendecomposition
-        lap_eig.values = values;
-        lap_eig.funcs = funcs;
-        lap_eig.moments = moments;
-        lap_eig.massrelax = massrelax;
-        lap_eig.totaltime = totaltime;
     else
         % Perform eigendecomposition
         eiglim = length2eig(setup.mf.length_scale, mean_diffusivity);
-        lap_eig = compute_laplace_eig(femesh, setup.pde, eiglim, setup.mf.neig_max);
+        lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf, eiglim);
 
         % Save eigendecomposition
         disp("save " + fname + " -v7.3 -struct lap_eig");
@@ -147,7 +141,7 @@ if isfield(setup, "mf")
     clear fname
 
     % Compute length scales of eigenvalues
-    lap_eig.length_scales = eig2length(lap_eig.values, mean_diffusivity);
+    lap_eig = add_eig_length(lap_eig, mean_diffusivity);
 end
 
 
@@ -155,10 +149,10 @@ end
 if isfield(setup, "mf")
     % Compute the JN value that relates the eigenmodes to their contribution
     % to the Matrix Formalism signal for a diffusion-encoding sequence
-    mf_jn = compute_mf_jn(lap_eig.values, setup);
+    mf_jn = compute_mf_jn(lap_eig, setup);
 
     % Compute the Matrix Formalism effective diffusion tensor
-    diffusion_tensor = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
+    [diffusion_tensor, diffusion_tensor_all] = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
 end
 
 
@@ -189,23 +183,24 @@ end
 plot_femesh_everywhere(femesh, refinement_str);
 
 % Plot Matrix Formalism effective diffusion tensor
-plot_diffusion_tensor(diffusion_tensor, mean_diffusivity);
+plot_diffusion_tensor(diffusion_tensor_all, mean_diffusivity);
 
 % Plot some Laplace eigenfunctions
-neig = length(lap_eig.values);
-nshow = min(10, neig);
-for ieig = nshow:nshow
-    diffdir = squeeze(lap_eig.moments(1, ieig, :));
-    diffdir = diffdir / norm(diffdir, 2);
-    title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
-        ieig, lap_eig.length_scales(ieig), round(diffdir' * 100) / 100);
+% TO DO: add support for uncorrelated compartments
+% neig = length(lap_eig.values);
+% nshow = min(10, neig);
+% for ieig = nshow:nshow
+%     diffdir = squeeze(lap_eig.moments(1, ieig, :));
+%     diffdir = diffdir / norm(diffdir, 2);
+%     title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
+%         ieig, lap_eig.length_scales(ieig), round(diffdir' * 100) / 100);
 
-    % Split Laplace eigenfunctions into compartments
-    npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
-    lap_eig_funcs_sep = mat2cell(lap_eig.funcs, npoint_cmpts);
-    % plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
-    plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
-end
+%     % Split Laplace eigenfunctions into compartments
+%     npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+%     lap_eig_funcs_sep = mat2cell(lap_eig.funcs, npoint_cmpts);
+%     % plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
+%     plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
+% end
 
 % Relative error between BTPDE and MF signal
 signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
