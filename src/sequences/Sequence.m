@@ -82,8 +82,7 @@ classdef (Abstract) Sequence
             %STRING Convert sequence to string.
             %   If there are other parameters than `delta` and `Delta`, this
             %   method should be overwritten.
-            % s = sprintf("%s(delta = %g, Delta = %g)", class(obj), obj.delta, obj.Delta);
-            s = sprintf("%s(%g, %g)", class(obj), obj.delta, obj.Delta);
+            s = sprintf("%s(delta=%g, Delta=%g)", class(obj), obj.delta, obj.Delta);
         end
         
         function s = char(obj)

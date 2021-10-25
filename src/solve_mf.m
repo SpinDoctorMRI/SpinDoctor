@@ -120,9 +120,10 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
             K = L + T2 + 1i * q * A;
             edK = expm(-seq.delta * K);
             edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+            etL = expm(-seq.tpause * (L + T2));
 
             % Laplace coefficients of final magnetization
-            nu = edK' * (edL * (edK * (edK' * (edL * (edK * nu0)))));
+            nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
         else
             % BT operator in Laplace basis for a given time profile value
             K = @(ft) L + T2 + 1i * q * ft * A;

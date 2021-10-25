@@ -161,5 +161,11 @@ classdef DoublePGSE < Sequence
                 timeprofile_str(2) = [];
             end
         end
+        
+        function s = string(obj)
+            %STRING Convert sequence to string.
+            s = sprintf("%s(delta=%g, Delta=%g, tm=%g)", class(obj), ...
+                obj.delta, obj.Delta, obj.delta+obj.tpause);
+        end
     end
 end
