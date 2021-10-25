@@ -124,24 +124,19 @@ if isfield(setup, "mf")
     if isfile(fname)
         % Load eigendecomposition
         disp("load " + fname);
-        lap_eig = load(fname);
-
+        load(fname);
+        % lap_eig = load(fname);
     else
         % Perform eigendecomposition
         eiglim = length2eig(setup.mf.length_scale, mean_diffusivity);
         lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf, eiglim);
+        % Compute length scales of eigenvalues
+        lap_eig = add_eig_length(lap_eig, mean_diffusivity);
 
         % Save eigendecomposition
-        disp("save " + fname + " -v7.3 -struct lap_eig");
-        save(fname, "-v7.3", "-struct", "lap_eig");
+         disp("save " + fname + " -v7.3 lap_eig");
+         save(fname, "-v7.3", "lap_eig");
     end
-
-    % Clear temporary variables
-    clear values funcs moments totaltime
-    clear fname
-
-    % Compute length scales of eigenvalues
-    lap_eig = add_eig_length(lap_eig, mean_diffusivity);
 end
 
 
@@ -152,7 +147,7 @@ if isfield(setup, "mf")
     mf_jn = compute_mf_jn(lap_eig, setup);
 
     % Compute the Matrix Formalism effective diffusion tensor
-    [diffusion_tensor, diffusion_tensor_all] = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
+    [diffusion_tensor, diffusion_tensor_all, A] = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
 end
 
 
@@ -182,44 +177,76 @@ end
 % plot_femesh(femesh, cmpts_in, cmpts_out, cmpts_ecs);
 plot_femesh_everywhere(femesh, refinement_str);
 
-% Plot Matrix Formalism effective diffusion tensor
-plot_diffusion_tensor(diffusion_tensor_all, mean_diffusivity);
+if isfield(setup, 'mf')
+    % Plot Matrix Formalism effective diffusion tensor
+    plot_diffusion_tensor(diffusion_tensor_all, mean_diffusivity);
 
-% Plot some Laplace eigenfunctions
-% TO DO: add support for uncorrelated compartments
-% neig = length(lap_eig.values);
-% nshow = min(10, neig);
-% for ieig = nshow:nshow
-%     diffdir = squeeze(lap_eig.moments(1, ieig, :));
-%     diffdir = diffdir / norm(diffdir, 2);
-%     title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
-%         ieig, lap_eig.length_scales(ieig), round(diffdir' * 100) / 100);
+    % Plot some Laplace eigenfunctions
+    if length(lap_eig) == 1
+        neig = length(lap_eig.values);
+        nshow = min(10, neig);
+        for ieig = nshow:nshow
+            diffdir = squeeze(lap_eig.moments(1, ieig, :));
+            diffdir = diffdir / norm(diffdir, 2);
+            title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
+                ieig, lap_eig.length_scales(ieig), round(diffdir' * 100) / 100);
 
-%     % Split Laplace eigenfunctions into compartments
-%     npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
-%     lap_eig_funcs_sep = mat2cell(lap_eig.funcs, npoint_cmpts);
-%     % plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
-%     plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
-% end
+            % Split Laplace eigenfunctions into compartments
+            npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+            lap_eig_funcs_sep = mat2cell(lap_eig.funcs, npoint_cmpts);
+            % plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
+            plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
+        end
+    else
+        % Plot the ieig-th eigenfunction for the compartment icmpt
+        icmpt = 7;
+        ncompartment = length(lap_eig);
+        icmpt = min(icmpt, ncompartment);
+        
+        ieig = 4;
+        neig = length(lap_eig(icmpt).values);
+        ieig = min(ieig, neig);
 
-% Relative error between BTPDE and MF signal
-signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
-    ./ max(abs(btpde.signal_allcmpts), [], 3);
+        diffdir = squeeze(lap_eig(icmpt).moments(1, ieig, :));
+        diffdir = diffdir / norm(diffdir, 2);
+        title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
+            icmpt, ieig, lap_eig(icmpt).length_scales(ieig), round(diffdir' * 100) / 100);
 
-% Difference between BTPDE and MF signal, normalized by initial signal
-signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ initial_signal;
+        % Split Laplace eigenfunctions into compartments
+        lap_eig_funcs_sep = cell(ncompartment, 1);
+        for jcmpt = 1:ncompartment
+            if jcmpt == icmpt
+                lap_eig_funcs_sep{icmpt} = lap_eig(icmpt).funcs(:, ieig);
+            else
+                lap_eig_funcs_sep{jcmpt} = lap_eig(jcmpt).funcs(:, 1) * 0;
+            end
+        end
+        plot_field_compartment(femesh, lap_eig_funcs_sep, icmpt, title_str, 1, false);
+%         plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str);
+        plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str);
+    end
+end
 
-% Plot quantities over many directions
-if ndirection > 1
-    % Plot HARDI signal
-    plot_hardi(setup.gradient.directions, real(btpde.signal_allcmpts) / sum(volumes), "BTPDE signal")
-    plot_hardi(setup.gradient.directions, real(mf.signal_allcmpts) / sum(volumes), "MF signal")
+if isfield(setup, 'mf') && isfield(setup, 'btpde')
+    % Relative error between BTPDE and MF signal
+    signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
+        ./ max(abs(btpde.signal_allcmpts), [], 3);
 
-    % Plot relative difference
-    fig_title = "Rel diff between BTPDE and MF";
-    plot_hardi(setup.gradient.directions, signal_allcmpts_relerr, fig_title);
+    % Difference between BTPDE and MF signal, normalized by initial signal
+    signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ initial_signal;
 
-    % Plot difference normalized by volume
-    fig_title = "Diff between BTPDE and MF normalized by volume";
-    plot_hardi(setup.gradient.directions, signal_allcmpts_abserr_vol, fig_title);
+    % Plot quantities over many directions
+    if ndirection > 1
+        % Plot HARDI signal
+        plot_hardi(setup.gradient.directions, real(btpde.signal_allcmpts) / sum(volumes), "BTPDE signal")
+        plot_hardi(setup.gradient.directions, real(mf.signal_allcmpts) / sum(volumes), "MF signal")
+
+        % Plot relative difference
+        fig_title = "Rel diff between BTPDE and MF";
+        plot_hardi(setup.gradient.directions, signal_allcmpts_relerr, fig_title);
+
+        % Plot difference normalized by volume
+        fig_title = "Diff between BTPDE and MF normalized by volume";
+        plot_hardi(setup.gradient.directions, signal_allcmpts_abserr_vol, fig_title);
+    end
 end

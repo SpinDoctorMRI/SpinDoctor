@@ -244,7 +244,7 @@ end % One or many directions
 
 if isfield(setup, "mf")
     % Plot Matrix Formalism effective diffusion tensor
-    plot_diffusion_tensor(diffusion_tensor, mean_diffusivity);
+    plot_diffusion_tensor(diffusion_tensor_all, mean_diffusivity);
 
     % Relative error between BTPDE and MF signal
     signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
