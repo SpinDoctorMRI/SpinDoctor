@@ -106,24 +106,36 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
         A = sum(moments .* shiftdim(g, -2), 3);
 
         % Compute final magnetization (in Laplace basis)
-        % If PGSE, use three intervals; if DoublePGSE, use six intervals; otherwise many intervals.
+        % If PGSE, use three intervals; if DoublePGSE, use seven intervals; otherwise many intervals.
         if isa(seq, "PGSE")
             % Constant BT operator in Laplace basis
             K = L + T2 + 1i * q * A;
-            edK = expm(-seq.delta * K);
-            edL = expm(-(seq.Delta - seq.delta) * (L + T2));
 
             % Laplace coefficients of final magnetization
-            nu = edK' * (edL * (edK * nu0));
+            nu = expmv(-seq.delta, K, nu0);
+            nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+            nu = expmv(-seq.delta, K', nu);
+
+            % edK = expm(-seq.delta * K);
+            % edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+            % nu = edK' * (edL * (edK * nu0));
         elseif isa(seq, "DoublePGSE")
             % Constant BT operator in Laplace basis
             K = L + T2 + 1i * q * A;
-            edK = expm(-seq.delta * K);
-            edL = expm(-(seq.Delta - seq.delta) * (L + T2));
-            etL = expm(-seq.tpause * (L + T2));
 
             % Laplace coefficients of final magnetization
-            nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
+            nu = expmv(-seq.delta, K, nu0);
+            nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+            nu = expmv(-seq.delta, K', nu);
+            nu = expmv(-seq.tpause, L + T2, nu);
+            nu = expmv(-seq.delta, K, nu);
+            nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+            nu = expmv(-seq.delta, K', nu);
+
+            % edK = expm(-seq.delta * K);
+            % edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+            % etL = expm(-seq.tpause * (L + T2));
+            % nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
         else
             % BT operator in Laplace basis for a given time profile value
             K = @(ft) L + T2 + 1i * q * ft * A;
@@ -137,7 +149,8 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
                 ft = (seq.call(time(i + 1)) + seq.call(time(i))) / 2;
 
                 % Laplace coefficients of magnetization at end of interval
-                nu = expm(-dt * K(ft)) * nu;
+                nu = expmv(-dt, K(ft), nu);
+                % nu = expm(-dt * K(ft)) * nu;
             end
         end
 
@@ -197,23 +210,36 @@ else    % All compartments are uncorrelated
             A = sum(moments .* shiftdim(g, -2), 3);
 
             % Compute final magnetization (in Laplace basis)
-            % If PGSE, use three intervals; if DoublePGSE, use six intervals; otherwise many intervals.
+            % If PGSE, use three intervals; if DoublePGSE, use seven intervals; otherwise many intervals.
             if isa(seq, "PGSE")
                 % Constant BT operator in Laplace basis
                 K = L + T2 + 1i * q * A;
-                edK = expm(-seq.delta * K);
-                edL = expm(-(seq.Delta - seq.delta) * (L + T2));
 
                 % Laplace coefficients of final magnetization
-                nu = edK' * (edL * (edK * nu0));
+                nu = expmv(-seq.delta, K, nu0);
+                nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+                nu = expmv(-seq.delta, K', nu);
+
+                % edK = expm(-seq.delta * K);
+                % edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+                % nu = edK' * (edL * (edK * nu0));
             elseif isa(seq, "DoublePGSE")
                 % Constant BT operator in Laplace basis
                 K = L + T2 + 1i * q * A;
-                edK = expm(-seq.delta * K);
-                edL = expm(-(seq.Delta - seq.delta) * (L + T2));
 
                 % Laplace coefficients of final magnetization
-                nu = edK' * (edL * (edK * (edK' * (edL * (edK * nu0)))));
+                nu = expmv(-seq.delta, K, nu0);
+                nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+                nu = expmv(-seq.delta, K', nu);
+                nu = expmv(-seq.tpause, L + T2, nu);
+                nu = expmv(-seq.delta, K, nu);
+                nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+                nu = expmv(-seq.delta, K', nu);
+
+                % edK = expm(-seq.delta * K);
+                % edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+                % etL = expm(-seq.tpause * (L + T2));
+                % nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
             else
                 % BT operator in Laplace basis for a given time profile value
                 K = @(ft) L + T2 + 1i * q * ft * A;
@@ -227,7 +253,8 @@ else    % All compartments are uncorrelated
                     ft = (seq.call(time(i + 1)) + seq.call(time(i))) / 2;
 
                     % Laplace coefficients of magnetization at end of interval
-                    nu = expm(-dt * K(ft)) * nu;
+                    nu = expmv(-dt, K(ft), nu);
+                    % nu = expm(-dt * K(ft)) * nu;
                 end
             end
 
