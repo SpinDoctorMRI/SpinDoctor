@@ -32,17 +32,21 @@ elseif isfield(mf, 'maxiterations') && isnumeric(mf.maxiterations)
     params = [params {"MaxIterations" mf.maxiterations}];
 end
 
-% Check if user has provided a requested number of eigenvalues
+% Default: compute all eigenvalues using eig
+neig_max = Inf;
+% Check if user has provided a requested number of eigenvalues. Finite neig_max triggers eigs.
 if isfield(mf, 'neig_max') && isnumeric(mf.neig_max) && mf.neig_max > 0
     neig_max = mf.neig_max;
-else
-    % Compute all eigenvalues
-    neig_max = Inf;
+end
+if isinf(neig_max)
+    warning("Compute all eigenvalues using EIG which requires much more memory than EIGS. " ...
+                + "Eigenvalues out of the interval defined by length scale will be removed.");
 end
 
 % Extract domain parameters
 diffusivity = pde.diffusivity;
 relaxation = pde.relaxation;
+no_relaxation = all(isinf(relaxation));
 
 % Sizes
 ncompartment = femesh.ncompartment;
@@ -62,7 +66,11 @@ for icmpt = 1:ncompartment
     % Assemble mass, stiffness, and T2-relaxation matrices in compartment
     M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
     K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
-    R_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
+    if no_relaxation
+        R_cmpts{icmpt} = 0;
+    else
+        R_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
+    end
 
     % Assemble moment matrices (coordinate weighted mass matrices)
     for idim = 1:3
@@ -139,7 +147,11 @@ if all(pde.permeability==0)    % All compartments are uncorrelated
             moments(:, :, idim) = funcs' * Jx{idim} * funcs;
         end
         % Compute T2-weighted Laplace mass matrix
-        massrelax = funcs' * R * funcs;
+        if no_relaxation
+            massrelax = 0;
+        else
+            massrelax = funcs' * R * funcs;
+        end
 
         % Create output cell
         values_cmpts{icmpt} = values;
@@ -159,10 +171,12 @@ else    % One compartment or some compartments are connected by permeable interf
     disp("Coupling FEM matrices");
     M = blkdiag(M_cmpts{:});
     K = blkdiag(K_cmpts{:});
-    R = blkdiag(R_cmpts{:});
     Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
     Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
     Q = couple_flux_matrix(femesh, pde, Q_blocks, false);
+    if ~no_relaxation
+        R = blkdiag(R_cmpts{:});
+    end
 
     fprintf("Eigendecomposition of FE matrices: size %d x %d\n", size(M));
 
@@ -235,8 +249,12 @@ else    % One compartment or some compartments are connected by permeable interf
         moments(:, :, idim) = funcs' * Jx{idim} * funcs;
     end
     disp("Computing T2-weighted Laplace mass matrix");
-    massrelax = funcs' * R * funcs;
-    
+    if no_relaxation
+        massrelax = 0;
+    else
+        massrelax = funcs' * R * funcs;
+    end
+
     % Create output structure
     lap_eig.values = values;
     lap_eig.funcs = funcs;
