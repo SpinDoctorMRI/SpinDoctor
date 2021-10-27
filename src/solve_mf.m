@@ -65,6 +65,9 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
     L = diag(lap_eig.values);
     neig = length(lap_eig.values);
 
+    % Number of points in each compartment
+    npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+
     % Global matrix and density
     M = blkdiag(M_cmpts{:});
     rho = vertcat(rho_cmpts{:});
@@ -113,7 +116,7 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
 
             % Laplace coefficients of final magnetization
             nu = expmv(-seq.delta, K, nu0);
-            nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+            nu = expm(-(seq.Delta - seq.delta) * (L + T2)) * nu;
             nu = expmv(-seq.delta, K', nu);
 
             % edK = expm(-seq.delta * K);
@@ -124,18 +127,18 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
             K = L + T2 + 1i * q * A;
 
             % Laplace coefficients of final magnetization
-            nu = expmv(-seq.delta, K, nu0);
-            nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
-            nu = expmv(-seq.delta, K', nu);
-            nu = expmv(-seq.tpause, L + T2, nu);
-            nu = expmv(-seq.delta, K, nu);
-            nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
-            nu = expmv(-seq.delta, K', nu);
+            edK = expm(-seq.delta * K);
+            edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+            etL = expm(-seq.tpause * (L + T2));
+            nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
 
-            % edK = expm(-seq.delta * K);
-            % edL = expm(-(seq.Delta - seq.delta) * (L + T2));
-            % etL = expm(-seq.tpause * (L + T2));
-            % nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
+            % nu = expmv(-seq.delta, K, nu0);
+            % nu = expm(-(seq.Delta - seq.delta) * (L + T2)) * nu;
+            % nu = expmv(-seq.delta, K', nu);
+            % nu = expm(-seq.tpause * (L + T2)) * nu;
+            % nu = expmv(-seq.delta, K, nu);
+            % nu = expm(-(seq.Delta - seq.delta) * (L + T2)) * nu;
+            % nu = expmv(-seq.delta, K', nu);
         else
             % BT operator in Laplace basis for a given time profile value
             K = @(ft) L + T2 + 1i * q * ft * A;
@@ -156,9 +159,7 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
 
         % Final magnetization coefficients in finite element nodal basis
         mag = eigfuncs * nu;
-
-        % Number of points in each compartment
-        npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+        
         % Split magnetization into compartments
         mag = mat2cell(mag, npoint_cmpts);
         for icmpt = 1:ncompartment
@@ -214,36 +215,36 @@ else    % All compartments are uncorrelated
             if isa(seq, "PGSE")
                 % Constant BT operator in Laplace basis
                 K = L + T2 + 1i * q * A;
-
+    
                 % Laplace coefficients of final magnetization
                 nu = expmv(-seq.delta, K, nu0);
-                nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
+                nu = expm(-(seq.Delta - seq.delta) * (L + T2)) * nu;
                 nu = expmv(-seq.delta, K', nu);
-
+    
                 % edK = expm(-seq.delta * K);
                 % edL = expm(-(seq.Delta - seq.delta) * (L + T2));
                 % nu = edK' * (edL * (edK * nu0));
             elseif isa(seq, "DoublePGSE")
                 % Constant BT operator in Laplace basis
                 K = L + T2 + 1i * q * A;
-
+    
                 % Laplace coefficients of final magnetization
-                nu = expmv(-seq.delta, K, nu0);
-                nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
-                nu = expmv(-seq.delta, K', nu);
-                nu = expmv(-seq.tpause, L + T2, nu);
-                nu = expmv(-seq.delta, K, nu);
-                nu = expmv(-(seq.Delta - seq.delta), L + T2, nu);
-                nu = expmv(-seq.delta, K', nu);
-
-                % edK = expm(-seq.delta * K);
-                % edL = expm(-(seq.Delta - seq.delta) * (L + T2));
-                % etL = expm(-seq.tpause * (L + T2));
-                % nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
+                edK = expm(-seq.delta * K);
+                edL = expm(-(seq.Delta - seq.delta) * (L + T2));
+                etL = expm(-seq.tpause * (L + T2));
+                nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
+    
+                % nu = expmv(-seq.delta, K, nu0);
+                % nu = expm(-(seq.Delta - seq.delta) * (L + T2)) * nu;
+                % nu = expmv(-seq.delta, K', nu);
+                % nu = expm(-seq.tpause * (L + T2)) * nu;
+                % nu = expmv(-seq.delta, K, nu);
+                % nu = expm(-(seq.Delta - seq.delta) * (L + T2)) * nu;
+                % nu = expmv(-seq.delta, K', nu);
             else
                 % BT operator in Laplace basis for a given time profile value
                 K = @(ft) L + T2 + 1i * q * ft * A;
-
+    
                 % Transform Laplace coefficients using piecewise constant
                 % approximation of time profile
                 nu = nu0;
@@ -251,7 +252,7 @@ else    % All compartments are uncorrelated
                     % Time step and time profile on given interval
                     dt = time(i + 1) - time(i);
                     ft = (seq.call(time(i + 1)) + seq.call(time(i))) / 2;
-
+    
                     % Laplace coefficients of magnetization at end of interval
                     nu = expmv(-dt, K(ft), nu);
                     % nu = expm(-dt * K(ft)) * nu;

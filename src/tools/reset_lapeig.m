@@ -1,6 +1,6 @@
 function lap_eig = reset_lapeig(femesh, pde, lap_eig, eiglim)
-%RESET_LAPEIG Reset Laplace eigenvalues, functions and product moments based on a new eiglim.
-%
+%RESET_LAPEIG Reset Laplace eigenvalues, functions, moments and 
+%   massrelax based on a new eiglim or new relaxation.
 %   femesh: struct
 %   pde: struct
 %   lap_eig: struct
@@ -62,40 +62,36 @@ if all(pde.permeability==0)    % All compartments are uncorrelated
         neig_all = length(values);
         inds_keep = values <= eiglim;
 
-        if all(inds_keep, 'all')
-            warning('Compartment %d: no eigenvalue is removed.', icmpt);
-        else
-            % Remove moments and massrelax
-            lap_eig(icmpt).moments = 0;
-            lap_eig(icmpt).massrelax = 0;
+        % Remove moments and massrelax
+        lap_eig(icmpt).moments = 0;
+        lap_eig(icmpt).massrelax = 0;
 
-            % Remove out-of-range eigenvalues
-            values = values(inds_keep);
-            funcs = funcs(:, inds_keep);
-            neig = length(values);
-            if isfield(lap_eig, 'length_scales')
-                lap_eig(icmpt).length_scales = lap_eig(icmpt).length_scales(inds_keep);
-            end
-            fprintf("Compartment %d: remove %d eigenvalues.\n", icmpt, neig_all - neig);
-            
-            % Compute first order moments of eigenfunction products
-            moments = zeros(neig, neig, 3);
-            for idim = 1:3
-                moments(:, :, idim) = funcs' * Jx{idim} * funcs;
-            end
-            % Compute T2-weighted Laplace mass matrix
-            if no_relaxation
-                massrelax = 0;
-            else
-                massrelax = funcs' * R * funcs;
-            end
-            
-            % Reset lap_eig
-            lap_eig(icmpt).values = values;
-            lap_eig(icmpt).funcs = funcs;
-            lap_eig(icmpt).moments = moments;
-            lap_eig(icmpt).massrelax = massrelax;
+        % Remove out-of-range eigenvalues
+        values = values(inds_keep);
+        funcs = funcs(:, inds_keep);
+        neig = length(values);
+        if isfield(lap_eig, 'length_scales')
+            lap_eig(icmpt).length_scales = lap_eig(icmpt).length_scales(inds_keep);
         end
+        fprintf("Compartment %d: remove %d eigenvalues.\n", icmpt, neig_all - neig);
+        
+        % Compute first order moments of eigenfunction products
+        moments = zeros(neig, neig, 3);
+        for idim = 1:3
+            moments(:, :, idim) = funcs' * Jx{idim} * funcs;
+        end
+        % Compute T2-weighted Laplace mass matrix
+        if no_relaxation
+            massrelax = 0;
+        else
+            massrelax = funcs' * R * funcs;
+        end
+        
+        % Reset lap_eig
+        lap_eig(icmpt).values = values;
+        lap_eig(icmpt).funcs = funcs;
+        lap_eig(icmpt).moments = moments;
+        lap_eig(icmpt).massrelax = massrelax;
     end
 else    % One compartment or some compartments are connected by permeable interfaces
     % Create global mass, stiffness, relaxation, flux, and moment matrices (sparse)
@@ -112,40 +108,36 @@ else    % One compartment or some compartments are connected by permeable interf
     neig_all = length(values);
     inds_keep = values <= eiglim;
 
-    if all(inds_keep, 'all')
-        warning('No eigenvalue is removed.');
-    else
-        % Remove moments and massrelax
-        lap_eig.moments = 0;
-        lap_eig.massrelax = 0;
+    % Remove moments and massrelax
+    lap_eig.moments = 0;
+    lap_eig.massrelax = 0;
 
-        % Remove out-of-range eigenvalues
-        values = values(inds_keep);
-        funcs = funcs(:, inds_keep);
-        neig = length(values);
-        if isfield(lap_eig, 'length_scales')
-            lap_eig.length_scales = lap_eig.length_scales(inds_keep);
-        end
-        fprintf("Remove %d eigenvalues.\n", neig_all - neig);
-        
-        % Compute first order moments of eigenfunction products
-        moments = zeros(neig, neig, 3);
-        for idim = 1:3
-            moments(:, :, idim) = funcs' * Jx{idim} * funcs;
-        end
-        % Compute T2-weighted Laplace mass matrix
-        if no_relaxation
-            massrelax = 0;
-        else
-            massrelax = funcs' * R * funcs;
-        end
-
-        % Reset lap_eig
-        lap_eig.values = values;
-        lap_eig.funcs = funcs;
-        lap_eig.moments = moments;
-        lap_eig.massrelax = massrelax;
+    % Remove out-of-range eigenvalues
+    values = values(inds_keep);
+    funcs = funcs(:, inds_keep);
+    neig = length(values);
+    if isfield(lap_eig, 'length_scales')
+        lap_eig.length_scales = lap_eig.length_scales(inds_keep);
     end
+    fprintf("Remove %d eigenvalues.\n", neig_all - neig);
+    
+    % Compute first order moments of eigenfunction products
+    moments = zeros(neig, neig, 3);
+    for idim = 1:3
+        moments(:, :, idim) = funcs' * Jx{idim} * funcs;
+    end
+    % Compute T2-weighted Laplace mass matrix
+    if no_relaxation
+        massrelax = 0;
+    else
+        massrelax = funcs' * R * funcs;
+    end
+
+    % Reset lap_eig
+    lap_eig.values = values;
+    lap_eig.funcs = funcs;
+    lap_eig.moments = moments;
+    lap_eig.massrelax = massrelax;
 end
 
 % Display function evaluation time
