@@ -1,0 +1,30 @@
+\begin{tikzpicture}
+  \matrix (m)[matrix of nodes, column sep=3em, row sep=2em, align=center, nodes={rectangle,draw,anchor=center}]{
+  & |[block]|{Get input parameters} & \\
+  |[connector]| & |[block]|{Create cells (canonical configuration)} & |[decision]|{Plot cells } \\
+  |[block]|{Read neuron surface triangulation} & |[block]|{Create surface triangulation (canonical configuration)} &            |[decision]| {Plot surface triangulation} \\
+  |[block]|{Compute diffusion tensor, ADC, and Gaussian approximation signal} & |[block]|{Create FE mesh on canonical configuration; \\bend and twist the FE mesh nodes by analytical transformation.}         &           |[decision]|{Plot FE mesh}                                   \\
+  |[block]|{Laplace eigendecomposition} & |[block]| {Prepare experiments} & |[decision]|{Compute STA} \\
+  |[block]|{Solve MF} & |[block]|{Solve BTPDE} & |[block]|{Solve HADC} \\
+  & |[decision]|{Plot magnetization, fit ADC} & |[decision]|{Plot HADC} \\
+  };
+  \path [>=latex,->] (m-1-2) edge (m-2-1);
+  \path [>=latex,->] (m-2-1) edge (m-3-1);
+  \path [>=latex,->] (m-3-1) edge (m-4-2);
+  \path [>=latex,->] (m-1-2) edge (m-2-2);
+  \path [>=latex,->] (m-2-2) edge (m-3-2);
+  \path [>=latex,->] (m-3-2) edge (m-4-2);
+  \path [>=latex,->] (m-4-2) edge (m-5-2);
+  \path [>=latex,->] (m-5-2) edge (m-6-2);
+  \path [>=latex,->] (m-6-2) edge (m-7-2);
+  \path [>=latex,->] (m-2-2) edge (m-2-3);
+  \path [>=latex,->] (m-3-2) edge (m-3-3);
+  \path [>=latex,->] (m-4-2) edge (m-4-3);
+  \path [>=latex,->] (m-5-2) edge (m-6-3);
+  \path [>=latex,->] (m-5-2) edge (m-5-3);
+  \path [>=latex,->] (m-6-3) edge (m-7-3);
+  \path [>=latex,->] (m-5-2) edge (m-5-1);
+  \path [>=latex,->] (m-5-1) edge (m-4-1);
+  \path [>=latex,->] (m-5-1) edge (m-6-1);
+  \path [>=latex,->] (m-6-1) edge (m-7-2);
+\end{tikzpicture}

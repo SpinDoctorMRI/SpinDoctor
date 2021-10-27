@@ -1,0 +1,7 @@
+Generate a large number of possible cell centers.
+
+Compute the \soutnew{}{minimum} distance, $d$, between the current center and previously accepted cells.
+
+Find the intersection of [$d-d_\text{max} r_\text{mean}$, $d-d_\text{min} r_\text{mean}$] and $[r_\text{min}, r_\text{max}]$, where $r_\text{mean}=\frac{r_\text{min}+r_\text{max}}{2}$. If the intersection is not empty, then take the middle of the intersection as the new radius and accept the new center. Otherwise, reject the center.
+
+Loop through the possible centers until get $N_\text{cell}$ accepted cells.

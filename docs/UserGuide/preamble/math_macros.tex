@@ -1,0 +1,102 @@
+%% Math macros
+
+
+% Matrix notation
+\renewcommand{\vec}[1]{\ensuremath{\bm{#1}}}
+\newcommand{\mat}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\transpose}{\mathsf{T}}
+
+% Interface notations
+\newcommand{\jump}[1]{\ensuremath{[\![#1]\!]}}
+\newcommand{\avg}[1]{\ensuremath{\langle#1\rangle}}
+
+% Constants
+\newcommand{\imunit}{\ensuremath{\underline{\mathrm{i}}}}
+\newcommand{\euler}{\ensuremath{\mathrm{e}}}
+
+% Intrinsic diffusion coefficient
+\newcommand{\Dintr}{\ensuremath{\mathcal{D}_0}}
+
+% Physical units in dMRI
+% \newcommand{\munit}{\ensuremath{\mathrm{A/m}}} % Magnetization
+% \newcommand{\sunit}{\ensuremath{\mathrm{A m^2}}} % Signal
+\newcommand{\munit}{\ensuremath{}} % Magnetization
+\newcommand{\sunit}{\ensuremath{\mathrm{}}} % Signal
+\newcommand{\dunit}{\ensuremath{\mathrm{mm^2/s}}} % Diffusivity
+\newcommand{\bunit}{\ensuremath{\mathrm{s}/\text{mm}^2}} % B-value
+\newcommand{\tunit}{\ensuremath{\mathrm{ms}}} % Time
+\newcommand{\kunit}{\ensuremath{\mathrm{m/s}}} % Permeability
+\newcommand{\gunit}{\ensuremath{\mathrm{T/m}}} % Gradient amplitude
+\newcommand{\lunit}{\ensuremath{\mathrm{\mu m}}} % Length
+\newcommand{\qunit}{\ensuremath{\mathrm{(\mu s \mu m)^{-1}}}} % Q-value
+
+% Step sizes
+\newcommand{\dx}{\ensuremath{{\Delta x}}}
+\newcommand{\dy}{\ensuremath{{\Delta y}}}
+\newcommand{\dz}{\ensuremath{{\Delta z}}}
+\newcommand{\dt}{\ensuremath{{\Delta t}}}
+
+% Fixed length vectors
+\newcommand{\vtwo}[2]{\ensuremath{\begin{bmatrix}#1\\#2\end{bmatrix}}}
+\newcommand{\vthree}[3]{\ensuremath{\begin{bmatrix}#1\\#2\\#3\end{bmatrix}}}
+
+% Bold units
+\newcommand{\bx}{\ensuremath{{\bm{x}}}}
+\newcommand{\by}{\ensuremath{{\bm{y}}}}
+\newcommand{\bz}{\ensuremath{{\bm{z}}}}
+\newcommand{\br}{\ensuremath{{\bm{r}}}}
+\newcommand{\bs}{\ensuremath{{\bm{s}}}}
+\newcommand{\bg}{\ensuremath{{\bm{g}}}}
+\newcommand{\ba}{\ensuremath{{\bm{a}}}}
+\newcommand{\bM}{\ensuremath{{\bm{M}}}}
+\newcommand{\bk}{\ensuremath{{\bm{k}}}}
+\newcommand{\bG}{\ensuremath{{\bm{G}}}}
+\newcommand{\bL}{\ensuremath{{\bm{L}}}}
+\newcommand{\bD}{\ensuremath{{\bm{D}}}}
+\newcommand{\bn}{\ensuremath{{\bm{n}}}}
+\newcommand{\bq}{\ensuremath{{\bm{q}}}}
+\newcommand{\bv}{\ensuremath{{\bm{v}}}}
+\newcommand{\bnu}{\ensuremath{{\bm{\nu}}}}
+\newcommand{\bug}{\ensuremath{\bm{u}_{\bm{g}}}}
+\newcommand{\bua}{\ensuremath{\bm{u}_{\bm{a}}}}
+\newcommand{\bbd}[1]{\ensuremath{\bm{#1}}}
+\newcommand{\bmhat}{\ensuremath{{\bm{\widehat{m}}}}}
+
+% Short forms
+\newcommand{\eps}{\ensuremath{\epsilon}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\rtwo}{\ensuremath{{\mathbb{R}}^2}}
+\newcommand{\rthree}{\ensuremath{{\mathbb{R}}^3}}
+\newcommand{\rd}{\ensuremath{{\mathbb{R}}^d}}
+
+% Math environments
+\newcommand{\ben}{\begin{equation*}}
+        \newcommand{\een}{\end{equation*}}
+\newcommand{\be}[1]{\begin{equation} \label{#1}}
+        \newcommand{\ee}{\end{equation}}
+\newcommand{\eqn}[1]{(\ref{eqn:#1})}
+
+% Kernels
+\newcommand{\kernel}[2]{\ensuremath{{\frac{e^{-{\|#1\|^2}/{4#2}}}{(4\pi #2)^{\frac{d}{2}}}}}}
+\newcommand{\kerneltext}[2]{\ensuremath{{{e^{-{\|#1\|^2}/{4#2}}}/{(4\pi #2)^{\frac{d}{2}}}}}}
+
+% Fourier transform
+\newcommand{\fourier}[1]{\ensuremath{\int \limits_{\rd}e^{i \bs \cdot \bx}  #1 \, d\bx}}
+\newcommand{\invf}[1]{\ensuremath{\frac{1}{(2\pi)^d} \int \limits_{\rd} e^{-i \bs \cdot \bx} #1 \, d\bs }}
+\newcommand{\invfapprox}[1]{\ensuremath{\frac{1}{(2\pi)^d} \int \limits_{\|\bs\| \leq p} e^{-i \bs \cdot \bx} #1 \, d\bs }}
+
+% Review
+%\newcommand{\question}[1]{{\bf #1}}
+\newcommand{\ignore}[1]{}
+
+% Scientific notation
+\newcommand{\e}[1]{\ensuremath{\times 10^{#1}}}
+
+% Fractions
+\newcommand{\half}{\ensuremath{\frac{1}{2}}}
+\newcommand{\threehalf}{\ensuremath{\frac{3}{2}}}
+\newcommand\fr[2]{{\textstyle\frac{#1}{#2}}}
+
+% Partial derivatives
+\newcommand{\pd}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+\newcommand{\pdtwo}[2]{\ensuremath{\frac{\partial^2 #1}{\partial #2^2}}}

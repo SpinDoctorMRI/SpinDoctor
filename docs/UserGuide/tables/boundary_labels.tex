@@ -1,0 +1,32 @@
+\begin{tabular}{|c|c|c|c|c|c|}
+
+    \multicolumn{6}{c}{Spherical cells without nucleus}                                                                                                                                                                               \\ \hline
+    Label                     &                             & out,ecs                                       &                                                &                                                & ecs                   \\ \hline
+    Number                    &                             & $[1,\dots,n_\text{cell}]$                     &                                                &                                                & $n_\text{cell}+1$     \\ \hline
+
+    \multicolumn{6}{c}{Spherical cells with nucleus}                                                                                                                                                                                  \\ \hline
+    Label                     & in,out                      & out,ecs                                       &                                                &                                                & ecs                   \\ \hline
+    Number                    & $[1,\dots,n_\text{cell}]$   & $[n_\text{cell}+1,\dots,2n_\text{cell}]$      &                                                &                                                & $2n_\text{cell}+1$    \\ \hline
+
+    \multicolumn{6}{c}{Cylindrical cells without myelin}                                                                                                                                                                              \\ \hline
+    \multirow{2}{*}{Boundary} &                             & Cylinder                                      &                                                & Cylinder                                       & Outer ECS             \\
+                              &                             & side wall                                     &                                                & top and bottom                                 & boundary              \\ \hline
+    Label                     &                             & out,ecs                                       &                                                & out                                            & ecs                   \\ \hline
+    Number                    &                             & $[1, \dots, n_\text{cell}]$                   &                                                & $[n_\text{cell} + 1, \dots, 2 n_\text{cell}]$  & $2n_\text{cell}+1$    \\ \hline
+
+    \multicolumn{6}{c}{Cylindrical cells with myelin}                                                                                                                                                                                 \\ \hline
+    \multirow{2}{*}{Boundary} & Inner cylinder              & Outer cylinder                                & Inner cylinder                                 & Outer cylinder                                 & Outer ECS             \\
+                              & side wall                   & side wall                                     & top and bottom                                 & top and bottom                                 & boundary              \\ \hline
+    Label                     & in,out                      & out,ecs                                       & in                                             & out                                            & ecs                   \\ \hline
+    Number                    & $[1, \dots, n_\text{cell}]$ & $[n_\text{cell} + 1, \dots, 2 n_\text{cell}]$ & $[2n_\text{cell} + 1, \dots, 3 n_\text{cell}]$ & $[3n_\text{cell} + 1, \dots, 4 n_\text{cell}]$ & $4 n_\text{cell} + 1$ \\ \hline
+
+    \multicolumn{6}{c}{Neuron}                                                                                                                                                                                                        \\ \hline
+    Boundary                  &                             &                                               &                                                & Neuron                                         &                       \\ \hline
+    Label                     &                             &                                               &                                                & out                                            &                       \\ \hline
+    Number                    &                             &                                               &                                                & 1                                              &                       \\ \hline
+
+    \multicolumn{6}{c}{Neuron with ECS}                                                                                                                                                                                               \\ \hline
+    Boundary                  &                             & Neuron                                        &                                                &                                                & ECS                   \\ \hline
+    Label                     &                             & out,ecs                                       &                                                &                                                & ecs                   \\ \hline
+    Number                    &                             & 1                                             &                                                &                                                & 2                     \\ \hline
+\end{tabular}

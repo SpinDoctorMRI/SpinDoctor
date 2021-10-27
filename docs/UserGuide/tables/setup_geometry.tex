@@ -1,0 +1,18 @@
+\begin{tabular}{|l|l|p{8cm}|} \hline
+
+    Field name              & Example                 & Explanation                                                                                                                                                                            \\ \hline
+
+    \verb+cell_shape+  & \verb+"cylinder"+  & \verb+"sphere"+, \verb+"cylinder"+ or \verb+"neuron"+                                                                                                               \\ \hline
+    \verb+ncell+  & \verb+10+  & Number of cells (1 for neurons)                                                                                                                                                        \\ \hline
+    \verb+rmin+  & \verb+1.5+  & Minimum cell radius                                                                                                                                                                    \\ \hline
+    \verb+rmax+ & \verb+2.5+ & Maximum cell radius                                                                                                                                                                    \\ \hline
+    \verb+dmin+ & \verb+1.5+ & Minimum (\%) distance between cells $\frac{d_\text{min}(r_\text{min}+r_\text{max})}{2}$                                                                                                \\ \hline
+    \verb+dmax+ & \verb+2.5+ & Maximum (\%) distance between cells $\frac{d_\text{max}(r_\text{min}+r_\text{max})}{2}$                                                                                                \\ \hline
+    \verb+height+ & \verb+20+ & Cylinder height (ignored if not cylinder)                                                                                                                                              \\ \hline
+    \verb+deformation+ & \verb+[0.05 0.05]+ & [$\alpha$\quad $\beta$]; \newline $\alpha$ defines the amount of bend; \newline $\beta$ defines the amount of twist (in radians)                                                       \\ \hline
+    \verb+include_in+ & \verb+true+ & Indicator for including in-compartment                                                                                                                                                 \\ \hline
+    \verb+in_ratio+ & \verb+0.6+ & $\frac{r_\text{in}}{r_\text{out}} \in ]0,1[$                                                                                                                                           \\ \hline
+    \verb+ecs_shape+ & \verb+"no_ecs"+ & Do not include ECS: \verb+"no_ecs"+;\newline Box wrap ECS: \verb+"box"+;\newline Convex hull: \verb+"convex_hull"+ \newline Tight wrap: \verb+"tight_wrap"+; \\ \hline
+    \verb+ecs_ratio+ & \verb+0.3+ & ECS thickness as percentage of mean radius                                                                                                                                             \\ \hline
+    \verb+refinement+ & \verb+0.5+ & Requested TetGen maximum tetrahedron volume (comment line to use default)                                                                                                              \\ \hline
+\end{tabular}

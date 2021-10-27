@@ -1,0 +1,26 @@
+The external package Tetgen \cite{tetgen} generates the finite element mesh that keeps track of the different compartments and the interfaces between them. The mesh is saved in several text files.
+
+The connectivity matrices of the finite elements and facets are not modified by the coordinates transformation described below. The nodes are transformed by
+bending and twisting as described next.
+
+The set of FE mesh nodes $\{x_i,y_i,z_i\}$ are transformed in the following ways:
+
+Twisting around the $z$-axis with a user-chosen twisting parameter $\alpha_\text{twist}$ is defined by
+\ben
+\begin{split}
+  \vthree{x}{y}{z} & \rightarrow \begin{bmatrix}
+    \cos(\alpha_\text{twist} z) & -\sin(\alpha_\text{twist} z) & 0 \\
+    \sin(\alpha_\text{twist} z) & \cos(\alpha_\text{twist} z)  & 0 \\
+    0                           & 0                            & 1
+  \end{bmatrix} \vthree{x}{y}{z}.
+\end{split}
+\een
+
+Bending on the $x-z$ plane with a user-chosen bending parameter $\alpha_\text{bend}$ is defined by
+\ben
+\vthree{x}{y}{z} \rightarrow
+\vthree{x+
+  \alpha_\text{bend}z^2}{y}{z}.
+\een
+
+Given $[\alpha_\text{bend},\alpha_\text{twist}]$, bending is performed after twisting.
