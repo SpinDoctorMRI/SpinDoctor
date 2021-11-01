@@ -39,15 +39,19 @@ classdef CustomSequence < Sequence
             timeprofile_str = "custom time profile";
         end
         
-        function s = string(obj)
+        function s = string(obj, simplified)
             %STRING Convert custom sequence to string.
             f = functions(obj.timeprofile).function;
             if ~startsWith(f, "@")
                 f = "@" + f;
             end
-            s = sprintf("%s(%g, %g, %s)", class(obj), ...
-                obj.delta, obj.Delta, f);
+            if nargin == 2 && simplified
+                s = sprintf("%s_%s_d%g_D%g", class(obj), f, ...
+                    obj.delta, obj.Delta);
+            else
+                s = sprintf("%s(delta=%g, Delta=%g, %s)", class(obj), ...
+                    obj.delta, obj.Delta, f);
+            end
         end
     end
 end
-

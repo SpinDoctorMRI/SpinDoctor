@@ -32,8 +32,8 @@ sequences = setup.gradient.sequences;
 rmean = (setup.geometry.rmin + setup.geometry.rmax) / 2;
 
 % Sizes
-namplitude = length(setup.gradient.values);
-nsequence = length(setup.gradient.sequences);
+namplitude = setup.namplitude;
+nsequence = setup.nsequence;
 
 if setup.geometry.cell_shape == "cylinder"
     dim = 2;

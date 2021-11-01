@@ -7,17 +7,83 @@ function pde = prepare_pde(setup)
 
 
 % Extract compartment information
-ncell = setup.geometry.ncell;
 cell_shape = setup.geometry.cell_shape;
+ncell = setup.geometry.ncell;
 include_in = setup.geometry.include_in;
-in_ratio = setup.geometry.in_ratio;
 include_ecs = setup.geometry.ecs_shape ~= "no_ecs";
-ecs_ratio = setup.geometry.ecs_ratio;
+
 pde = setup.pde;
 
-% Check for correct radius ratios and that neurons do not have in-compartments
-assert(~include_in || 0 < in_ratio && in_ratio < 1 && cell_shape ~= "neuron");
-assert(~include_ecs || 0 < ecs_ratio);
+% check diffusivity (tensorize if scalars), relaxation, permeability
+pde.diffusivity_out = pde.diffusivity_out * eye(3);
+assert(check_diffusion_tensor(pde.diffusivity_out));
+if ~isfield(pde, 'initial_density_out')
+    pde.initial_density_out = 1.0;
+end
+if isfield(pde, 'relaxation_out')
+    assert(pde.relaxation_out > 0);
+else
+    pde.relaxation_out = Inf;
+end
+if isfield(pde, 'permeability_out')
+    assert(pde.permeability_out >= 0);
+else
+    pde.permeability_out = 0;
+end
+
+if include_ecs
+    pde.diffusivity_ecs = pde.diffusivity_ecs * eye(3);
+    assert(check_diffusion_tensor(pde.diffusivity_ecs));
+    if ~isfield(pde, 'initial_density_ecs')
+        pde.initial_density_ecs = 1.0;
+    end
+    if isfield(pde, 'relaxation_ecs')
+        assert(pde.relaxation_ecs > 0);
+    else
+        pde.relaxation_ecs = Inf;
+    end
+    if isfield(pde, 'permeability_ecs')
+        assert(pde.permeability_ecs >= 0);
+    else
+        pde.permeability_ecs = 0;
+    end
+    if isfield(pde, 'permeability_out_ecs')
+        assert(pde.permeability_out_ecs >= 0);
+    else
+        pde.permeability_out_ecs = 0;
+    end
+else
+    useless_fields = {'diffusivity_ecs', 'initial_density_ecs', ...
+        'relaxation_ecs', 'permeability_ecs', 'permeability_out_ecs'};
+    pde = rmfields(pde, useless_fields);
+end
+
+if include_in
+    pde.diffusivity_in = pde.diffusivity_in * eye(3);
+    assert(check_diffusion_tensor(pde.diffusivity_in));
+    if ~isfield(pde, 'initial_density_in')
+        pde.initial_density_in = 1.0;
+    end
+    if isfield(pde, 'relaxation_in')
+        assert(pde.relaxation_in > 0);
+    else
+        pde.relaxation_in = Inf;
+    end
+    if isfield(pde, 'permeability_in')
+        assert(pde.permeability_in >= 0);
+    else
+        pde.permeability_in = 0;
+    end
+    if isfield(pde, 'permeability_in_out')
+        assert(pde.permeability_in_out >= 0);
+    else
+        pde.permeability_in_out = 0;
+    end
+else
+    useless_fields = {'diffusivity_in', 'initial_density_in', ...
+        'relaxation_in', 'permeability_in', 'permeability_in_out'};
+    pde = rmfields(pde, useless_fields);
+end
 
 % Number of compartments
 ncompartment = (1 + include_in) * ncell + include_ecs;
@@ -77,35 +143,33 @@ if ismember(cell_shape, ["sphere", "neuron"]) && include_ecs
     boundaries = [boundaries "ecs"];
 end
 
-% Diffusion coefficients (tensorize if scalars)
-pde.diffusivity_in = pde.diffusivity_in * eye(3);
-pde.diffusivity_out = pde.diffusivity_out * eye(3);
-pde.diffusivity_ecs = pde.diffusivity_ecs * eye(3);
+% Initialization
 diffusivity = zeros(3, 3, ncompartment);
-diffusivity(:, :, compartments == "in") = repmat(pde.diffusivity_in, 1, 1, sum(compartments == "in"));
-diffusivity(:, :, compartments == "out") = repmat(pde.diffusivity_out, 1, 1, sum(compartments == "out"));
-diffusivity(:, :, compartments == "ecs") = repmat(pde.diffusivity_ecs, 1, 1, sum(compartments == "ecs"));
-
-% T2-relaxation coefficients
 relaxation = zeros(1, ncompartment);
-relaxation(compartments == "in") = pde.relaxation_in;
-relaxation(compartments == "out") = pde.relaxation_out;
-relaxation(compartments == "ecs") = pde.relaxation_ecs;
-
-% Initial conditions
 initial_density = zeros(1, ncompartment);
-initial_density(compartments == "in") = pde.initial_density_in;
-initial_density(compartments == "out") = pde.initial_density_out;
-initial_density(compartments == "ecs") = pde.initial_density_ecs;
-
-% Permeability coefficients
 permeability = zeros(1, nboundary);
-permeability(boundaries == "in") = pde.permeability_in;
-permeability(boundaries == "out") = pde.permeability_out;
-permeability(boundaries == "ecs") = pde.permeability_ecs;
-permeability(boundaries == "in,out") = pde.permeability_in_out;
-permeability(boundaries == "out,ecs") = pde.permeability_out_ecs;
 
+% out compartments
+diffusivity(:, :, compartments == "out") = repmat(pde.diffusivity_out, 1, 1, sum(compartments == "out"));
+initial_density(compartments == "out") = pde.initial_density_out;
+relaxation(compartments == "out") = pde.relaxation_out;
+permeability(boundaries == "out") = pde.permeability_out;
+
+if include_ecs
+    diffusivity(:, :, compartments == "ecs") = repmat(pde.diffusivity_ecs, 1, 1, sum(compartments == "ecs"));
+    initial_density(compartments == "ecs") = pde.initial_density_ecs;
+    relaxation(compartments == "ecs") = pde.relaxation_ecs;
+    permeability(boundaries == "ecs") = pde.permeability_ecs;
+    permeability(boundaries == "out,ecs") = pde.permeability_out_ecs;
+end
+
+if include_in
+    diffusivity(:, :, compartments == "in") = repmat(pde.diffusivity_in, 1, 1, sum(compartments == "in"));
+    initial_density(compartments == "in") = pde.initial_density_in;
+    relaxation(compartments == "in") = pde.relaxation_in;
+    permeability(boundaries == "in") = pde.permeability_in;
+    permeability(boundaries == "in,out") = pde.permeability_in_out;
+end
 
 % Update domain parameters with new variables
 pde.diffusivity = diffusivity;
@@ -114,3 +178,10 @@ pde.initial_density = initial_density;
 pde.permeability = permeability;
 pde.compartments = compartments;
 pde.boundaries = boundaries;
+end
+
+function flag = check_diffusion_tensor(diffusion_tensor)
+    % need to check the properties of intrinsic diffusion tensor
+    eigvals = eig(diffusion_tensor);
+    flag = all(eigvals >= 0) && all(size(diffusion_tensor) == 3);
+end

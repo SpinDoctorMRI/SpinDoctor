@@ -1,7 +1,7 @@
 function results = load_hadc(femesh, setup, savepath)
 %LOAD_HADC Load the results saved by SOLVE_HADC.
 %   The results of each iteration are loaded from
-%   "<SAVEPATH>/HADC_<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT".
+%   "<SAVEPATH>/<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT".
 %
 %   setup: struct
 %   savepath: string
@@ -21,6 +21,8 @@ sequences = setup.gradient.sequences;
 directions = setup.gradient.directions;
 reltol = setup.hadc.reltol;
 abstol = setup.hadc.abstol;
+solve_ode = setup.hadc.ode_solver;
+solver_str = func2str(solve_ode);
 
 initial_density = setup.pde.initial_density;
 
@@ -39,10 +41,10 @@ end
 
 % Folder for loading
 savepath = sprintf( ...
-    "%s/hadc_abstol%g_reltol%g", ...
-    savepath, abstol, reltol ...
+    "%s/%s_abstol%g_reltol%g", ...
+    savepath, solver_str, abstol, reltol ...
 );
-    
+
 % Initialize output arguments
 adc = zeros(ncompartment, nsequence, ndirection);
 adc_allcmpts = zeros(nsequence, ndirection);
@@ -51,27 +53,29 @@ itertimes = zeros(ncompartment, nsequence, ndirection);
 % Cartesian indices (for parallel looping with linear indices)
 allinds = [ncompartment nsequence ndirection];
 
-% Iterate over gradient amplitudes, sequences and directions. If the Matlab
+% Iterate over gradient compartments, sequences and directions. If the Matlab
 % PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
 % parallel, otherwise it should work like a normal loop. If that is not the
 % case, replace the `parfor` keyword by the normal `for` keyword.
 parfor iall = 1:prod(allinds)
-
     % Extract indices
     [icmpt, iseq, idir] = ind2sub(allinds, iall);
 
     % Extract parameters for iteration
     seq = sequences{iseq};
-    g = directions(:, idir);
+    ug = directions(:, idir);
 
     % File name for saving or loading iteration results
-    filename = sprintf("%s/%s.mat", savepath, adc_string(icmpt, seq, g));
-    
+    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+
     % Load results
-    fprintf("Load %s\n", filename);
+    fprintf("Load hadc %d/%d.\n", iall, prod(allinds));
     mfile = matfile(filename, "Writable", false);
-    adc(iall) = mfile.adc;
-    itertimes(iall) = mfile.itertime;
+    gradient_field = sprintf("cmpt%d_", icmpt) + gradient_fieldstring(ug);
+    data = mfile.(gradient_field);
+
+    adc(iall) = data.adc;
+    itertimes(iall) = data.itertimes;
 end % iterations
 
 % Compute total HADC (weighted sum over compartments)

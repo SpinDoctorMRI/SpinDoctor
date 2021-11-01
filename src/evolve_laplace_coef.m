@@ -12,6 +12,7 @@ function nu = evolve_laplace_coef(nu0, seq, iqA, LT2, ninterval)
 %
 %   nu: double(neig, 1)
 
+
 % BT operator in Laplace basis
 K = LT2 + iqA;
 

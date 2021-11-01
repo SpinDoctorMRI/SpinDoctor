@@ -36,9 +36,9 @@ solver_str = func2str(solve_ode);
 % Sizes
 ncompartment = femesh.ncompartment;
 nboundary = femesh.nboundary;
-namplitude = size(qvalues, 1);
-nsequence = length(sequences);
-ndirection = size(directions, 2);
+namplitude = setup.namplitude;
+nsequence = setup.nsequence;
+ndirection = setup.ndirection;
 
 % Compute volumes and surface areas
 volumes = zeros(1, ncompartment);

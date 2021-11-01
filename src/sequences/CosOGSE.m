@@ -137,10 +137,15 @@ classdef CosOGSE < Sequence
             end
         end
 
-        function s = string(obj)
+        function s = string(obj, simplified)
             %STRING Convert sequence to string.
-            s = sprintf("%s(delta=%g, Delta=%g, nperiod=%g)", class(obj), ...
-                obj.delta, obj.Delta, obj.nperiod);
+            if nargin == 2 && simplified
+                s = sprintf("%s_d%g_D%g_n%g", class(obj), ...
+                    obj.delta, obj.Delta, obj.nperiod);
+            else
+                s = sprintf("%s(delta=%g, Delta=%g, nperiod=%g)", class(obj), ...
+                    obj.delta, obj.Delta, obj.nperiod);
+            end
         end
     end
 end

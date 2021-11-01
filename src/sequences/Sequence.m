@@ -28,6 +28,7 @@ classdef (Abstract) Sequence
             %   Here it is assumed that the sequence is parametrized by the two
             %   parameters `delta` and `Delta` only. Subclasses may have more
             %   parameters.
+            assert(delta > 0 && Delta > 0);
             if Delta<delta
                 error('Sequence: delta should be less than or equal to Delta.') 
             else
@@ -78,11 +79,16 @@ classdef (Abstract) Sequence
             jn = dtime * trapz(jn) / obj.integral_F2;
         end
         
-        function s = string(obj)
+        function s = string(obj, simplified)
             %STRING Convert sequence to string.
             %   If there are other parameters than `delta` and `Delta`, this
             %   method should be overwritten.
-            s = sprintf("%s(delta=%g, Delta=%g)", class(obj), obj.delta, obj.Delta);
+            if nargin == 2 && simplified
+                s = sprintf("%s_d%g_D%g", class(obj), obj.delta, obj.Delta);
+            else
+                s = sprintf("%s(delta=%g, Delta=%g)", class(obj), ...
+                    obj.delta, obj.Delta);
+            end
         end
         
         function s = char(obj)

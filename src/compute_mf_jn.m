@@ -15,20 +15,20 @@ ninterval = setup.mf.ninterval;
 
 % Sizes
 nsequence = length(sequences);
-ncompartment = length(lap_eig);
+n_lap_eig = length(lap_eig);
 
 % Initialize output argument
-mf_jn = cell(1, ncompartment);
+mf_jn = cell(1, n_lap_eig);
 
-parfor icmpt = 1:ncompartment
-    eigvals = lap_eig(icmpt).values;
+parfor ilapeig = 1:n_lap_eig
+    eigvals = lap_eig(ilapeig).values;
     neig = length(eigvals);
-    mf_jn_icmpt = zeros(nsequence, neig);
+    mf_jn_ilapeig = zeros(nsequence, neig);
 
     % Compute Jn
     for iseq = 1:nsequence
-        if ncompartment > 1
-            fprintf(" Compartment %d: experiment %d of %d\n", icmpt, iseq, nsequence);
+        if n_lap_eig > 1
+            fprintf(" Compartment %d: experiment %d of %d\n", ilapeig, iseq, nsequence);
         else
             fprintf(" Experiment %d of %d\n", iseq, nsequence);
         end
@@ -39,13 +39,13 @@ parfor icmpt = 1:ncompartment
         for ieig = 1:neig
             lambda = eigvals(ieig);
             if abs(lambda) < 1e-16
-                mf_jn_icmpt(iseq, ieig) = 0;
+                mf_jn_ilapeig(iseq, ieig) = 0;
             elseif ismember(class(seq), ["PGSE", "DoublePGSE", "CosOGSE", "SinOGSE"])
-                mf_jn_icmpt(iseq, ieig) = seq.J(lambda);
+                mf_jn_ilapeig(iseq, ieig) = seq.J(lambda);
             else
-                mf_jn_icmpt(iseq, ieig) = seq.J(lambda, ninterval);
+                mf_jn_ilapeig(iseq, ieig) = seq.J(lambda, ninterval);
             end
         end
     end
-    mf_jn{icmpt} = mf_jn_icmpt;
+    mf_jn{ilapeig} = mf_jn_ilapeig;
 end

@@ -1,0 +1,23 @@
+function fullstring = gradient_fieldstring(ug, b)
+%GRADIENT_FIELDSTRING Get fieldname string representation of gradient.
+%
+%   ug: [3 x 1] gradient direction
+%   b: double   gradient amplitude
+%
+%   fullstring: string
+
+
+if nargin == 2
+    fullstring = sprintf("b%g_ug%.6f_%.6f_%.6f", b, ug);
+elseif nargin == 1
+    fullstring = sprintf("ug%.6f_%.6f_%.6f", ug);
+else
+    error('Illegal input.')
+end
+
+% replace illegal character
+% replace decimal point '.' with 'o'
+fullstring = replace(fullstring, '.', 'o');
+% replace minus sign '-' with 'n'
+fullstring = replace(fullstring, '-', 'n');
+end

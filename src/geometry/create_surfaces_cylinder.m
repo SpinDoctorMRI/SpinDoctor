@@ -26,15 +26,19 @@ rmin = setup.geometry.rmin;
 rmax = setup.geometry.rmax;
 height = setup.geometry.height;
 include_in = setup.geometry.include_in;
-in_ratio = setup.geometry.in_ratio;
 ecs_shape = setup.geometry.ecs_shape;
-ecs_ratio = setup.geometry.ecs_ratio;
-
 include_ecs = ecs_shape ~= "no_ecs";
+if include_in
+    in_ratio = setup.geometry.in_ratio;
+else
+    in_ratio = 0;
+end
+if include_ecs
+    ecs_ratio = setup.geometry.ecs_ratio;
+end
+
 nboundary = (include_in + 1) * 2 * ncell + include_ecs;
-
 rmean = (rmin + rmax) / 2;
-
 create_nside = @(r) max(nside_min, round(nside * r / rmean));
 % create_nside = @(r) nside;
 create_angles = @(n) 2 * pi * (0:n-1) / n;
@@ -196,7 +200,6 @@ if ~include_ecs
     % remove ECS facets, if no_ecs
     facets = facets(:, ~isnan(facetmarkers));
     facetmarkers = facetmarkers(~isnan(facetmarkers));
-    nfacet = size(facets, 2);
 end
 
 % Copy points, edges and markers two the two 3D planes top and bottom

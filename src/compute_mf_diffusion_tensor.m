@@ -1,14 +1,21 @@
-function [diffusion_tensor, diffusion_tensor_all, A] = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn)
+function [diffusion_tensor, diffusion_tensor_all, mf_jn, a] = compute_mf_diffusion_tensor(femesh, setup, lap_eig)
 %COMPUTE_MF_DIFFUSION_TENSOR Compute the effective diffusion tensor.
 %
 %   femesh: struct
+%   setup: struct
 %   lap_eig: struct
-%   mf_jn: cell
 %
 %   diffusion_tensor: double(3, 3, nsequence, [ncompartment])
+%   diffusion_tensor_all: double(3, 3, nsequence)
+%   mf_jn: cell(1, ncompartment)
+%   A: double(3, neig) or cell(1, ncompartment)
 
 
-% Sizes
+% Compute the JN value that characterizes the contribution of
+% a diffusion-encoding sequence to the effective diffusion tensor
+mf_jn = compute_mf_jn(lap_eig, setup);
+
+% Get sizes
 nsequence = size(mf_jn{1}, 1);
 ncompartment = length(femesh.points);
 
@@ -30,36 +37,41 @@ if length(lap_eig) == 1    % One compartment or some compartments are connected 
     % Assemble mass matrix
     M = blkdiag(M_cmpts{:});
     points = [femesh.points{:}];
+    
+    % Compute the matrix A that quantifies the geometrical contribution of
+    % a femesh to the effective diffusion tensor
     eigfuncs = lap_eig.funcs;
-    A = points * M * eigfuncs;
+    a = points * M * eigfuncs;
 
     % Compute diffusion tensor
     for iseq = 1:nsequence
         jn = mf_jn{1}(iseq, :);
-        diffusion_tensor(:, :, iseq) = A .* jn * A' / sum(volumes);
+        diffusion_tensor(:, :, iseq) = a .* jn * a' / sum(volumes);
     end
     diffusion_tensor_all = diffusion_tensor;
 else    % All compartments are uncorrelated
     % Initialize output arguments
     diffusion_tensor = zeros(3, 3, nsequence, ncompartment);
-    A = cell(1, ncompartment);
+    a = cell(1, ncompartment);
 
     parfor icmpt = 1:ncompartment
         % Eigenvalues and moments
         M = M_cmpts{icmpt};
         points = femesh.points{icmpt};
-        eigfuncs = lap_eig(icmpt).funcs;
 
-        a = points * M * eigfuncs;
+        % Compute the matrix 'a' that quantifies the geometrical contribution of
+        % a femesh to the effective diffusion tensor
+        eigfuncs = lap_eig(icmpt).funcs;
+        ai = points * M * eigfuncs;
 
         % Compute diffusion tensor
         for iseq = 1:nsequence
             jn = mf_jn{icmpt}(iseq, :);
-            diffusion_tensor(:, :, iseq, icmpt) = a .* jn * a' / volumes(icmpt);
+            diffusion_tensor(:, :, iseq, icmpt) = ai .* jn * ai' / volumes(icmpt);
         end
-        A{icmpt} = a;
+        a{icmpt} = ai;
     end
-    
+
     volume_fraction = reshape(volumes / sum(volumes), 1, 1, 1, []);
     diffusion_tensor_all = sum(diffusion_tensor.*volume_fraction, 4);
 end
