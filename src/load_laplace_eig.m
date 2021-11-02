@@ -38,13 +38,13 @@ elseif nargin == 3
         % saved lap_eig doesn't exist, check existence of any larger lap_eig
         lapeig_list = dir(sprintf("%s/lap_eig_lengthscale*_neigmax*.mat", eigenpath));
         for ilist = 1:length(lapeig_list)
-            [ls, nmax] = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%f.mat');
-            if ls <= length_scale && nmax >= neig_max
+            ls_nmax = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%f.mat');
+            if mf.length_scale >= ls_nmax(1) && ls_nmax(2) >= mf.neig_max
                 % reuse larger eigendecomposition
                 name = fullfile(lapeig_list(ilist).folder, lapeig_list(ilist).name);
                 lap_eig = load_laplace_eig(name);
                 if ~isempty(lap_eig)
-                    fprintf("Rompute Laplace eigendecomposition using saved result: %s", name);
+                    fprintf("Compute Laplace eigendecomposition using saved result: %s\n", name);
                     eiglim = length2eig(mf.length_scale, diffusivity);
                     lap_eig = reset_lapeig(lap_eig, eiglim, mf.neig_max);
                     break;

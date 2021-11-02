@@ -45,19 +45,6 @@ signal_allcmpts = zeros(namplitude, nsequence, ndirection);
 adc = zeros(ncompartment, nsequence, ndirection);
 adc_allcmpts = zeros(nsequence, ndirection);
 
-% Compute compartmentwise signal
-for idir = 1:ndirection
-    g = directions(:, idir);
-    for iseq = 1:nsequence
-        b = bvalues(:, iseq);
-        for icmpt = 1:ncompartment
-            D = g' * diffusion_tensor(:, :, iseq, icmpt) * g;
-            adc(icmpt, iseq, idir) = D;
-            signal(icmpt, :, iseq, idir) = initial_signal * exp(-D * b);
-        end
-    end
-end
-
 % Compute signal_allcmpts
 for idir = 1:ndirection
     g = directions(:, idir);
@@ -67,6 +54,24 @@ for idir = 1:ndirection
         adc_allcmpts(iseq, idir) = D;
         signal_allcmpts(:, iseq, idir) = initial_signal * exp(-D * b);
     end
+end
+
+% Compute compartmentwise signal
+if length(size(diffusion_tensor)) == 4
+    for idir = 1:ndirection
+        g = directions(:, idir);
+        for iseq = 1:nsequence
+            b = bvalues(:, iseq);
+            for icmpt = 1:ncompartment
+                D = g' * diffusion_tensor(:, :, iseq, icmpt) * g;
+                adc(icmpt, iseq, idir) = D;
+                signal(icmpt, :, iseq, idir) = initial_signal * exp(-D * b);
+            end
+        end
+    end
+else
+    adc = adc_allcmpts;
+    signal = signal_allcmpts;
 end
 
 % Create output structure

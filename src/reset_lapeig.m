@@ -18,8 +18,9 @@ for ilapeig = 1:length(lap_eig)
 
     % Remove eigenvalues above interval defined by length scale
     inds_keep = values <= eiglim;
-    inds_keep(neigmax+1:end) = 0;
-
+    if ~isinf(neigmax)
+        inds_keep(neigmax+1:end) = 0;
+    end
     % Reset lap_eig
     lap_eig(ilapeig).values = values(inds_keep);
     lap_eig(ilapeig).funcs = lap_eig(ilapeig).funcs(:, inds_keep);

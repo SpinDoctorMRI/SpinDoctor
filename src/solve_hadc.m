@@ -21,8 +21,8 @@ function results = solve_hadc(femesh, setup, savepath)
 
 % Check if a save path has been provided (this toggers saving)
 do_save = nargin == nargin(@solve_hadc);
-if isfield(setup.btpde, 'rerun')
-    rerun = setup.btpde.rerun;
+if isfield(setup.hadc, 'rerun')
+    rerun = setup.hadc.rerun;
 else
     rerun = false;
 end

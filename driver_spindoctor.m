@@ -17,7 +17,7 @@ addpath(genpath("src"));
 %% Define inputs
 
 % Get setup
-addpath setups
+addpath(genpath("setups"));
 
 % setup_1axon_analytical;
 % setup_1sphere_analytical;

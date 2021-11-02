@@ -65,6 +65,9 @@ allinds = [namplitude nsequence ndirection];
 % PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
 % parallel, otherwise it should work like a normal loop. If that is not the
 % case, replace the `parfor` keyword by the normal `for` keyword.
+
+% Save magnetization in temp_mag to avoid parfor IO error
+temp_mag = cell(namplitude, nsequence, ndirection);
 parfor iall = 1:prod(allinds)
 
     % Extract Cartesian indices
@@ -86,9 +89,13 @@ parfor iall = 1:prod(allinds)
     signal(:, iall) = data.signal;
     itertimes(iall) = data.itertimes;
     if load_magnetization
-        magnetization(:, iall) = data.magnetization;
+        temp_mag{iall} = data.magnetization;
     end
 end % iterations
+
+for iall = 1:prod(allinds)
+    magnetization(:, iall) = temp_mag{iall};
+end
 
 % Total magnetization (sum over compartments)
 signal_allcmpts(:) = sum(signal, 1);
