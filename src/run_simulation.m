@@ -45,9 +45,9 @@ if isfield(setup, "mf")
 
     % Compute MF magnetization and signal
     savepath = create_savepath(setup, "mf", saveroot);
-    results.mf = solve_mf(femesh, setup, lap_eig, savepath, magnetization_flag);
+    results.mf = solve_mf(femesh, setup, results.lap_eig, savepath, magnetization_flag);
 
-    results.mf_hadc = solve_mf_hadc(femesh, setup, lap_eig);
+    results.mf_hadc = solve_mf_hadc(femesh, setup, results.lap_eig);
 end
 
 % Solve Karger model
