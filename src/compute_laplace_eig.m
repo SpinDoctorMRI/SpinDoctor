@@ -168,12 +168,17 @@ if no_result
         fprintf("Eigendecomposition of FE matrices: size %d x %d\n", size(M));
 
         % Compute at most all eigenvalues in the given domain
-        neig_max = min(neig_max, size(M, 1));
-        if isfield(mf, 'subspacedimension') && isnumeric(mf.subspacedimension)
-            params = [params {"SubspaceDimension" mf.subspacedimension}];
-        elseif isfield(mf, 'ssdim') && isnumeric(mf.ssdim)
-            params = [params {"SubspaceDimension" mf.ssdim}];
+        if isfield(mf, 'subspacedimension') && isnumeric(mf.subspacedimension) && ~isinf(neig_max)
+            ssdim = max([neig_max+2, mf.subspacedimension]);
+            ssdim = min([ssdim, size(M, 1)]);
+            params = [params {"SubspaceDimension" ssdim}];
+        elseif isfield(mf, 'ssdim') && isnumeric(mf.ssdim) && ~isinf(neig_max)
+            ssdim = max([neig_max+2, mf.ssdim]);
+            ssdim = min([ssdim, size(M, 1)]);
+            params = [params {"SubspaceDimension" ssdim}];
         end
+        neig_max = min([neig_max, size(M, 1)]);
+        
         % Display algorithm iteration details
         params = [params {"Display" true}];
         

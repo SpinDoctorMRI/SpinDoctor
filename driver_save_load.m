@@ -68,17 +68,15 @@ end
 if isfield(setup, "mf")
     % Laplace eigendecomposition
     eigenpath = create_savepath(setup, "lap_eig");
-%     lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf, eigenpath);
-    lap_eig = load_laplace_eig(eigenpath, setup.mf, setup.pde.mean_diffusivity);
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf, eigenpath);
+    % lap_eig = load_laplace_eig(eigenpath, setup.mf, setup.pde.mean_diffusivity);
 
     % Compute MF magnetization and signal
     savepath = create_savepath(setup, "mf");
     mf = solve_mf(femesh, setup, lap_eig, savepath, magnetization_flag);
 %     mf = load_mf(setup, savepath, magnetization_flag);
 
-    if isfield(setup.mf, 'hadc') && setup.mf.hadc
-        mf_hadc = solve_mf_hadc(femesh, setup, lap_eig);
-    end
+    mf_hadc = solve_mf_hadc(femesh, setup, lap_eig);
 end
 
 

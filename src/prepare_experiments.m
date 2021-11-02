@@ -75,7 +75,7 @@ end
 if isfield(setup, "karger")
     if ~isfield(setup.karger, "ode_solver")
         % Set default
-        setup.karger.ode_solver = @ode43;
+        setup.karger.ode_solver = @ode45;
     elseif ischar(setup.karger.ode_solver) || isstring(setup.karger.ode_solver)
         setup.karger.ode_solver = str2func(setup.karger.ode_solver);
     elseif ~isa(setup.karger.ode_solver, "function_handle")
@@ -161,7 +161,6 @@ function mf = check_mf(mf)
         mf.length_scale = 0;
     end
 
-    if ~isfield(mf, 'hadc');                mf.hadc = true;                     end
     if ~isfield(mf, 'rerun');               mf.rerun = false;                   end
     if ~isfield(mf, 'rerun_eigen');         mf.rerun_eigen = false;             end
     if isfield(mf, 'tolerance');            assert(mf.tolerance > 0);           end
