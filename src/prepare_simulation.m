@@ -33,7 +33,7 @@ setup.ndirection = size(setup.gradient.directions, 2);
 % Create or load finite element mesh
 [femesh, surfaces, cells] = create_geometry(setup);
 
-% Compute initial total signal
-setup.pde.initial_signal = setup.pde.initial_density * femesh.volumes';
+% Compute initial total signal (use round to avoid different MD5 hash code)
+setup.pde.initial_signal = round(setup.pde.initial_density * femesh.volumes', 10);
 % Compute mean diffusivity
-setup.pde.mean_diffusivity = compute_mean_diffusivity(setup.pde.diffusivity, femesh);
+setup.pde.mean_diffusivity = round(compute_mean_diffusivity(setup.pde.diffusivity, femesh), 10);
