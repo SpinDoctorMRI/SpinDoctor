@@ -10,6 +10,11 @@ function geometry = prepare_geometry(setup)
 geometry = setup.geometry;
 cell_shape = geometry.cell_shape;
 
+% check setup.name
+if ischar(setup.name)
+    setup.name = string(setup.name);
+end
+
 % check ncell
 assert(isnumeric(geometry.ncell) && geometry.ncell >= 1);
 % check if geometry.ncell is integer
