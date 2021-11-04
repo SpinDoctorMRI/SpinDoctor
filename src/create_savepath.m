@@ -30,15 +30,17 @@ if ismember(simulation_method, ["btpde", "btpde_midpoint"])
 
     % Encode pde parameters
     % Make sure different settings are saved in different folders using hash
+    fields = {'initial_signal', 'mean_diffusivity'};
+    pde = rmfields(setup.pde, fields);
     pde_str = "kappa";
-    if isfield(setup.pde, 'permeability_in_out')
-        pde_str = pde_str + "_inout" + num2str(setup.pde.permeability_in_out);
+    if isfield(pde, 'permeability_in_out')
+        pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out);
     end
-    if isfield(setup.pde, 'permeability_out_ecs')
-        pde_str = pde_str + "_outecs" + num2str(setup.pde.permeability_out_ecs);
+    if isfield(pde, 'permeability_out_ecs')
+        pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs);
     end
     pde_str = pde_str + sprintf("_out%g_md5_%s", ...
-        setup.pde.permeability_out, DataHash(setup.pde, 10));
+        pde.permeability_out, DataHash(pde, 10));
 
     % Construct the final path
     savepath = fullfile(save_dir_path_geometry, pde_str, simulation_method);
@@ -48,20 +50,22 @@ elseif ismember(simulation_method, ["lap_eig", "mf"])
     % Encode pde parameters
     % Laplace eigendecomposition doesn't depend on relaxation and initial density
     fields = {'relaxation_in', 'relaxation_out', 'relaxation_ecs', ...
-    'initial_density_in', 'initial_density_out', 'initial_density_ecs'};
+    'initial_density_in', 'initial_density_out', 'initial_density_ecs', ...
+    'initial_signal', 'mean_diffusivity'};
     pde = rmfields(setup.pde, fields);
     pde_str = "kappa";
-    if isfield(setup.pde, 'permeability_in_out')
-        pde_str = pde_str + "_inout" + num2str(setup.pde.permeability_in_out);
+    if isfield(pde, 'permeability_in_out')
+        pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out);
     end
-    if isfield(setup.pde, 'permeability_out_ecs')
-        pde_str = pde_str + "_outecs" + num2str(setup.pde.permeability_out_ecs);
+    if isfield(pde, 'permeability_out_ecs')
+        pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs);
     end
-    pde_str = pde_str + sprintf("_out%g_md5_%s", setup.pde.permeability_out, DataHash(pde, 10));
+    pde_str = pde_str + sprintf("_out%g_md5_%s", pde.permeability_out, DataHash(pde, 10));
 
     % construct the final path
     if simulation_method == "mf"
-        pde = setup.pde;
+        fields = {'initial_signal', 'mean_diffusivity'};
+        pde = rmfields(setup.pde, fields);
         if isfield(pde, 'relaxation_in') && ~isfield(pde, 'relaxation_ecs')
             mf_str = sprintf("mf_relax_out%g_in%g_density_out%g_in%g_md5_%s", ...
                 pde.relaxation_out, pde.relaxation_in, pde.initial_density_out, ...
@@ -88,7 +92,8 @@ elseif ismember(simulation_method, "hadc")
 
     % Encode pde parameters
     fields = {'permeability_in_out', 'permeability_out_ecs', ...
-    'permeability_in', 'permeability_out', 'permeability_ecs'};
+    'permeability_in', 'permeability_out', 'permeability_ecs', ...
+    'initial_signal', 'mean_diffusivity'};
     pde = rmfields(setup.pde, fields);
     
     if isfield(pde, 'relaxation_in') && ~isfield(pde, 'relaxation_ecs')

@@ -4,9 +4,9 @@ function results = solve_btpde(femesh, setup, savepath, save_magnetization)
 %   SOLVE_BTPDE(FEMESH, SETUP) solves the BTPDE and returns results.
 %
 %   SOLVE_BTPDE(FEMESH, SETUP, SAVEPATH) saves the results of each iteration at
-%   "<SAVEPATH>/<SOLVEROPTIONS>/<ITERATIONINFO>.MAT". If a result is already
-%   present in the iteration file, the solver loads the results instead of
-%   solving for that iteration.
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
+%   If a result is already present in the iteration file, the solver loads
+%   the results instead of solving for that iteration.
 %
 %   SOLVE_BTPDE(FEMESH, SETUP, SAVEPATH, SAVE_MAGNETIZATION) also omits saving
 %   or loading the magnetization field if SAVE_MAGNETIZATION is set to FALSE.

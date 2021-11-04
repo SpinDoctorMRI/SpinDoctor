@@ -9,7 +9,6 @@ function lap_eig = reset_lapeig(lap_eig, eiglim, neigmax)
 %       funcs: [npoint x neig]
 %       length_scale: [neig x 1]
 %       totaltime: [1 x 1]
-%       md5: md5 hash string
 
 
 for ilapeig = 1:length(lap_eig)
@@ -25,7 +24,6 @@ for ilapeig = 1:length(lap_eig)
     lap_eig(ilapeig).values = values(inds_keep);
     lap_eig(ilapeig).funcs = lap_eig(ilapeig).funcs(:, inds_keep);
     lap_eig(ilapeig).length_scales = lap_eig(ilapeig).length_scales(inds_keep);
-    lap_eig(ilapeig).md5 = DataHash(lap_eig(ilapeig).funcs);
 end
 
 % Display function evaluation time

@@ -2,7 +2,7 @@ function results = load_btpde(setup, savepath, load_magnetization)
 %LOAD_BTPDE Load the results saved by SOLVE_BTPDE.
 %
 %   LOAD_BTDPE(SETUP, SAVEPATH) loads the results of each iteration from
-%   "<SAVEPATH>/<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT".
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
 %
 %   LOAD_BTDPE(SETUP, SAVEPATH, LOAD_MAGNETIZATION) also omits loading
 %   the magnetization field if LOAD_MAGNETIZATION is set to FALSE.
@@ -60,42 +60,27 @@ signal = zeros(ncompartment, namplitude, nsequence, ndirection);
 signal_allcmpts = zeros(namplitude, nsequence, ndirection);
 itertimes = zeros(namplitude, nsequence, ndirection);
 
-% Cartesian indices (for parallel looping with linear indices)
-allinds = [namplitude nsequence ndirection];
-
-% Iterate over gradient amplitudes, sequences and directions. If the Matlab
-% PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
-% parallel, otherwise it should work like a normal loop. If that is not the
-% case, replace the `parfor` keyword by the normal `for` keyword.
-
-% Save magnetization in temp_mag to avoid parfor IO error
-temp_mag = cell(namplitude, nsequence, ndirection);
-parfor iall = 1:prod(allinds)
-    % Extract Cartesian indices
-    [iamp, iseq, idir] = ind2sub(allinds, iall);
-
-    % Extract iteration inputs
+inds = [namplitude ndirection];
+% Iterate over gradient amplitudes, sequences and directions.
+for iseq = 1:nsequence
     seq = sequences{iseq};
-    b = bvalues(iamp, iseq);
-    ug = directions(:, idir);
-
-    % File name for saving or loading iteration results
-    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
-
     % Load results
-    fprintf("Load btpde %d/%d.\n", iall, prod(allinds));
-    mfile = matfile(filename, "Writable", false);
-    data = mfile.(gradient_fieldstring(ug, b));
-    
-    signal(:, iall) = data.signal;
-    itertimes(iall) = data.itertimes;
-    if load_magnetization
-        temp_mag{iall} = data.magnetization;
-    end
-end % iterations
+    filename = sprintf("%s/%s.mat", savepath, seq.string(true));    
+    fprintf("Load btpde %d/%d.\n", iseq, nsequence);
+    mfile = load(filename);
+    for iall = 1:prod(inds)
+        [iamp, idir] = ind2sub(inds, iall);
+        % Extract iteration inputs
+        b = bvalues(iamp, iseq);
+        ug = directions(:, idir);
+        data = mfile.(gradient_fieldstring(ug, b));
 
-for iall = 1:prod(allinds)
-    magnetization(:, iall) = temp_mag{iall};
+        signal(:, iamp, iseq, idir) = data.signal;
+        itertimes(iamp, iseq, idir) = data.itertimes;
+        if load_magnetization
+            magnetization(:, iamp, iseq, idir) = data.magnetization;
+        end
+    end
 end
 
 % Total magnetization (sum over compartments)

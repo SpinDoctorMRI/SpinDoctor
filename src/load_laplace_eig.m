@@ -2,7 +2,7 @@ function lap_eig = load_laplace_eig(path, mf, diffusivity)
 %LOAD_LAPLACE_EIG Load laplace eigendecomposition.
 %
 %   path: string - path to the lap_eig file or the folder containing lap_eig
-%   mf (optional): struct
+%   mf: struct
 %   diffusivity: double
 %
 %   lap_eig: struct
@@ -11,16 +11,9 @@ function lap_eig = load_laplace_eig(path, mf, diffusivity)
 lap_eig = [];
 if nargin == 1
     % path points to the lap_eig file
+    fprintf("Load Laplace eigenfunctions from %s.\n", path);
     mfile = matfile(path, "Writable", false);
     lap_eig = mfile.lap_eig;
-    for ilapeig = 1:length(lap_eig)
-        % Check integrity of saved eigenfunctions
-        if lap_eig(ilapeig).md5 ~= DataHash(lap_eig(ilapeig).funcs)
-            mfile.lap_eig = [];
-            lap_eig = [];
-            break;
-        end
-    end
 elseif nargin == 3
     % path points to the folder containing lap_eig
     eigenpath = path;

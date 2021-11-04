@@ -5,9 +5,9 @@ function results = solve_btpde_midpoint(femesh, setup, savepath, save_magnetizat
 %
 %   SOLVE_BTPDE_MIDPOINT(FEMESH, SETUP) solves the BTPDE and returns results.
 %
-%   SOLVE_BTPDE_MIDPOINT(FEMESH, SETUP, SAVEPATH) saves the results of each
-%   iteration at "<SAVEPATH>/<SOLVEROPTIONS>/<ITERATIONINFO>.MAT". If a result
-%   is already present in the iteration file, the solver loads the results
+%   SOLVE_BTPDE_MIDPOINT(FEMESH, SETUP, SAVEPATH) saves the results of each iteration at
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde_midpoint/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
+%   If a result is already present in the iteration file, the solver loads the results
 %   instead of solving for that iteration.
 %
 %   SOLVE_BTPDE_MIDPOINT(FEMESH, SETUP, SAVEPATH, SAVE_MAGNETIZATION) also omits

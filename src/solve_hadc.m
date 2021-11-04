@@ -4,9 +4,9 @@ function results = solve_hadc(femesh, setup, savepath)
 %   SOLVE_HADC(FEMESH, SETUP) solves the HADC and returns results.
 %
 %   SOLVE_HADC(FEMESH, SETUP, SAVEPATH) saves the results of each iteration at
-%   "<SAVEPATH>/<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT". If a result is already
-%   present in the iteration file, the solver loads the results instead of
-%   solving for that iteration.
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/hadc/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
+%   If a result is already present in the iteration file, the solver loads
+%   the results instead of solving for that iteration.
 %
 %   femesh: struct
 %   setup: struct

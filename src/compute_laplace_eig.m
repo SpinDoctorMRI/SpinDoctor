@@ -11,12 +11,10 @@ function lap_eig = compute_laplace_eig(femesh, pde, mf, savepath)
 %       funcs: [npoint x neig]
 %       length_scales: [neig x 1]
 %       totaltime: [1 x 1]
-%       md5: md5 hash string
 
 
 % Measure computational time of eigendecomposition
 starttime = tic;
-disp("Computing or loading the Laplace eigenfunctions");
 
 % Check if a save path has been provided (this toggers saving)
 do_save = nargin == nargin(@solve_btpde);
@@ -41,10 +39,6 @@ end
 % Set neig_max to Inf to trigger the full eigendecomposition.
 neig_max = mf.neig_max;
 length_scale = mf.length_scale;
-if isinf(neig_max)
-    warning("Compute all eigenvalues using EIG which requires much more memory than EIGS. " ...
-                + "Eigenvalues out of the interval defined by length scale will be removed.");
-end
 
 % Extract domain parameters
 diffusivity = pde.diffusivity;
@@ -73,6 +67,11 @@ if do_save
 end
 
 if no_result
+    if isinf(neig_max)
+        warning("Compute all eigenvalues using EIG which requires much more memory than EIGS. " ...
+                    + "Eigenvalues out of the interval defined by length scale will be removed.");
+    end
+
     % Assemble finite element matrices
     disp("Setting up FEM matrices");
     M_cmpts = cell(1, ncompartment);
@@ -93,7 +92,6 @@ if no_result
         values_cmpts = cell(1, ncompartment);
         funcs_cmpts = cell(1, ncompartment);
         totaltime_cmpts = cell(1, ncompartment);
-        md5_cmpts = cell(1, ncompartment);
 
         parfor icmpt = 1:ncompartment
             starttime_icmpt = tic;
@@ -150,12 +148,10 @@ if no_result
             values_cmpts{icmpt} = values;
             funcs_cmpts{icmpt} = funcs;
             totaltime_cmpts{icmpt} = toc(starttime_icmpt);
-            md5_cmpts{icmpt} = DataHash(funcs);
         end
         lap_eig = struct('values', values_cmpts, ...
                         'funcs', funcs_cmpts, ...
-                        'totaltime', totaltime_cmpts, ...
-                        'md5', md5_cmpts);
+                        'totaltime', totaltime_cmpts);
 
     else    % One compartment or some compartments are connected by permeable interfaces
         % Create global mass, stiffness, and flux matrices (sparse)
@@ -218,14 +214,12 @@ if no_result
         fprintf("Found %d eigenvalues on [%g, %g]\n", neig, 0, eiglim);
 
         % Normalize eigenfunctions with mass weighting
-        disp("Normalizing eigenfunctions");
         funcs = funcs ./ sqrt(dot(funcs, M * funcs));
 
         % Create output structure
         lap_eig.values = values;
         lap_eig.funcs = funcs;
         lap_eig.totaltime = toc(starttime);
-        lap_eig.md5 = DataHash(funcs);
     end
 end
 

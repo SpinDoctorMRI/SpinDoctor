@@ -1,19 +1,37 @@
 function results = solve_mf(femesh, setup, lap_eig, savepath, save_magnetization)
 %SOLVE_MF Compute the solution to the BTPDE using Matrix Formalism.
 %
+%   SOLVE_MF(FEMESH, SETUP, LAP_EIG) solves the BTPDE using
+%   Matrix Formalism and returns results.
+%
+%   SOLVE_MF(FEMESH, SETUP, LAP_EIG, SAVEPATH) saves the results of each iteration at
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/ninterval<n>/<SEQUENCEINFO>.MAT".
+%   If a result is already present in the iteration file, the solver loads
+%   the results instead of solving for that iteration.
+%
+%   SOLVE_MF(FEMESH, SETUP, LAP_EIG, SAVEPATH, SAVE_MAGNETIZATION) also omits saving
+%   or loading the magnetization field if SAVE_MAGNETIZATION is set to FALSE.
+%
 %   femesh: struct
 %   setup: struct
 %   lap_eig: struct with fields
 %       values: double(neig, 1)
 %       funcs: double(npoint, neig)
-%   savepath: path string
-%   save_magnetization (optinal): boolean 
+%   savepath (optional): path string
+%   save_magnetization (optinal): logical. Defaults to true.
 %
 %   results: struct with fields
-%       signal: double(ncompartment, nsequence, namplitude, ndirection)
-%       signal_allcmpts: double(nsequence, namplitude, ndirection)
-%       ctime: double(ncompartment, nsequence, namplitude, ndirection)
-%       magnetization: cell(ncompartment, nsequence, namplitude, ndirection)
+%       magnetization: {ncompartment x namplitude x nsequence x
+%                       ndirection}[npoint x 1]
+%           Magnetization field at final timestep
+%       signal: [ncompartment x namplitude x nsequence x ndirection]
+%           Compartmentwise total magnetization at final timestep
+%       signal_allcmpts: [namplitude x nsequence x ndirection]
+%           Total magnetization at final timestep
+%       itertimes: [namplitude x nsequence x ndirection]
+%           Computational time for each iteration
+%       totaltime: [1 x 1]
+%           Total computational time, including matrix assembly
 
 
 % Measure time of function evaluation
@@ -126,7 +144,7 @@ if multi_lap_eig
         % Coefficients of initial spin density in Laplace eigenfunction basis
         nu0 = funcs' * (M * rho);
 
-        fprintf("Computing MF magnetization for compartment %d " ...
+        fprintf("Computing or loading MF magnetization for compartment %d " ...
             + "using %d eigenvalues.\n", ilapeig, neig);
         % Save data in temporary containers to avoid parfor I/O error.
         % can be simplified if version > R2019
@@ -156,7 +174,6 @@ if multi_lap_eig
             % Check if results are already available
             if ~rerun && do_save && hasfield(mfile, gradient_field)
                 % Load results
-                % fprintf("Load mf %d/%d.\n", iall, prod(allinds));
                 try
                     data = mfile.(gradient_field);
                     signal_ilapeig(iall) = data.signal(ilapeig);
@@ -235,7 +252,7 @@ else
     % Coefficients of initial spin density in Laplace eigenfunction basis
     nu0 = funcs' * (M * rho);
 
-    fprintf("Computing MF magnetization using %d eigenvalues.\n", neig);
+    fprintf("Computing or loading MF magnetization using %d eigenvalues.\n", neig);
     % save magnetization to parfor_mag to avoid I/O error using parfor
     parfor_mag = cell(allinds);
     parfor iall = 1:prod(allinds)
