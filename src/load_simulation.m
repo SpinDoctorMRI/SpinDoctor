@@ -1,4 +1,4 @@
-function results = load_simulation(setup, magnetization_flag, saveroot)
+function [results, setup, femesh] = load_simulation(setup, magnetization_flag, saveroot)
 %LOAD_SIMULATION Load simulation defined by steup
 
 if nargin == 1

@@ -1,4 +1,4 @@
-function results = run_simulation(setup, magnetization_flag, saveroot)
+function [results, setup, femesh] = run_simulation(setup, magnetization_flag, saveroot)
 %RUN_SIMULATION Run simulation defined by steup
 
 if nargin == 1

@@ -6,5 +6,8 @@ function points = unitsphere(npoint)
 % [points, ~, ~] = spheresurface_regularpoints(1, ndirection);
 points = fibonacci(npoint);
 
+% remove negative zeros
+points(points == 0) = +0;
+
 end
 

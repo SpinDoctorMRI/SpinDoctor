@@ -30,5 +30,8 @@ if nargin == nargin(@unitsemicircle) && (normal(1) ~= 0 || normal(2) ~= 0)
     points = R' * points;
 end
 
+% remove negative zeros
+points(points == 0) = +0;
+
 end
 
