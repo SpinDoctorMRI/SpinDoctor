@@ -152,7 +152,7 @@ classdef SinOGSE < Sequence
             end
         end
         
-        function s = string(obj)
+        function s = string(obj, simplified)
             %STRING Convert sequence to string.
             if nargin == 2 && simplified
                 s = sprintf("%s_d%g_D%g_n%g", class(obj), ...

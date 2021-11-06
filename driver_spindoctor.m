@@ -190,7 +190,7 @@ end % One or many directions
 
 if isfield(setup, "mf")
     % Plot Matrix Formalism effective diffusion tensor
-    plot_diffusion_tensor(diffusion_tensor_all, setup.pde.mean_diffusivity);
+    plot_diffusion_tensor(mf_hadc.diffusion_tensor_allcmpts, setup.pde.mean_diffusivity);
 
     % Relative error between BTPDE and MF signal
     signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
@@ -204,7 +204,7 @@ if isfield(setup, "mf")
         plot_signal(setup.gradient.bvalues, btpde.signal_allcmpts, free.signal_allcmpts, btpde_fit.S0_allcmpts, btpde_fit.adc, "BTPDE signal");
         plot_signal(setup.gradient.bvalues, mf.signal_allcmpts, free.signal_allcmpts, mf_fit.S0_allcmpts, mf_fit.adc, "MF signal");
         % plot_signal(setup.gradient.bvalues, mfga.signal_allcmpts, free.signal_allcmpts, setup.pde.initial_signal, mfga.adc_allcmpts, "MFGA signal");
-        plot_signal_btpde_mf(setup, btpde.signal_allcmpts, mf.signal_allcmpts, mfga.signal_allcmpts);
+        plot_signal_btpde_mf(setup, btpde.signal_allcmpts, mf.signal_allcmpts, mf_hadc.signal_allcmpts);
 
         % Display difference
         disp("Error (normalized by initial signal)");
