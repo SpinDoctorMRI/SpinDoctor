@@ -11,10 +11,10 @@ if nargin == 2
     if abs(b) < 1e-14
         fullstring = sprintf("b0");
     else
-        fullstring = sprintf("b%g_ug%.6f_%.6f_%.6f", b, ug);
+        fullstring = sprintf("b%g_ug%.4f_%.4f_%.4f", b, ug);
     end
 elseif nargin == 1
-    fullstring = sprintf("ug%.6f_%.6f_%.6f", ug);
+    fullstring = sprintf("ug%.4f_%.4f_%.4f", ug);
 else
     error('Illegal input.')
 end
