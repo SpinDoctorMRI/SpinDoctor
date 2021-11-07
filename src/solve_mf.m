@@ -347,7 +347,7 @@ if do_save
                     data.q = qvalues(iamp, iseq);
                     data.b = bvalues(iamp, iseq);
                     data.ug = directions(:, idir);
-                    data.g = data.q * 1e6 / setup.gamma;
+                    data.g = gvalues(iamp, iseq);
                     data.signal = signal(:, iamp, iseq, idir);
                     data.itertimes = itertimes(:, iamp, iseq, idir);
                     if save_magnetization
