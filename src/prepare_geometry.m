@@ -67,7 +67,13 @@ switch cell_shape
 end
 
 if isfield(geometry, 'tetgen_options')
-    assert(isstring(geometry.tetgen_options) || ischar(geometry.tetgen_options));
+    if ischar(geometry.tetgen_options)
+        geometry.tetgen_options = string(geometry.tetgen_options);
+    end
+    assert(isstring(geometry.tetgen_options));
+    if ~strncmpi(geometry.tetgen_options, "-", 1)
+        geometry.tetgen_options = "-" + geometry.tetgen_options;
+    end
     geometry = rmfields(geometry, {'refinement'});
 elseif ~isfield(geometry, 'refinement')
     geometry.refinement = -1;

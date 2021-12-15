@@ -42,6 +42,12 @@ fclose(fid);
 elements = vec(2:5, :);
 elementmarkers = vec(6, :);
 
+if ismember(0, facets)
+   % reorder index
+   facets = facets + 1;
+   elements = elements + 1;
+end
+
 % Create output structure
 femesh_all.points = points;
 femesh_all.facets = facets;

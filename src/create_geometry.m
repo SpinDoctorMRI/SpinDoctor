@@ -39,7 +39,8 @@ nboundary = setup.nboundary;
 if ~isfolder(filepath) && ~isempty(filepath)
     mkdir(filepath);
 end
-is_stl = ext == '.stl';
+% is public polyhedral file formats (STL, PLY, OFF)
+is_ply = ismember(lower(ext), [".stl", ".ply", ".off"]);
 
 % File name to save or load cell description
 cellfilename = filename + "_cells";
@@ -63,13 +64,17 @@ save_meshdir_path = fullfile(filepath, meshdir_name);
 if ~isfolder(save_meshdir_path)
     mkdir(save_meshdir_path);
 end
-if is_stl
+if is_ply
     filename_new = save_meshdir_path + "/" + name + ext;
     if ~isfile(filename_new)
         copyfile(filename, save_meshdir_path);
-        call_tetgen(filename_new);
+        if isfield(setup.geometry, "tetgen_options")
+            call_tetgen(filename_new, setup.geometry.tetgen_options);
+        else    
+            call_tetgen(filename_new);
+        end
     end
-    tetgen_stl = replace(filename_new,'.stl','.1');
+    tetgen_ply = replace(filename_new, ext, '.1');
 end
 
 % Use an existing finite elements mesh. 
@@ -97,8 +102,8 @@ else
             % Create surface geometry of cylinders
             surfaces = create_surfaces_cylinder(cells, setup);
         case "neuron"
-            if is_stl
-                surfaces = create_surfaces_neuron(tetgen_stl, setup);
+            if is_ply
+                surfaces = create_surfaces_neuron(tetgen_ply, setup);
             else
                 surfaces = create_surfaces_neuron(filename, setup);
             end
