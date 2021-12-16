@@ -16,39 +16,39 @@ pde = setup.pde;
 
 % check diffusivity (tensorize if scalars), relaxation, permeability
 pde.diffusivity_out = pde.diffusivity_out * eye(3);
-assert(check_diffusion_tensor(pde.diffusivity_out));
+assert(check_diffusion_tensor(pde.diffusivity_out), "Please check diffusivity_out.");
 if ~isfield(pde, 'initial_density_out')
     pde.initial_density_out = 1.0;
 end
 if isfield(pde, 'relaxation_out')
-    assert(pde.relaxation_out > 0);
+    assert(pde.relaxation_out > 0, "relaxation_out is negative or zero.");
 else
     pde.relaxation_out = Inf;
 end
 if isfield(pde, 'permeability_out')
-    assert(pde.permeability_out >= 0);
+    assert(pde.permeability_out >= 0, "permeability_out is negative.");
 else
     pde.permeability_out = 0;
 end
 
 if include_ecs
     pde.diffusivity_ecs = pde.diffusivity_ecs * eye(3);
-    assert(check_diffusion_tensor(pde.diffusivity_ecs));
+    assert(check_diffusion_tensor(pde.diffusivity_ecs), "Please check diffusivity_ecs.");
     if ~isfield(pde, 'initial_density_ecs')
         pde.initial_density_ecs = 1.0;
     end
     if isfield(pde, 'relaxation_ecs')
-        assert(pde.relaxation_ecs > 0);
+        assert(pde.relaxation_ecs > 0, "relaxation_ecs is negative or zero.");
     else
         pde.relaxation_ecs = Inf;
     end
     if isfield(pde, 'permeability_ecs')
-        assert(pde.permeability_ecs >= 0);
+        assert(pde.permeability_ecs >= 0, "permeability_ecs is negative.");
     else
         pde.permeability_ecs = 0;
     end
     if isfield(pde, 'permeability_out_ecs')
-        assert(pde.permeability_out_ecs >= 0);
+        assert(pde.permeability_out_ecs >= 0, "permeability_out_ecs is negative.");
     else
         pde.permeability_out_ecs = 0;
     end
@@ -60,22 +60,22 @@ end
 
 if include_in
     pde.diffusivity_in = pde.diffusivity_in * eye(3);
-    assert(check_diffusion_tensor(pde.diffusivity_in));
+    assert(check_diffusion_tensor(pde.diffusivity_in), "Please check diffusivity_in.");
     if ~isfield(pde, 'initial_density_in')
         pde.initial_density_in = 1.0;
     end
     if isfield(pde, 'relaxation_in')
-        assert(pde.relaxation_in > 0);
+        assert(pde.relaxation_in > 0, "relaxation_in is negative or zero.");
     else
         pde.relaxation_in = Inf;
     end
     if isfield(pde, 'permeability_in')
-        assert(pde.permeability_in >= 0);
+        assert(pde.permeability_in >= 0, "permeability_in is negative.");
     else
         pde.permeability_in = 0;
     end
     if isfield(pde, 'permeability_in_out')
-        assert(pde.permeability_in_out >= 0);
+        assert(pde.permeability_in_out >= 0, "permeability_in_out is negative.");
     else
         pde.permeability_in_out = 0;
     end

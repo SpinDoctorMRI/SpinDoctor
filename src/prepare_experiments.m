@@ -8,12 +8,14 @@ function setup = prepare_experiments(setup)
 
 
 % Check consistency of gradient sequences
-assert(isa(setup.gradient.sequences, "cell"))
+assert(isa(setup.gradient.sequences, "cell"), ...
+        "Gradient sequences must use cell type data container.")
 setup.gradient.sequences = setup.gradient.sequences(:)';
 nsequence = length(setup.gradient.sequences);
 for iseq = 1:nsequence
     seq = setup.gradient.sequences{iseq};
-    assert(isa(seq, "Sequence"))
+    assert(isa(seq, "Sequence"), ...
+        "Gradient sequence must be an instance of Sequence class.")
 end
 
 % Assign b-values, q-values and g-values
@@ -67,8 +69,10 @@ end
 
 % Check analytical experiment
 if isfield(setup, "analytical")
-    assert(setup.analytical.length_scale >= 0)
-    assert(setup.analytical.eigstep > 0)
+    assert(setup.analytical.length_scale >= 0, ...
+        "analytical: length scale is negative.")
+    assert(setup.analytical.eigstep > 0, ...
+        "analytical: eigstep is negative or zero.")
 end
 
 % Check Karger experiment
@@ -79,7 +83,7 @@ if isfield(setup, "karger")
     elseif ischar(setup.karger.ode_solver) || isstring(setup.karger.ode_solver)
         setup.karger.ode_solver = str2func(setup.karger.ode_solver);
     elseif ~isa(setup.karger.ode_solver, "function_handle")
-        error("The Karger ODE solver must be a function handle or a string");
+        error("karger: ODE solver must be a function handle or a string");
     end
 end
 end
@@ -91,17 +95,17 @@ function btpde = check_btpde(btpde)
     elseif ischar(btpde.ode_solver) || isstring(btpde.ode_solver)
         btpde.ode_solver = str2func(btpde.ode_solver);
     elseif ~isa(btpde.ode_solver, "function_handle")
-        error("The BTPDE ODE solver must be a function handle or a string");
+        error("btpde: ODE solver must be a function handle or a string");
     end
 
     if isfield(btpde, "reltol")
-        assert(btpde.reltol > 0);
+        assert(btpde.reltol > 0, "btpde: reltol is negative or zero.");
     else
         btpde.reltol = 1e-4;
     end
 
     if isfield(btpde, "abstol")
-        assert(btpde.abstol > 0);
+        assert(btpde.abstol > 0, "btpde: abstol is negative or zero.");
     else
         btpde.abstol = 1e-6;
     end
@@ -112,8 +116,10 @@ function btpde = check_btpde(btpde)
 end
 
 function btpde_mp = check_btpde_midpoint(btpde_mp)
-    assert(btpde_mp.implicitness > 0);
-    assert(btpde_mp.timestep > 0);
+    assert(btpde_mp.implicitness > 0, ...
+        "btpde_midpoint: implicitness is negative or zero.");
+    assert(btpde_mp.timestep > 0, ...
+        "btpde_midpoint: timestep is negative or zero.");
     if ~isfield(btpde_mp, "rerun")
         btpde_mp.rerun = false;
     end
@@ -126,17 +132,17 @@ function hadc = check_hadc(hadc)
     elseif ischar(hadc.ode_solver) || isstring(hadc.ode_solver)
         hadc.ode_solver = str2func(hadc.ode_solver);
     elseif ~isa(hadc.ode_solver, "function_handle")
-        error("The HADC ODE solver must be a function handle or a string");
+        error("hadc: ODE solver must be a function handle or a string");
     end
 
     if isfield(hadc, "reltol")
-        assert(hadc.reltol > 0);
+        assert(hadc.reltol > 0, "hadc: reltol is negative or zero.");
     else
         hadc.reltol = 1e-4;
     end
 
     if isfield(hadc, "abstol")
-        assert(hadc.abstol > 0);
+        assert(hadc.abstol > 0, "hadc: abstol is negative or zero.");
     else
         hadc.abstol = 1e-6;
     end
@@ -147,25 +153,54 @@ function hadc = check_hadc(hadc)
 end
 
 function mf = check_mf(mf)
-    assert(mf.neig_max >= 1);
+    mf.neig_max = round(mf.neig_max);
+    assert(mf.neig_max >= 1, ...
+        "matrix formalism: maximum number of eigenvalues must be greater than 1.");
 
     if isfield(mf, 'ninterval')
-        assert(mf.ninterval >= 1);
+        mf.ninterval = round(mf.ninterval);
+        assert(mf.ninterval >= 1, ...
+            "matrix formalism: number of intervals must be greater than 1.");
     else
         mf.ninterval = 500;
     end
 
     if isfield(mf, 'length_scale')
-        assert(mf.length_scale >= 0);
+        assert(mf.length_scale >= 0, ...
+            "matrix formalism: length scale is negative.");
     else
         mf.length_scale = 0;
     end
 
-    if ~isfield(mf, 'rerun');               mf.rerun = false;                   end
-    if ~isfield(mf, 'rerun_eigen');         mf.rerun_eigen = false;             end
-    if isfield(mf, 'tolerance');            assert(mf.tolerance > 0);           end
-    if isfield(mf, 'maxiter');              assert(mf.maxiter > 0);             end
-    if isfield(mf, 'maxiterations');        assert(mf.maxiterations > 0);       end
-    if isfield(mf, 'ssdim');                assert(mf.ssdim > 0);               end
-    if isfield(mf, 'subspacedimension');    assert(mf.subspacedimension > 0);   end
+    if isfield(mf, 'maxiter')
+        mf.maxiter = round(mf.maxiter);
+        assert(mf.maxiter > 0, ...
+            "matrix formalism: maximum number of iterations is negative.");
+    end
+
+    if isfield(mf, 'maxiterations')
+        mf.maxiterations = round(mf.maxiterations);
+        assert(mf.maxiterations > 0, ...
+            "matrix formalism: maximum number of iterations is negative.");
+    end
+
+    if isfield(mf, 'ssdim')
+        mf.ssdim = round(mf.ssdim);
+        assert(mf.ssdim > 0, ...
+            "matrix formalism: maximum size of Krylov subspace is negative.");
+    end
+
+    if isfield(mf, 'subspacedimension')
+        mf.subspacedimension = round(mf.subspacedimension);
+        assert(mf.subspacedimension > 0, ...
+            "matrix formalism: maximum size of Krylov subspace is negative.");
+    end
+
+    if isfield(mf, 'tolerance')
+        assert(mf.tolerance > 0, ...
+            "matrix formalism: convergence tolerance is negative.");
+    end
+
+    if ~isfield(mf, 'rerun');           mf.rerun = false;           end
+    if ~isfield(mf, 'rerun_eigen');     mf.rerun_eigen = false;     end
 end
