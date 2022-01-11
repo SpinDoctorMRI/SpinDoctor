@@ -2,7 +2,7 @@ function results = load_mf(setup, savepath, load_magnetization)
 %LOAD_MF Load the Matrix Formalism solution to the BTPDE.
 %
 %   LOAD_MF(SETUP, SAVEPATH) loads the results of each iteration from
-%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/ninterval<n>/<SEQUENCEINFO>.MAT".
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT".
 %
 %   LOAD_MF(SETUP, SAVEPATH, LOAD_MAGNETIZATION) also omits loading
 %   the magnetization field if LOAD_MAGNETIZATION is set to FALSE.
@@ -37,7 +37,6 @@ end
 bvalues = setup.gradient.bvalues;
 sequences = setup.gradient.sequences;
 directions = setup.gradient.directions;
-ninterval = setup.mf.ninterval;
 
 % Sizes
 ncompartment = setup.ncompartment;
@@ -46,7 +45,12 @@ nsequence = setup.nsequence;
 ndirection = setup.ndirection;
 
 % Folder for saving
-savepath = sprintf("%s/ninterval%d", savepath, ninterval);
+mf_str = sprintf("neig_max%d_lengthscale_min%.4f_ninterval%d", ...
+    setup.mf.neig_max, setup.mf.length_scale, setup.mf.ninterval);
+if ~isinf(setup.mf.neig_max)
+    mf_str = mf_str + sprintf("_md5_%s", DataHash(setup.mf.eigs, 10));
+end
+savepath = sprintf("%s/%s", savepath, mf_str);
 
 % Initialize output arguments
 magnetization = cell(ncompartment, namplitude, nsequence, ndirection);

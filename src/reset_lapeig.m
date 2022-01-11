@@ -25,6 +25,3 @@ for ilapeig = 1:length(lap_eig)
     lap_eig(ilapeig).funcs = lap_eig(ilapeig).funcs(:, inds_keep);
     lap_eig(ilapeig).length_scales = lap_eig(ilapeig).length_scales(inds_keep);
 end
-
-% Display function evaluation time
-disp("Done with reset eigendecomposition.");

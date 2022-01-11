@@ -5,7 +5,7 @@ function results = solve_mf(femesh, setup, lap_eig, savepath, save_magnetization
 %   Matrix Formalism and returns results.
 %
 %   SOLVE_MF(FEMESH, SETUP, LAP_EIG, SAVEPATH) saves the results of each iteration at
-%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/ninterval<n>/<SEQUENCEINFO>.MAT".
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT".
 %   If a result is already present in the iteration file, the solver loads
 %   the results instead of solving for that iteration.
 %
@@ -40,15 +40,11 @@ starttime = tic;
 % Check if a savepath has been provided (this toggers saving)
 do_save = nargin >= nargin(@solve_mf) - 1;
 
-% Provide default value
+% Provide default value if not given
 if nargin < nargin(@solve_btpde)
     save_magnetization = true;
 end
-if isfield(setup.mf, 'rerun')
-    rerun = setup.mf.rerun;
-else
-    rerun = false;
-end
+rerun = setup.mf.rerun;
 
 % Extract domain parameters
 initial_density = setup.pde.initial_density;
@@ -72,7 +68,13 @@ ndirection = setup.ndirection;
 
 if do_save
     % Folder for saving
-    savepath = sprintf("%s/ninterval%d", savepath, ninterval);
+    mf_str = sprintf("neig_max%d_lengthscale_min%.4f_ninterval%d", ...
+        setup.mf.neig_max, setup.mf.length_scale, setup.mf.ninterval);
+    if ~isinf(setup.mf.neig_max)
+        % if neig_max is inf, mf.eigs doesn't exist or is removed.
+        mf_str = mf_str + sprintf("_md5_%s", DataHash(setup.mf.eigs, 10));
+    end
+    savepath = fullfile(savepath, mf_str);
     if ~isfolder(savepath)
         mkdir(savepath);
     end
@@ -151,7 +153,7 @@ if multi_lap_eig
         mag_ilapeig = cell(allinds);
         signal_ilapeig = zeros(allinds);
         itertimes_ilapeig = zeros(allinds);
-        parfor iall = 1:prod(allinds)
+        for iall = 1:prod(allinds)
             % Measure iteration time
             itertime = tic;
 
@@ -255,7 +257,7 @@ else
     fprintf("Computing or loading MF magnetization using %d eigenvalues.\n", neig);
     % save magnetization to parfor_mag to avoid I/O error using parfor
     parfor_mag = cell(allinds);
-    parfor iall = 1:prod(allinds)
+    for iall = 1:prod(allinds)
         % Measure iteration time
         itertime = tic;
 

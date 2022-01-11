@@ -83,6 +83,9 @@ refinement_str = "";
 if isfield(setup.geometry, "refinement")
     refinement_str = sprintf("_refine%g", setup.geometry.refinement);
 end
+if isfield(setup.geometry, "tetgen_options")
+    refinement_str = sprintf("_tet%g", setup.geometry.tetgen_options);
+end
 ecs_str = sprintf("_%s", setup.geometry.ecs_shape);
 if isfield(setup.geometry, 'ecs_ratio') && setup.geometry.ecs_shape ~= "no_ecs"
     ecs_str = ecs_str + sprintf("%g", setup.geometry.ecs_ratio);

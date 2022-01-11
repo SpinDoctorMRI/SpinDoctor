@@ -157,6 +157,13 @@ function mf = check_mf(mf)
     assert(mf.neig_max >= 1, ...
         "matrix formalism: maximum number of eigenvalues must be greater than 1.");
 
+    if isfield(mf, 'length_scale')
+        assert(mf.length_scale >= 0, ...
+            "matrix formalism: length scale is negative.");
+    else
+        mf.length_scale = 0;
+    end
+
     if isfield(mf, 'ninterval')
         mf.ninterval = round(mf.ninterval);
         assert(mf.ninterval >= 1, ...
@@ -165,42 +172,56 @@ function mf = check_mf(mf)
         mf.ninterval = 500;
     end
 
-    if isfield(mf, 'length_scale')
-        assert(mf.length_scale >= 0, ...
-            "matrix formalism: length scale is negative.");
-    else
-        mf.length_scale = 0;
-    end
-
-    if isfield(mf, 'maxiter')
-        mf.maxiter = round(mf.maxiter);
-        assert(mf.maxiter > 0, ...
-            "matrix formalism: maximum number of iterations is negative.");
-    end
-
-    if isfield(mf, 'maxiterations')
-        mf.maxiterations = round(mf.maxiterations);
-        assert(mf.maxiterations > 0, ...
-            "matrix formalism: maximum number of iterations is negative.");
-    end
-
-    if isfield(mf, 'ssdim')
-        mf.ssdim = round(mf.ssdim);
-        assert(mf.ssdim > 0, ...
-            "matrix formalism: maximum size of Krylov subspace is negative.");
-    end
-
-    if isfield(mf, 'subspacedimension')
-        mf.subspacedimension = round(mf.subspacedimension);
-        assert(mf.subspacedimension > 0, ...
-            "matrix formalism: maximum size of Krylov subspace is negative.");
-    end
-
-    if isfield(mf, 'tolerance')
-        assert(mf.tolerance > 0, ...
-            "matrix formalism: convergence tolerance is negative.");
-    end
-
     if ~isfield(mf, 'rerun');           mf.rerun = false;           end
     if ~isfield(mf, 'rerun_eigen');     mf.rerun_eigen = false;     end
+    
+    if isinf(mf.neig_max)
+        % Infinite neig_max triggers eig instead of eigs
+        rmfields(mf, {'eigs'});
+    elseif isfield(mf, 'eigs')
+        % Check Matlab's eigs settings
+        % more info https://www.mathworks.com/help/matlab/ref/eigs.html
+        if isfield(mf.eigs, 'sigma')
+            if isstring(mf.eigs.sigma) || ischar(mf.eigs.sigma)
+                mf.eigs.sigma = string(mf.eigs.sigma);
+            elseif ~isnumeric(mf.eigs.sigma)
+                error("mf.eigs.sigma must be a string or a scalar.");
+            end
+        else
+            mf.eigs.sigma = -1e-8;
+        end
+
+        % alias of maxiterations
+        if isfield(mf.eigs, 'maxiter')
+            mf.eigs.maxiter = round(mf.eigs.maxiter);
+            assert(mf.eigs.maxiter > 0, ...
+                "matrix formalism: maximum number of iterations is negative.");
+        end
+
+        if isfield(mf.eigs, 'maxiterations')
+            mf.eigs.maxiterations = round(mf.eigs.maxiterations);
+            assert(mf.eigs.maxiterations > 0, ...
+                "matrix formalism: maximum number of iterations is negative.");
+        end
+
+        % alias of subspacedimensions
+        if isfield(mf.eigs, 'ssdim')
+            mf.eigs.ssdim = round(mf.eigs.ssdim);
+            assert(mf.eigs.ssdim > 0, ...
+                "matrix formalism: maximum size of Krylov subspace is negative.");
+        end
+
+        if isfield(mf.eigs, 'subspacedimension')
+            mf.eigs.subspacedimension = round(mf.eigs.subspacedimension);
+            assert(mf.eigs.subspacedimension > 0, ...
+                "matrix formalism: maximum size of Krylov subspace is negative.");
+        end
+
+        if isfield(mf.eigs, 'tolerance')
+            assert(mf.eigs.tolerance > 0, ...
+                "matrix formalism: convergence tolerance is negative.");
+        end
+    else
+        mf.eigs.sigma = -1e-8;
+    end
 end
