@@ -177,7 +177,7 @@ function mf = check_mf(mf)
     
     if isinf(mf.neig_max)
         % Infinite neig_max triggers eig instead of eigs
-        rmfields(mf, {'eigs'});
+        mf = rmfields(mf, {'eigs'});
     elseif isfield(mf, 'eigs')
         % Check Matlab's eigs settings
         % more info https://www.mathworks.com/help/matlab/ref/eigs.html

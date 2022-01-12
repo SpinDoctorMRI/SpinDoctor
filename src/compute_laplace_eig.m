@@ -28,6 +28,8 @@ params = {};
 % set eigs' sigma
 if isfield(mf, 'eigs')
     params = [params {mf.eigs.sigma}];
+else
+    params = [params {-1e-8}];
 end
 
 % Display algorithm iteration details
