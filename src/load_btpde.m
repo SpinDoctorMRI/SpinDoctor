@@ -66,7 +66,7 @@ for iseq = 1:nsequence
     seq = sequences{iseq};
     % Load results
     filename = sprintf("%s/%s.mat", savepath, seq.string(true));    
-    fprintf("Load btpde %d/%d.\n", iseq, nsequence);
+    fprintf("Load btpde for %s, %d/%d.\n", seq.string, iseq, nsequence);
     mfile = load(filename);
     for iall = 1:prod(inds)
         [iamp, idir] = ind2sub(inds, iall);

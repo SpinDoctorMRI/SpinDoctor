@@ -105,9 +105,10 @@ setup.mf.length_scale = 1;                              % Minimum length scale o
 setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE)
 setup.mf.rerun_eigen = true;                            % Rerun eigendecomposition
 setup.mf.rerun = true;                                  % Rerun MF simulation
-setup.mf.tolerance = 1e-10;                             % Convergence tolerance of eigs
-setup.mf.maxiter = 1000;                                % Maximum number of eigs iterations
-setup.mf.ssdim = 1500;                                  % Maximum size of Krylov subspace
+setup.mf.eigs.sigma = -1e-8;                            % Type of eigenvalues (default: all eigs close to -1e-8)
+setup.mf.eigs.tolerance = 1e-10;                        % Convergence tolerance of eigs
+setup.mf.eigs.maxiter = 1000;                           % Maximum number of eigs iterations
+setup.mf.eigs.ssdim = 14000;                            % Maximum size of Krylov subspace
 
 %% Karger model parameters (comment block to skip experiment)
 setup.karger.ndirection = 50;                           % Number of directions to compute diffusion tensor

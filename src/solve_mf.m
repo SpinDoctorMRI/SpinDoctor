@@ -5,7 +5,7 @@ function results = solve_mf(femesh, setup, lap_eig, savepath, save_magnetization
 %   Matrix Formalism and returns results.
 %
 %   SOLVE_MF(FEMESH, SETUP, LAP_EIG, SAVEPATH) saves the results of each iteration at
-%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT".
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT".
 %   If a result is already present in the iteration file, the solver loads
 %   the results instead of solving for that iteration.
 %
@@ -115,10 +115,10 @@ for icmpt = 1:ncompartment
     rho_cmpts{icmpt} = complex(initial_density(icmpt)) * ones(size(femesh.points{icmpt}, 2), 1);
 end
 
-% Cartesian indices (for parallel looping with linear indices)
-allinds = [namplitude nsequence ndirection];
+% Cartesian indices (for looping with linear indices)
+ainds = [namplitude ndirection];
 % Record unsaved experiments
-no_result_flag = false(allinds);
+no_result_flag = false(namplitude, nsequence, ndirection);
 
 if multi_lap_eig
     for ilapeig = 1:length(lap_eig)
@@ -148,90 +148,83 @@ if multi_lap_eig
 
         fprintf("Computing or loading MF magnetization for compartment %d " ...
             + "using %d eigenvalues.\n", ilapeig, neig);
-        % Save data in temporary containers to avoid parfor I/O error.
-        % can be simplified if version > R2019
-        mag_ilapeig = cell(allinds);
-        signal_ilapeig = zeros(allinds);
-        itertimes_ilapeig = zeros(allinds);
-        for iall = 1:prod(allinds)
-            % Measure iteration time
-            itertime = tic;
 
-            % Extract indices
-            [iamp, iseq, idir] = ind2sub(allinds, iall);
-
-            % Experiment parameters
+        for iseq = 1:nsequence
+            % Sequence parameters
             seq = sequences{iseq};
-            q = qvalues(iamp, iseq);
-            b = bvalues(iamp, iseq);
-            ug = directions(:, idir);
-            g = gvalues(iamp, iseq);
-
-            % File name for saving or loading iteration results
+            % File for saving or loading iteration results
             filename = sprintf("%s/%s.mat", savepath, seq.string(true));
             mfile = matfile(filename, "Writable", false);
-            gradient_field = gradient_fieldstring(ug, b);
-            no_result = true;
 
-            % Check if results are already available
-            if ~rerun && do_save && hasfield(mfile, gradient_field)
-                % Load results
-                try
-                    data = mfile.(gradient_field);
-                    signal_ilapeig(iall) = data.signal(ilapeig);
-                    if save_magnetization
-                        mag_ilapeig{iall} = data.magnetization{ilapeig};
+            for ia = 1:prod(ainds)
+                % Measure iteration time
+                itertime = tic;
+    
+                % Extract indices
+                [iamp, idir] = ind2sub(ainds, ia);
+    
+                % Experiment parameters
+                q = qvalues(iamp, iseq);
+                b = bvalues(iamp, iseq);
+                ug = directions(:, idir);
+                g = gvalues(iamp, iseq);
+    
+                gradient_field = gradient_fieldstring(ug, b);
+                no_result = true;
+    
+                % Check if results are already available
+                if ~rerun && do_save && hasfield(mfile, gradient_field)
+                    % Load results
+                    try
+                        data = mfile.(gradient_field);
+                        signal(ilapeig, iamp, iseq, idir) = data.signal(ilapeig);
+                        if save_magnetization
+                            magnetization{ilapeig, iamp, iseq, idir} = data.magnetization{ilapeig};
+                        end
+                        itertimes(ilapeig, iamp, iseq, idir) = data.itertimes(ilapeig);
+                        no_result = false;
+                    catch
+                        no_result = true;
+                        warning("mf: the saved data of experiment %s %s is broken. Rerun simulation.", ...
+                            seq.string, gradient_field);
                     end
-                    itertimes_ilapeig(iall) = data.itertimes(ilapeig);
-                    no_result = false;
-                catch
-                    no_result = true;
-                    warning("mf: the saved data of experiment %s %s is broken. Rerun simulation.", ...
-                        seq.string, gradient_field);
                 end
-            end
-            no_result_flag(iall) = no_result_flag(iall) | no_result;
-
-            % Run simulation if no result is saved or results are not available
-            if no_result
-                % Display state of iterations
-                fprintf("Computing MF magnetization using %d eigenvalues\n" ...
-                + "  Direction %d of %d: ug = [%.2f; %.2f; %.2f]\n" ...
-                + "  Sequence  %d of %d: f = %s\n" ...
-                + "  Amplitude %d of %d: g = %g, q = %g, b = %g\n", ...
-                neig, ...
-                idir, ndirection, ug, ...
-                iseq, nsequence, seq, ...
-                iamp, namplitude, g, q, b);
-
-                % Components of BT operator matrix
-                A = sum(moments .* shiftdim(ug, -2), 3);
-
-                % Compute final magnetization (in Laplace basis)
-                nu = evolve_laplace_coef(nu0, seq, 1i * q * A, L + T2, ninterval);
-
-                % Final magnetization coefficients in finite element nodal basis
-                mag = funcs * nu;
-                if save_magnetization
-                    mag_ilapeig{iall} = mag;
+                no_result_flag(ia) = no_result_flag(ia) | no_result;
+    
+                % Run simulation if no result is saved or results are not available
+                if no_result
+                    % Display state of iterations
+                    fprintf("Computing MF magnetization using %d eigenvalues\n" ...
+                    + "  Direction %d of %d: ug = [%.2f; %.2f; %.2f]\n" ...
+                    + "  Sequence  %d of %d: f = %s\n" ...
+                    + "  Amplitude %d of %d: g = %g, q = %g, b = %g\n", ...
+                    neig, ...
+                    idir, ndirection, ug, ...
+                    iseq, nsequence, seq, ...
+                    iamp, namplitude, g, q, b);
+    
+                    % Components of BT operator matrix
+                    A = sum(moments .* shiftdim(ug, -2), 3);
+    
+                    % Compute final magnetization (in Laplace basis)
+                    nu = evolve_laplace_coef(nu0, seq, 1i * q * A, L + T2, ninterval);
+    
+                    % Final magnetization coefficients in finite element nodal basis
+                    mag = funcs * nu;
+                    if save_magnetization
+                        magnetization{ilapeig, iamp, iseq, idir} = mag;
+                    end
+                    signal(ilapeig, iamp, iseq, idir) = sum(M * mag);
+                    itertimes(ilapeig, iamp, iseq, idir) = toc(itertime);
                 end
-                signal_ilapeig(iall) = sum(M * mag);
-                itertimes_ilapeig(iall) = toc(itertime);
-            end
-        end % iterations
-
-        signal(ilapeig, :) = signal_ilapeig(:);
-        itertimes(ilapeig, :) = itertimes_ilapeig(:);
-        if save_magnetization
-            magnetization(ilapeig, :) = mag_ilapeig(:);
-        end
+            end % iterations
+        end % sequences
     end % lapeig iterations
 else
     % Extract eigenvalues, eigenfunctions
     L = diag(lap_eig.values);
     funcs = lap_eig.funcs;
     neig = length(lap_eig.values);
-
     % Number of points in each compartment
     npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
 
@@ -255,87 +248,81 @@ else
     nu0 = funcs' * (M * rho);
 
     fprintf("Computing or loading MF magnetization using %d eigenvalues.\n", neig);
-    % save magnetization to parfor_mag to avoid I/O error using parfor
-    parfor_mag = cell(allinds);
-    for iall = 1:prod(allinds)
-        % Measure iteration time
-        itertime = tic;
-
-        % Extract indices
-        [iamp, iseq, idir] = ind2sub(allinds, iall);
-
-        % Experiment parameters
-        q = qvalues(iamp, iseq);
-        b = bvalues(iamp, iseq);
+    for iseq = 1:nsequence
+        % Sequence parameters
         seq = sequences{iseq};
-        ug = directions(:, idir);
-        g = gvalues(iamp, iseq);
-
         % File name for saving or loading iteration results
         filename = sprintf("%s/%s.mat", savepath, seq.string(true));
         mfile = matfile(filename, "Writable", false);
-        gradient_field = gradient_fieldstring(ug, b);
-        no_result = true;
 
-        % Check if results are already available
-        if ~rerun && do_save && hasfield(mfile, gradient_field)
-            % Load results
-            fprintf("Load mf %d/%d.\n", iall, prod(allinds));
-            try
-                data = mfile.(gradient_field);
-                signal(:, iall) = data.signal;
-                if save_magnetization
-                    parfor_mag{iall} = data.magnetization;
+        for ia = 1:prod(ainds)
+            % Measure iteration time
+            itertime = tic;
+    
+            % Extract indices
+            [iamp, idir] = ind2sub(ainds, ia);
+    
+            % Experiment parameters
+            q = qvalues(iamp, iseq);
+            b = bvalues(iamp, iseq);
+            ug = directions(:, idir);
+            g = gvalues(iamp, iseq);
+    
+            gradient_field = gradient_fieldstring(ug, b);
+            no_result = true;
+    
+            % Check if results are already available
+            if ~rerun && do_save && hasfield(mfile, gradient_field)
+                % Load results
+                fprintf("Load mf for %s, %d/%d.\n", seq.string, ia, namplitude*nsequence*ndirection);
+                try
+                    data = mfile.(gradient_field);
+                    signal(:, iamp, iseq, idir) = data.signal;
+                    if save_magnetization
+                        magnetization(:, iamp, iseq, idir) = data.magnetization;
+                    end
+                    itertimes(:, iamp, iseq, idir) = data.itertimes;
+                    no_result = false;
+                catch
+                    no_result = true;
+                    warning("mf: the saved data of experiment %s %s is broken. Rerun simulation.", ...
+                        seq.string, gradient_field);
                 end
-                itertimes(:, iall) = data.itertimes;
-                no_result = false;
-            catch
-                no_result = true;
-                warning("mf: the saved data of experiment %s %s is broken. Rerun simulation.", ...
-                    seq.string, gradient_field);
             end
-        end
-        no_result_flag(iall) = no_result_flag(iall) | no_result;
-
-        % Run simulation if no result is saved or results are not available
-        if no_result
-            % Display state of iterations
-            fprintf("Computing MF magnetization using %d eigenvalues\n" ...
-            + "  Direction %d of %d: ug = [%.2f; %.2f; %.2f]\n" ...
-            + "  Sequence  %d of %d: f = %s\n" ...
-            + "  Amplitude %d of %d: g = %g, q = %g, b = %g\n", ...
-            neig, ...
-            idir, ndirection, ug, ...
-            iseq, nsequence, seq, ...
-            iamp, namplitude, g, q, b);
-
-            % Components of BT operator matrix
-            A = sum(moments .* shiftdim(ug, -2), 3);
-
-            % Compute final magnetization (in Laplace basis)
-            nu = evolve_laplace_coef(nu0, seq, 1i * q * A, L + T2, ninterval);
-
-            % Final magnetization coefficients in finite element nodal basis
-            mag = funcs * nu;
-            mag = mat2cell(mag, npoint_cmpts);
-            if save_magnetization
-                parfor_mag{iall} = mag;
+            no_result_flag(ia) = no_result_flag(ia) | no_result;
+    
+            % Run simulation if no result is saved or results are not available
+            if no_result
+                % Display state of iterations
+                fprintf("Computing MF magnetization using %d eigenvalues\n" ...
+                + "  Direction %d of %d: ug = [%.2f; %.2f; %.2f]\n" ...
+                + "  Sequence  %d of %d: f = %s\n" ...
+                + "  Amplitude %d of %d: g = %g, q = %g, b = %g\n", ...
+                neig, ...
+                idir, ndirection, ug, ...
+                iseq, nsequence, seq, ...
+                iamp, namplitude, g, q, b);
+    
+                % Components of BT operator matrix
+                A = sum(moments .* shiftdim(ug, -2), 3);
+    
+                % Compute final magnetization (in Laplace basis)
+                nu = evolve_laplace_coef(nu0, seq, 1i * q * A, L + T2, ninterval);
+    
+                % Final magnetization coefficients in finite element nodal basis
+                mag = funcs * nu;
+                mag = mat2cell(mag, npoint_cmpts);
+                if save_magnetization
+                    magnetization(:, iamp, iseq, idir) = mag;
+                end
+                signal(:, iamp, iseq, idir) = cellfun(@(M, m) sum(M * m), M_cmpts', mag);
+                itertimes(:, iamp, iseq, idir) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
             end
-            signal(:, iall) = cellfun(@(M, m) sum(M * m), M_cmpts', mag);
-            itertimes(:, iall) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
-        end
-    end % parfor iterations
-
-    if save_magnetization
-        for iall = 1:prod(allinds)
-            for icmpt = 1:ncompartment
-                magnetization{icmpt, iall} = parfor_mag{iall}{icmpt};
-            end
-        end
-    end
+        end % iterations
+    end % sequences
 end
 
-if do_save
+if do_save && any(no_result_flag, 'all')
     for iseq = 1:nsequence
         seq = sequences{iseq};
         filename = sprintf("%s/%s.mat", savepath, seq.string(true));

@@ -36,9 +36,9 @@ setup.btpde.abstol = 1e-6;                              % Absolute tolerance for
 % MF experiment parameters (comment block to skip experiment)
 setup.mf.neig_max = Inf;                               % Requested number of eigenvalues
 setup.mf.length_scale = 1;                              % Minimum length scale of eigenfunctions
-setup.mf.ninterval = 1000;                               % Number of intervals to discretize time profile in MF (if not PGSE)
-setup.mf.tolerance = 1e-10;                             % Convergence tolerance of eigs
-setup.mf.maxiter = 1000;                                % Maximum number of eigs iterations
+setup.mf.ninterval = 1000;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
+setup.mf.eigs.tolerance = 1e-10;                             % Convergence tolerance of eigs
+setup.mf.eigs.maxiter = 1000;                                % Maximum number of eigs iterations
 % other fixed settings
 magnetization_flag = false;
 saveroot = 'new_save_path';

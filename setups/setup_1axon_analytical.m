@@ -101,7 +101,7 @@ setup.hadc.abstol = 1e-4;                               % Absolute tolerance for
 %% MF experiment parameters (comment block to skip experiment)
 setup.mf.length_scale = 1;                              % Minimum length scale of eigenfunctions
 setup.mf.neig_max = 1000;                               % Requested number of eigenvalues
-setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE)
+setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 
 %% Analytical experiment parameters (comment block to skip experiment)
 setup.analytical.length_scale = 0.3;                    % Minimum length scale of eigenfunctions

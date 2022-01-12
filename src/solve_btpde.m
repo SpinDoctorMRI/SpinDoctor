@@ -83,116 +83,146 @@ end
 
 % Initialize output arguments
 magnetization = cell(ncompartment, namplitude, nsequence, ndirection);
-signal = zeros(ncompartment, namplitude, nsequence, ndirection);
+signal = inf(ncompartment, namplitude, nsequence, ndirection);
 signal_allcmpts = zeros(namplitude, nsequence, ndirection);
 itertimes = zeros(namplitude, nsequence, ndirection);
 totaltime_addition = 0;
 
-% Number of points in each compartment
-npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+% Check if results are already available
+if ~rerun && do_save
+    for iseq = 1:nsequence
+        % Extract iteration inputs
+        seq = sequences{iseq};
+        filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+        mfile = matfile(filename, "Writable", false);
 
-% Assemble finite element matrices
-disp("Setting up FEM matrices");
-M_cmpts = cell(1, ncompartment);
-K_cmpts = cell(1, ncompartment);
-R_cmpts = cell(1, ncompartment);
-Jx_cmpts = repmat({cell(1, ncompartment)}, 1, 3);
-rho_cmpts = cell(1, ncompartment);
-for icmpt = 1:ncompartment
-    % Finite elements
-    points = femesh.points{icmpt};
-    elements = femesh.elements{icmpt};
-    [~, volumes] = get_volume_mesh(points, elements);
-
-    % Assemble mass, stiffness, and T2-relaxation matrices in compartment
-    M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
-    K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
-    R_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
-    
-    % Assemble moment matrices (coordinate weighted mass matrices)
-    for idim = 1:3
-        Jx_cmpts{idim}{icmpt} = mass_matrixP1_3D(elements', volumes', points(idim, :)');
-    end
-    
-    % Create initial conditions (enforce complex values)
-    rho_cmpts{icmpt} = complex(initial_density(icmpt)) * ones(npoint_cmpts(icmpt), 1);
-end
-
-% Create global mass, stiffness, relaxation, flux, and moment matrices (sparse)
-disp("Coupling FEM matrices");
-M = blkdiag(M_cmpts{:});
-K = blkdiag(K_cmpts{:});
-R = blkdiag(R_cmpts{:});
-Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
-Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
-Q = couple_flux_matrix(femesh, setup.pde, Q_blocks, false);
-
-% Global initial conditions
-rho = vertcat(rho_cmpts{:});
-
-% Set parameters for ODE solver
-options_template = odeset( ...
-    "Mass", M, ...
-    "AbsTol", abstol, ...
-    "RelTol", reltol, ...
-    "Vectorized", "on", ...
-    "Stats", "off", ...
-    "MassSingular", "no" ...
-);
-
-% Cartesian indices (for parallel looping with linear indices)
-allinds = [namplitude nsequence ndirection];
-
-% Iterate over gradient amplitudes, sequences and directions. If the Matlab
-% PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
-% parallel, otherwise it should work like a normal loop. If that is not the
-% case, replace the `parfor` keyword by the normal `for` keyword.
-
-% Temporarily save results in temp_store to avoid I/O error
-temp_store = cell(allinds);
-
-parfor iall = 1:prod(allinds)
-    % Measure iteration time
-    itertime = tic;
-
-    % Extract Cartesian indices
-    [iamp, iseq, idir] = ind2sub(allinds, iall);
-
-    % Extract iteration inputs
-    seq = sequences{iseq};
-    q = qvalues(iamp, iseq);
-    b = bvalues(iamp, iseq);
-    ug = directions(:, idir);
-    g = gvalues(iamp, iseq);
-
-    % File name for saving or loading iteration results
-    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
-    mfile = matfile(filename, "Writable", false);
-    gradient_field = gradient_fieldstring(ug, b);
-    no_result = true;
-
-    % Check if results are already available
-    if ~rerun && do_save && hasfield(mfile, gradient_field)
-        % Load results
-        fprintf("Load btpde %d/%d.\n", iall, prod(allinds));
-        try
-            data = mfile.(gradient_field);
-            signal(:, iall) = data.signal;
-            itertimes(iall) = data.itertimes;
-            totaltime_addition = totaltime_addition + data.itertimes;
-            if save_magnetization
-                mag = data.magnetization;
+        for iall = 1:prod([namplitude, ndirection])   
+            % Extract Cartesian indices
+            [iamp, idir] = ind2sub([namplitude, ndirection], iall);
+        
+            % Extract iteration inputs
+            b = bvalues(iamp, iseq);
+            ug = directions(:, idir);
+        
+            % File name for saving or loading iteration results
+            gradient_field = gradient_fieldstring(ug, b);
+        
+            % Check if results are already available
+            if hasfield(mfile, gradient_field)
+                % Load results
+                fprintf("Load btpde for %s, %d/%d.\n", seq.string, iall, prod([namplitude, ndirection]));
+                time_temp = totaltime_addition;
+                try
+                    savedata = mfile.(gradient_field);
+                    signal(:, iamp, iseq, idir) = savedata.signal;
+                    itertimes(iamp, iseq, idir) = savedata.itertimes;
+                    totaltime_addition = totaltime_addition + savedata.itertimes;
+                    if save_magnetization
+                        for icmpt = 1:ncompartment
+                            magnetization{icmpt, iamp, iseq, idir} = savedata.magnetization{icmpt};
+                        end
+                    end
+                catch
+                    signal(:, iamp, iseq, idir) = inf;
+                    itertimes(iamp, iseq, idir) = 0;
+                    totaltime_addition = time_temp;
+                    if save_magnetization
+                        for icmpt = 1:ncompartment
+                            magnetization{icmpt, iamp, iseq, idir} = [];
+                        end
+                    end
+                    warning("btpde: the saved data of experiment %s %s doesn't exist or is broken."...
+                     + " Rerun simulation.", ...
+                        seq.string, gradient_field);
+                end
             end
-            no_result = false;
-        catch
-            no_result = true;
-            warning("btpde: the saved data of experiment %s %s is broken. Rerun simulation.", ...
-                seq.string, gradient_field);
         end
     end
+end
 
-    % Run simulation if no result is saved or results are not available
-    if no_result
+if any(isinf(signal), 'all')
+    % Number of points in each compartment
+    npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+
+    % Assemble finite element matrices
+    disp("Setting up FEM matrices");
+    M_cmpts = cell(1, ncompartment);
+    K_cmpts = cell(1, ncompartment);
+    R_cmpts = cell(1, ncompartment);
+    Jx_cmpts = repmat({cell(1, ncompartment)}, 1, 3);
+    rho_cmpts = cell(1, ncompartment);
+    for icmpt = 1:ncompartment
+        % Finite elements
+        points = femesh.points{icmpt};
+        elements = femesh.elements{icmpt};
+        [~, volumes] = get_volume_mesh(points, elements);
+
+        % Assemble mass, stiffness, and T2-relaxation matrices in compartment
+        M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
+        K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
+        R_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
+        
+        % Assemble moment matrices (coordinate weighted mass matrices)
+        for idim = 1:3
+            Jx_cmpts{idim}{icmpt} = mass_matrixP1_3D(elements', volumes', points(idim, :)');
+        end
+        
+        % Create initial conditions (enforce complex values)
+        rho_cmpts{icmpt} = complex(initial_density(icmpt)) * ones(npoint_cmpts(icmpt), 1);
+    end
+
+    % Create global mass, stiffness, relaxation, flux, and moment matrices (sparse)
+    disp("Coupling FEM matrices");
+    M = blkdiag(M_cmpts{:});
+    K = blkdiag(K_cmpts{:});
+    R = blkdiag(R_cmpts{:});
+    Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
+    Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
+    Q = couple_flux_matrix(femesh, setup.pde, Q_blocks, false);
+
+    % Global initial conditions
+    rho = vertcat(rho_cmpts{:});
+
+    % Set parameters for ODE solver
+    options_template = odeset( ...
+        "Mass", M, ...
+        "AbsTol", abstol, ...
+        "RelTol", reltol, ...
+        "Vectorized", "on", ...
+        "Stats", "off", ...
+        "MassSingular", "no" ...
+    );
+
+    % Cartesian indices (for parallel looping with linear indices)
+    allinds = [namplitude nsequence ndirection];
+
+    % Iterate over gradient amplitudes, sequences and directions. If the Matlab
+    % PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
+    % parallel, otherwise it should work like a normal loop. If that is not the
+    % case, replace the `parfor` keyword by the normal `for` keyword.
+
+    % Temporarily save results in temp_store to avoid I/O error
+    temp_store = cell(allinds);
+
+    parfor iall = 1:prod(allinds)
+        % skip, if signal is already there
+        if all(~isinf(signal(:, iall)), 'all')
+            continue
+        end
+        
+        % Measure iteration time
+        itertime = tic;
+
+        % Extract Cartesian indices
+        [iamp, iseq, idir] = ind2sub(allinds, iall);
+
+        % Extract iteration inputs
+        seq = sequences{iseq};
+        q = qvalues(iamp, iseq);
+        b = bvalues(iamp, iseq);
+        ug = directions(:, idir);
+        g = gvalues(iamp, iseq);
+
         % Get intervals based on the properties of the time profile
         [timelist, interval_str, timeprofile_str] = seq.intervals;
 
@@ -257,6 +287,7 @@ parfor iall = 1:prod(allinds)
         itertimes(iall) = toc(itertime);
         
         if do_save
+            data = struct;
             data.b = b;
             data.q = q;
             data.g = g;
@@ -270,41 +301,39 @@ parfor iall = 1:prod(allinds)
             % Save iteration results
             temp_store{iall} = data;
         end
-    end
-    
-    % Store magnetization
-    if save_magnetization
-        for icmpt = 1:ncompartment
-            magnetization{icmpt, iall} = mag{icmpt};
+        
+        % Store magnetization
+        if save_magnetization
+            magnetization(:, iall) = mag;
         end
-    end
-end % iterations
+    end % iterations
 
-if do_save
-    for iseq = 1:nsequence
-        seq = sequences{iseq};
-        filename = sprintf("%s/%s.mat", savepath, seq.string(true));
-        fprintf("Save %s\n", filename);
-        mfile = matfile(filename, "Writable", true);
-        for iamp = 1:namplitude
-            for idir = 1:ndirection
-                if ~isempty(temp_store{iamp, iseq, idir})
-                    % Extract iteration inputs
-                    b = bvalues(iamp, iseq);
-                    ug = directions(:, idir);
+    if do_save
+        for iseq = 1:nsequence
+            seq = sequences{iseq};
+            filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+            fprintf("Save %s\n", filename);
+            mfile = matfile(filename, "Writable", true);
+            for iamp = 1:namplitude
+                for idir = 1:ndirection
+                    if ~isempty(temp_store{iamp, iseq, idir})
+                        % Extract iteration inputs
+                        b = bvalues(iamp, iseq);
+                        ug = directions(:, idir);
 
-                    % Save results to MAT-file
-                    gradient_field = gradient_fieldstring(ug, b);
-                    mfile.(gradient_field) = temp_store{iamp, iseq, idir};
-
-                    % dMRI signal is centrosymmetric
-                    ug = -ug;
-                    % convert negative zeros to positive zeros
-                    ug(ug == 0) = +0;
-                    gradient_field = gradient_fieldstring(ug, b);
-                    if ~hasfield(mfile, gradient_field)
-                        temp_store{iamp, iseq, idir}.ug = ug;
+                        % Save results to MAT-file
+                        gradient_field = gradient_fieldstring(ug, b);
                         mfile.(gradient_field) = temp_store{iamp, iseq, idir};
+
+                        % dMRI signal is centrosymmetric
+                        ug = -ug;
+                        % convert negative zeros to positive zeros
+                        ug(ug == 0) = +0;
+                        gradient_field = gradient_fieldstring(ug, b);
+                        if ~hasfield(mfile, gradient_field)
+                            temp_store{iamp, iseq, idir}.ug = ug;
+                            mfile.(gradient_field) = temp_store{iamp, iseq, idir};
+                        end
                     end
                 end
             end
