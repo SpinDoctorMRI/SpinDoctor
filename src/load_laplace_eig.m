@@ -17,7 +17,7 @@ if nargin == 1
 elseif nargin == 3
     % eigenpath points to the folder containing lap_eig
     filename = sprintf( ...
-        "%s/lap_eig_lengthscale%.4f_neigmax%d.mat", ...
+        "%s/lap_eig_lengthscale%.4f_neigmax%g.mat", ...
         eigenpath, mf.length_scale, mf.neig_max ...
     );
 
@@ -30,7 +30,7 @@ elseif nargin == 3
         % saved lap_eig doesn't exist, check existence of any larger lap_eig
         lapeig_list = dir(sprintf("%s/lap_eig_lengthscale*_neigmax*.mat", eigenpath));
         for ilist = 1:length(lapeig_list)
-            ls_nmax = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%d.mat');
+            ls_nmax = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%f.mat');
             if mf.length_scale >= ls_nmax(1)
                 % reuse larger eigendecomposition
                 name = fullfile(lapeig_list(ilist).folder, lapeig_list(ilist).name);
@@ -45,7 +45,7 @@ elseif nargin == 3
         end
         % length scale is prior to neig_max
         for ilist = 1:length(lapeig_list)
-            ls_nmax = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%d.mat');
+            ls_nmax = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%f.mat');
             if ~isinf(ls_nmax(2)) && ls_nmax(2) >= mf.neig_max
                 % reuse larger eigendecomposition
                 name = fullfile(lapeig_list(ilist).folder, lapeig_list(ilist).name);

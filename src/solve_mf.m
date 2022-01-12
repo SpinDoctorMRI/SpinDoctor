@@ -68,7 +68,7 @@ ndirection = setup.ndirection;
 
 if do_save
     % Folder for saving
-    mf_str = sprintf("neig_max%d_lengthscale_min%.4f_ninterval%d", ...
+    mf_str = sprintf("neig_max%g_lengthscale_min%.4f_ninterval%d", ...
         setup.mf.neig_max, setup.mf.length_scale, setup.mf.ninterval);
     if ~isinf(setup.mf.neig_max)
         % if neig_max is inf, mf.eigs doesn't exist or is removed.
