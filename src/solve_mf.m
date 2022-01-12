@@ -189,7 +189,7 @@ if multi_lap_eig
                             seq.string, gradient_field);
                     end
                 end
-                no_result_flag(ia) = no_result_flag(ia) | no_result;
+                no_result_flag(iamp, iseq, idir) = no_result_flag(iamp, iseq, idir) | no_result;
     
                 % Run simulation if no result is saved or results are not available
                 if no_result
@@ -274,7 +274,7 @@ else
             % Check if results are already available
             if ~rerun && do_save && hasfield(mfile, gradient_field)
                 % Load results
-                fprintf("Load mf for %s, %d/%d.\n", seq.string, ia, namplitude*nsequence*ndirection);
+                fprintf("Load mf for %s, %d/%d.\n", seq.string, ia, namplitude*ndirection);
                 try
                     data = mfile.(gradient_field);
                     signal(:, iamp, iseq, idir) = data.signal;
@@ -289,7 +289,7 @@ else
                         seq.string, gradient_field);
                 end
             end
-            no_result_flag(ia) = no_result_flag(ia) | no_result;
+            no_result_flag(iamp, iseq, idir) = no_result_flag(iamp, iseq, idir) | no_result;
     
             % Run simulation if no result is saved or results are not available
             if no_result

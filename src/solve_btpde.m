@@ -110,7 +110,7 @@ if ~rerun && do_save
             % Check if results are already available
             if hasfield(mfile, gradient_field)
                 % Load results
-                fprintf("Load btpde for %s, %d/%d.\n", seq.string, iall, prod([namplitude, ndirection]));
+                fprintf("Load btpde for %s, %d/%d.\n", seq.string, iall, namplitude*ndirection);
                 time_temp = totaltime_addition;
                 try
                     savedata = mfile.(gradient_field);
