@@ -63,7 +63,7 @@ inds = [namplitude ndirection];
 for iseq = 1:nsequence
     seq = sequences{iseq};
     % Load results
-    filename = sprintf("%s/%s.mat", savepath, seq.string(true));    
+    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
     fprintf("Load mf for %s, %d/%d.\n", seq.string, iseq, nsequence);
     mfile = load(filename);
     for iall = 1:prod(inds)

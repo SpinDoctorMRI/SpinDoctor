@@ -59,8 +59,8 @@ eiglim = length2eig(mf.length_scale, mean_diffusivity);
 ncompartment = femesh.ncompartment;
 
 % Check if saved lap_eig exists
-no_result = true;    
-if ~rerun
+no_result = true;
+if do_save && ~rerun
     lap_eig = load_laplace_eig(savepath, mf, mean_diffusivity);
     if ~isempty(lap_eig)
         no_result = false;

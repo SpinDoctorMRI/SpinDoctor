@@ -118,9 +118,7 @@ if ~rerun && do_save
                     itertimes(iamp, iseq, idir) = savedata.itertimes;
                     totaltime_addition = totaltime_addition + savedata.itertimes;
                     if save_magnetization
-                        for icmpt = 1:ncompartment
-                            magnetization{icmpt, iamp, iseq, idir} = savedata.magnetization{icmpt};
-                        end
+                        magnetization(:, iamp, iseq, idir) = savedata.magnetization;
                     end
                 catch
                     signal(:, iamp, iseq, idir) = inf;
