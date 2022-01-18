@@ -19,8 +19,12 @@ starttime = tic;
 % Check if a save path has been provided (this toggers saving)
 do_save = nargin == nargin(@compute_laplace_eig);
 
-% Provide default value
+% Extract mf parameters
 rerun = mf.rerun_eigen;
+if mf.surf_relaxation
+    % surface relaxation is on, use lap_eig with zero Neumann condition
+    pde.permeability = 0;
+end
 
 % Solver parameters
 params = {};

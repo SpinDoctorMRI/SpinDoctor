@@ -80,7 +80,7 @@ elseif ismember(simulation_method, ["lap_eig", "mf"])
     % Laplace eigendecomposition doesn't depend on relaxation and initial density
     fields = {'relaxation_in', 'relaxation_out', 'relaxation_ecs', ...
     'initial_density_in', 'initial_density_out', 'initial_density_ecs', ...
-    'initial_signal', 'mean_diffusivity'};
+    'initial_signal', 'mean_diffusivity', 'relaxation', 'initial_density'};
     pde = rmfields(setup.pde, fields);
 
     pde_str = "mf_diffusivity";
@@ -93,11 +93,27 @@ elseif ismember(simulation_method, ["lap_eig", "mf"])
     end
 
     pde_str = pde_str + "_permea";
-    if isfield(pde, 'permeability_in_out')
-        pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out);
-    end
-    if isfield(pde, 'permeability_out_ecs')
-        pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs);
+    if setup.mf.surf_relaxation && simulation_method == "lap_eig"
+        % surface relaxation is on, use lap_eig with zero Neumann condition
+        pde.permeability = pde.permeability * 0;
+        pde.permeability_out = 0;
+        if isfield(pde, 'permeability_in_out')
+            pde_str = pde_str + "_inout0";
+            pde.permeability_in_out = 0;
+            pde.permeability_in = 0;
+        end
+        if isfield(pde, 'permeability_out_ecs')
+            pde_str = pde_str + "_outecs0";
+            pde.permeability_out_ecs = 0;
+            pde.permeability_ecs = 0;
+        end
+    else
+        if isfield(pde, 'permeability_in_out')
+            pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out);
+        end
+        if isfield(pde, 'permeability_out_ecs')
+            pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs);
+        end
     end
 
     pde_str = pde_str + sprintf("_md5_%s", DataHash(pde, 10));
@@ -135,7 +151,7 @@ elseif ismember(simulation_method, "hadc")
     % Encode pde parameters
     fields = {'permeability_in_out', 'permeability_out_ecs', ...
     'permeability_in', 'permeability_out', 'permeability_ecs', ...
-    'initial_signal', 'mean_diffusivity'};
+    'initial_signal', 'mean_diffusivity', 'permeability'};
     pde = rmfields(setup.pde, fields);
     
     if isfield(pde, 'relaxation_in') && ~isfield(pde, 'relaxation_ecs')

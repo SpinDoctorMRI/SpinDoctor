@@ -68,8 +68,11 @@ ndirection = setup.ndirection;
 
 if do_save
     % Folder for saving
-    mf_str = sprintf("neig_max%g_lengthscale_min%.4f_ninterval%d", ...
+    mf_str = sprintf("neigmax%g_lengthscale_min%.4f_ninterval%d", ...
         setup.mf.neig_max, setup.mf.length_scale, setup.mf.ninterval);
+    if setup.mf.surf_relaxation
+        mf_str = "surface_relaxation_" + mf_str;
+    end
     if ~isinf(setup.mf.neig_max)
         % if neig_max is inf, mf.eigs doesn't exist or is removed.
         mf_str = mf_str + sprintf("_md5_%s", DataHash(setup.mf.eigs, 10));
@@ -165,12 +168,18 @@ if any(isinf(signal), 'all')
         rho_cmpts{icmpt} = complex(initial_density(icmpt)) * ones(size(femesh.points{icmpt}, 2), 1);
     end
 
+    if setup.mf.surf_relaxation
+        % construct and assemble flux matrix
+        Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
+        Q = couple_flux_matrix(femesh, setup.pde, Q_blocks, false);
+    end
+
     % Cartesian indices (for looping with linear indices)
     allinds = [namplitude nsequence ndirection];
     % Record unsaved experiments
     no_result_flag = false(namplitude, nsequence, ndirection);
 
-    if multi_lap_eig
+    if multi_lap_eig && ~setup.mf.surf_relaxation
         for ilapeig = 1:length(lap_eig)
             % Extract eigenvalues, eigenfunctions
             L = diag(lap_eig(ilapeig).values);
@@ -246,16 +255,32 @@ if any(isinf(signal), 'all')
             end % iterations
         end % lapeig iterations
     else
-        % Extract eigenvalues, eigenfunctions
-        L = diag(lap_eig.values);
-        funcs = lap_eig.funcs;
-        neig = length(lap_eig.values);
-        % Number of points in each compartment
-        npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
-
         % Prepare mass, density, moments and relaxation matrices
         M = blkdiag(M_cmpts{:});
         rho = vertcat(rho_cmpts{:});
+
+        % Number of points in each compartment
+        npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+
+        % Extract eigenvalues, eigenfunctions
+        if setup.mf.surf_relaxation
+            disp("Matrix formalism: surface relaxation is on.");
+            if multi_lap_eig
+                % Assemble eigenvalues and eigenfunctions of all decoupled compartments
+                [values, funcs] = assemble_lapeig(lap_eig, M, npoint_cmpts);
+            else
+                values = lap_eig.values;
+                funcs = lap_eig.funcs;
+            end
+            % Surface relaxation matrix
+            surface_relaxation = funcs' * Q * funcs;
+            L = diag(values) + surface_relaxation;
+        else
+            L = diag(lap_eig.values);
+            funcs = lap_eig.funcs;
+        end
+        neig = size(L, 1);
+
         % Compute first order moments of eigenfunction products
         Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
         moments = zeros(neig, neig, 3);
