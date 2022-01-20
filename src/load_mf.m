@@ -48,7 +48,7 @@ ndirection = setup.ndirection;
 mf_str = sprintf("neig_max%g_lengthscale_min%.4f_ninterval%d", ...
     setup.mf.neig_max, setup.mf.length_scale, setup.mf.ninterval);
 if ~isinf(setup.mf.neig_max)
-    mf_str = mf_str + sprintf("_md5_%s", DataHash(setup.mf.eigs, 10));
+    mf_str = mf_str + sprintf("_md5_%s", DataHash(setup.mf.eigs, 6));
 end
 savepath = sprintf("%s/%s", savepath, mf_str);
 

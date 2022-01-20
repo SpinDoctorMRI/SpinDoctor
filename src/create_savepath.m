@@ -32,35 +32,35 @@ if ismember(simulation_method, ["btpde", "btpde_midpoint"])
     fields = {'initial_signal', 'mean_diffusivity'};
     pde = rmfields(setup.pde, fields);
     
-    pde_str = "btpde_diffusivity";
-    pde_str = pde_str + "_out" + num2str(trace(pde.diffusivity_out)/3);
+    pde_str = "btpde_D";
+    pde_str = pde_str + "_out" + num2str(trace(pde.diffusivity_out)/3, '%g');
     if isfield(pde, 'diffusivity_in')
-        pde_str = pde_str + "_in" + num2str(trace(pde.diffusivity_in)/3);
+        pde_str = pde_str + "_in" + num2str(trace(pde.diffusivity_in)/3, '%g');
     end
     if isfield(pde, 'diffusivity_ecs')
-        pde_str = pde_str + "_ecs" + num2str(trace(pde.diffusivity_ecs)/3);
+        pde_str = pde_str + "_ecs" + num2str(trace(pde.diffusivity_ecs)/3, '%g');
     end
 
     pde_str = pde_str + "_permea";
     if isfield(pde, 'permeability_in_out')
-        pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out);
+        pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out, '%g');
     end
     if isfield(pde, 'permeability_out_ecs')
-        pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs);
+        pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs, '%g');
     end
 
     pde_str = pde_str + "_relax";
     inf_flag = true;
     if isfield(pde, 'relaxation_out') && ~isinf(pde.relaxation_out)
-        pde_str = pde_str + "_out" + num2str(pde.relaxation_out);
+        pde_str = pde_str + "_out" + num2str(pde.relaxation_out, '%g');
         inf_flag = false;
     end
     if isfield(pde, 'relaxation_in') && ~isinf(pde.relaxation_in)
-        pde_str = pde_str + "_in" + num2str(pde.relaxation_in);
+        pde_str = pde_str + "_in" + num2str(pde.relaxation_in, '%g');
         inf_flag = false;
     end
     if isfield(pde, 'relaxation_ecs') && ~isinf(pde.relaxation_ecs)
-        pde_str = pde_str + "_ecs" + num2str(pde.relaxation_ecs);
+        pde_str = pde_str + "_ecs" + num2str(pde.relaxation_ecs, '%g');
         inf_flag = false;
     end
     if inf_flag
@@ -68,7 +68,7 @@ if ismember(simulation_method, ["btpde", "btpde_midpoint"])
     end
     
     % Make sure different settings are saved in different folders using hash
-    pde_str = pde_str + sprintf("_md5_%s", DataHash(pde, 10));
+    pde_str = pde_str + sprintf("_%s", DataHash(pde, 6));
 
     % Construct the final path
     savepath = fullfile(save_dir_path_geometry, pde_str, simulation_method);
@@ -83,13 +83,13 @@ elseif ismember(simulation_method, ["lap_eig", "mf"])
     'initial_signal', 'mean_diffusivity', 'relaxation', 'initial_density'};
     pde = rmfields(setup.pde, fields);
 
-    pde_str = "mf_diffusivity";
-    pde_str = pde_str + "_out" + num2str(trace(pde.diffusivity_out)/3);
+    pde_str = "mf_D";
+    pde_str = pde_str + "_out" + num2str(trace(pde.diffusivity_out)/3, '%g');
     if isfield(pde, 'diffusivity_in')
-        pde_str = pde_str + "_in" + num2str(trace(pde.diffusivity_in)/3);
+        pde_str = pde_str + "_in" + num2str(trace(pde.diffusivity_in)/3, '%g');
     end
     if isfield(pde, 'diffusivity_ecs')
-        pde_str = pde_str + "_ecs" + num2str(trace(pde.diffusivity_ecs)/3);
+        pde_str = pde_str + "_ecs" + num2str(trace(pde.diffusivity_ecs)/3, '%g');
     end
 
     pde_str = pde_str + "_permea";
@@ -109,14 +109,14 @@ elseif ismember(simulation_method, ["lap_eig", "mf"])
         end
     else
         if isfield(pde, 'permeability_in_out')
-            pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out);
+            pde_str = pde_str + "_inout" + num2str(pde.permeability_in_out, '%g');
         end
         if isfield(pde, 'permeability_out_ecs')
-            pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs);
+            pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs, '%g');
         end
     end
 
-    pde_str = pde_str + sprintf("_md5_%s", DataHash(pde, 10));
+    pde_str = pde_str + sprintf("_%s", DataHash(pde, 6));
 
     % construct the final path
     if simulation_method == "mf"
@@ -124,20 +124,20 @@ elseif ismember(simulation_method, ["lap_eig", "mf"])
         pde = rmfields(setup.pde, fields);
 
         if isfield(pde, 'relaxation_in') && ~isfield(pde, 'relaxation_ecs')
-            mf_str = sprintf("relax_out%g_in%g_density_out%g_in%g_md5_%s", ...
+            mf_str = sprintf("relax_o%g_i%g_density_o%g_i%g_%s", ...
                 pde.relaxation_out, pde.relaxation_in, pde.initial_density_out, ...
-                pde.initial_density_in, DataHash(pde, 10));
+                pde.initial_density_in, DataHash(pde, 6));
         elseif isfield(pde, 'relaxation_ecs') && ~isfield(pde, 'relaxation_in')
-            mf_str = sprintf("relax_out%g_ecs%g_density_out%g_ecs%g_md5_%s", ...
+            mf_str = sprintf("relax_o%g_ecs%g_density_o%g_ecs%g_%s", ...
                 pde.relaxation_out, pde.relaxation_ecs, ...
-                pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 10));
+                pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 6));
         elseif isfield(pde, 'relaxation_ecs') && isfield(pde, 'relaxation_in')
-            mf_str = sprintf("relax_i%g_o%g_e%g_density_i%g_o%g_e%g_md5_%s", pde.relaxation_in, ...
+            mf_str = sprintf("relax_i%g_o%g_e%g_density_i%g_o%g_e%g_%s", pde.relaxation_in, ...
                 pde.relaxation_out, pde.relaxation_ecs, pde.initial_density_in, ...
-                pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 10));
+                pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 6));
         else
-            mf_str = sprintf("relax_out%g_density_out%g_md5_%s", pde.relaxation_out, ...
-                pde.initial_density_out, DataHash(pde, 10));
+            mf_str = sprintf("relax_o%g_density_o%g_%s", pde.relaxation_out, ...
+                pde.initial_density_out, DataHash(pde, 6));
         end
         savepath = fullfile(save_dir_path_geometry, pde_str, mf_str);
 
@@ -155,20 +155,20 @@ elseif ismember(simulation_method, "hadc")
     pde = rmfields(setup.pde, fields);
     
     if isfield(pde, 'relaxation_in') && ~isfield(pde, 'relaxation_ecs')
-        pde_str = sprintf("hadc_relax_out%g_in%g_density_out%g_in%g_md5_%s", ...
+        pde_str = sprintf("hadc_relax_o%g_i%g_density_o%g_i%g_%s", ...
             pde.relaxation_out, pde.relaxation_in, pde.initial_density_out, ...
-            pde.initial_density_in, DataHash(pde, 10));
+            pde.initial_density_in, DataHash(pde, 6));
     elseif isfield(pde, 'relaxation_ecs') && ~isfield(pde, 'relaxation_in')
-        pde_str = sprintf("hadc_relax_out%g_ecs%g_density_out%g_ecs%g_md5_%s", ...
+        pde_str = sprintf("hadc_relax_o%g_ecs%g_density_o%g_ecs%g_%s", ...
             pde.relaxation_out, pde.relaxation_ecs, ...
-            pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 10));
+            pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 6));
     elseif isfield(pde, 'relaxation_ecs') && isfield(pde, 'relaxation_in')
-        pde_str = sprintf("hadc_relax_i%g_o%g_e%g_density_i%g_o%g_e%g_md5_%s", pde.relaxation_in, ...
+        pde_str = sprintf("hadc_relax_i%g_o%g_e%g_density_i%g_o%g_e%g_%s", pde.relaxation_in, ...
             pde.relaxation_out, pde.relaxation_ecs, pde.initial_density_in, ...
-            pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 10));
+            pde.initial_density_out, pde.initial_density_ecs, DataHash(pde, 6));
     else
-        pde_str = sprintf("hadc_relax_out%g_density_out%g_md5_%s", pde.relaxation_out, ...
-            pde.initial_density_out, DataHash(pde, 10));
+        pde_str = sprintf("hadc_relax_o%g_density_o%g_%s", pde.relaxation_out, ...
+            pde.initial_density_out, DataHash(pde, 6));
     end
 
     % construct the final path
