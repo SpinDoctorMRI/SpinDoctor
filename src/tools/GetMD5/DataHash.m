@@ -7,6 +7,14 @@ function H = DataHash(Data, n)
    if isempty(whichMEX)
       InstallMex('GetMD5.c');
    end
+   
+   % test compiled hash function GetMD5
+   try
+       assert(string(GetMD5(1)) == "e02e0d84c1f7b647c18ab9646d57ec89")
+   catch
+       InstallMex('GetMD5.c', '-replace');
+   end
+   
    whichMEX  = which(['GetMD5.', mexext]);
    if isempty(whichMEX)
       error('GetMD5 installation failed. Please check it or replace DataHash with your favorite hash function.')
