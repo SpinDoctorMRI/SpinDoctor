@@ -48,6 +48,9 @@ if ismember(simulation_method, ["btpde", "btpde_midpoint"])
     if isfield(pde, 'permeability_out_ecs')
         pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs, '%g');
     end
+    if endsWith(pde_str,"_permea")
+        pde_str = erase(pde_str, "_permea");
+    end
 
     pde_str = pde_str + "_relax";
     inf_flag = true;
@@ -114,6 +117,9 @@ elseif ismember(simulation_method, ["lap_eig", "mf"])
         if isfield(pde, 'permeability_out_ecs')
             pde_str = pde_str + "_outecs" + num2str(pde.permeability_out_ecs, '%g');
         end
+    end
+    if endsWith(pde_str,"_permea")
+        pde_str = erase(pde_str, "_permea");
     end
 
     pde_str = pde_str + sprintf("_%s", DataHash(pde, 6));

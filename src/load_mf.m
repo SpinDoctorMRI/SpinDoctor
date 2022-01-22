@@ -45,12 +45,16 @@ nsequence = setup.nsequence;
 ndirection = setup.ndirection;
 
 % Folder for saving
-mf_str = sprintf("neig_max%g_lengthscale_min%.4f_ninterval%d", ...
-    setup.mf.neig_max, setup.mf.length_scale, setup.mf.ninterval);
-if ~isinf(setup.mf.neig_max)
-    mf_str = mf_str + sprintf("_md5_%s", DataHash(setup.mf.eigs, 6));
+mf_str = sprintf("neig%g_ls%.4f", ...
+    setup.mf.neig_max, setup.mf.length_scale);
+if setup.mf.surf_relaxation
+    mf_str = "surf_relaxation_" + mf_str;
 end
-savepath = sprintf("%s/%s", savepath, mf_str);
+if ~isinf(setup.mf.neig_max)
+    % if neig_max is inf, mf.eigs doesn't exist or is removed.
+    mf_str = mf_str + sprintf("_%s", DataHash(setup.mf.eigs, 6));
+end
+savepath = fullfile(savepath, mf_str);
 
 % Initialize output arguments
 magnetization = cell(ncompartment, namplitude, nsequence, ndirection);
