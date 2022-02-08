@@ -64,6 +64,10 @@ end
 
 % Check MF experiment
 if isfield(setup, "mf")
+    if numel(unique(setup.pde.initial_density)) ~= 1
+        warning("mf: matrix formalism method is inaccurate " + ...
+            "for nonequilibrium spin density distribution.");
+    end
     setup.mf = check_mf(setup.mf);
 end
 
