@@ -111,13 +111,15 @@ if ecs_shape ~= "no_ecs"
             [tri, xyz] = boundaryFacets(shp);
             TR = triangulation(tri,xyz);
             V = vertexNormal(TR);
-            P = incenter(TR);
-            F = faceNormal(TR);
+            % P = incenter(TR);
+            % F = faceNormal(TR);
             
             points_ecs = [(xyz + 0.5*ecs_gap * V)',...
-                          (xyz + ecs_gap * V)',...
-                          (P + 0.5*ecs_gap * F)',...
-                          (P + ecs_gap * F)'];
+                          (xyz + ecs_gap * V)'];
+            % points_ecs = [(xyz + 0.5*ecs_gap * V)',...
+            %               (xyz + ecs_gap * V)',...
+            %               (P + 0.5*ecs_gap * F)',...
+            %               (P + ecs_gap * F)'];
             shp2 = alphaShape([points,points_ecs]', 'HoleThreshold', (4/3)*pi*20^3);
             shp2.Alpha = 1.5*shp2.criticalAlpha("one-region");
             [tri, xyz] = boundaryFacets(shp2);
