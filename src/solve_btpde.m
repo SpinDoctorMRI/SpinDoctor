@@ -202,7 +202,8 @@ if any(isinf(signal), 'all')
     % Temporarily save results in temp_store to avoid I/O error
     temp_store = cell(allinds);
 
-    parfor iall = 1:prod(allinds)
+    opts = parforOptions(parpool('local', [1, 2048]));
+    parfor (iall = 1:prod(allinds), opts)
         % skip, if signal is already there
         if all(~isinf(signal(:, iall)), 'all')
             continue

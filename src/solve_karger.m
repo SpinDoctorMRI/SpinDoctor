@@ -105,10 +105,7 @@ itertimes = zeros(namplitude, nsequence, ndirection);
 % Cartesian indices (for parallel looping with linear indices)
 allinds = [namplitude nsequence ndirection];
 
-% Iterate over gradient amplitudes, sequences and directions. If the Matlab
-% PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
-% parallel, otherwise it should work like a normal loop. If that is not the
-% case, replace the `parfor` keyword by the normal `for` keyword.
+% Iterate over gradient amplitudes, sequences and directions.
 for iall = 1:prod(allinds)
     
     % Measure iteration time

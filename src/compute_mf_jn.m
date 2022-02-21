@@ -20,7 +20,8 @@ n_lap_eig = length(lap_eig);
 % Initialize output argument
 mf_jn = cell(1, n_lap_eig);
 
-parfor ilapeig = 1:n_lap_eig
+opts = parforOptions(parpool('local', [1, 2048]));
+parfor (ilapeig = 1:n_lap_eig, opts)
     eigvals = lap_eig(ilapeig).values;
     neig = length(eigvals);
     mf_jn_ilapeig = zeros(nsequence, neig);
