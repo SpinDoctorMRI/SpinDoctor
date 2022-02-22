@@ -31,7 +31,7 @@ elseif nargin == 3
         lapeig_list = dir(sprintf("%s/lap_eig_lengthscale*_neigmax*.mat", eigenpath));
         for ilist = 1:length(lapeig_list)
             ls_nmax = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%f.mat');
-            % is there a smaller length scale
+            % check if there is a smaller length scale
             if mf.length_scale >= ls_nmax(1)
                 % reuse larger eigendecomposition
                 name = fullfile(lapeig_list(ilist).folder, lapeig_list(ilist).name);
@@ -39,16 +39,13 @@ elseif nargin == 3
                 if ~isempty(lap_eig)
                     fprintf("Compute Laplace eigendecomposition using saved result: %s\n", name);
                     eiglim = length2eig(mf.length_scale, diffusivity);
+                    % reset larger lapeig according to eiglim and mf.neig_max
                     lap_eig = reset_lapeig(lap_eig, eiglim, mf.neig_max);
-                    if min(vertcat(lap_eig.length_scales)) > mf.length_scale
-                        warning("No eigenvalues were outside the interval. Consider increasing neig_max " ...
-                        + "if there are more eigenvalues that may not have been found in the interval.");
-                    end
                     return;
                 end
             end
         end
-        % is there a larger neigmax (length scale is prior to neigmax)
+        % check if there is a larger neigmax (length scale is prior to neigmax)
         for ilist = 1:length(lapeig_list)
             ls_nmax = sscanf(lapeig_list(ilist).name, 'lap_eig_lengthscale%f_neigmax%f.mat');
             if ~isinf(ls_nmax(2)) && ls_nmax(2) >= mf.neig_max
@@ -57,8 +54,6 @@ elseif nargin == 3
                 lap_eig = load_laplace_eig(name);
                 if ~isempty(lap_eig)
                     fprintf("Compute Laplace eigendecomposition using saved result: %s\n", name);
-                    warning("No eigenvalues were outside the interval. Consider increasing neig_max " ...
-                        + "if there are more eigenvalues that may not have been found in the interval.");
                     eiglim = length2eig(mf.length_scale, diffusivity);
                     lap_eig = reset_lapeig(lap_eig, eiglim, mf.neig_max);
                     return;

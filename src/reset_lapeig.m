@@ -17,9 +17,20 @@ for ilapeig = 1:length(lap_eig)
 
     % Remove eigenvalues above interval defined by length scale
     inds_keep = values <= eiglim;
+
+    % Remove redundant eigenvalues defined by maximum number of eigenvalues
     if ~isinf(neigmax)
-        inds_keep(neigmax+1:end) = 0;
+        if ~isempty(inds_keep(neigmax+1:end)) && any(inds_keep(neigmax+1:end), 'all')
+            msg = join([ ...
+                "No eigenvalues were outside the interval.", ...
+                "Consider increasing neig_max if there are more eigenvalues", ...
+                "that may not have been found in the interval."
+            ]);
+            warning(msg);
+        end
+        inds_keep(neigmax+1:end) = false;
     end
+
     % Reset lap_eig
     lap_eig(ilapeig).values = values(inds_keep);
     lap_eig(ilapeig).funcs = lap_eig(ilapeig).funcs(:, inds_keep);
