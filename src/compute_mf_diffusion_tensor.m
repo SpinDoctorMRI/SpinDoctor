@@ -54,8 +54,12 @@ else    % All compartments are uncorrelated
     diffusion_tensor = zeros(3, 3, nsequence, ncompartment);
     a = cell(1, ncompartment);
 
-    opts = parforOptions(parpool('local', [1, 2048]));
-    parfor (icmpt = 1:ncompartment, opts)
+    % Check if Parallel Computing Toolbox is licensed
+    if license('test', 'Distrib_Computing_Toolbox') && isempty(gcp('nocreate'))
+        parpool('local', [1, 2048]);
+    end
+
+    parfor icmpt = 1:ncompartment
         % Eigenvalues and moments
         M = M_cmpts{icmpt};
         points = femesh.points{icmpt};

@@ -171,8 +171,12 @@ allinds = [namplitude nsequence ndirection];
 % Temporarily save results in temp_store to avoid I/O error
 temp_store = cell(allinds);
 
-opts = parforOptions(parpool('local', [1, 2048]));
-parfor (iall = 1:prod(allinds), opts)
+% Check if Parallel Computing Toolbox is licensed
+if license('test', 'Distrib_Computing_Toolbox') && isempty(gcp('nocreate'))
+    parpool('local', [1, 2048]);
+end
+
+parfor iall = 1:prod(allinds)
 
     % Measure iteration time
     itertime = tic;
