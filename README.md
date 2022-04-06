@@ -1,4 +1,4 @@
-# SpinDoctor Matrix Formalism Module
+# SpinDoctor Matrix Formalism Module (old code 2019)
 
 ==================================
 
