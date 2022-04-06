@@ -1,8 +1,8 @@
-# SpinDoctor Neuron Module
+# SpinDoctor Neuron Module (old code 2020)
 
 ==================================
 
-This branch contains code and documentation dating from 2019, which can be used to run some of the examples from the paper 
+This branch contains code and documentation dating from 2020, which can be used to run some of the examples from the paper 
 
 C. Fang, V.-D. Nguyen, D. Wassermann, J.-R. Li  
 [Diffusion MRI simulation of realistic neurons with SpinDoctor and the Neuron Module](https://doi.org/10.1016/j.neuroimage.2020.117198)    
