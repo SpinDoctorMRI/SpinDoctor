@@ -4,7 +4,7 @@
 
 This branch contains code and documentation dating from 2020, which can be used to run some of the examples from the paper 
 
-J.-R. Li, T. N. Tran, V.-D. Nguyen
+J.-R. Li, T. N. Tran, V.-D. Nguyen  
 [Practical computation of the diffusion MRI signal of realistic neurons based on Laplace eigenfunctions](https://doi.org/10.1002/nbm.4353)  
 NMR in Biomedicine. 2020
 
