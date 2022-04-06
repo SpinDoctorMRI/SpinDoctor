@@ -1,40 +1,35 @@
 # SpinDoctor Neuron Module
 
+==================================
+
 This branch contains code and documentation to run some of the examples from the paper 
 
 C. Fang, V.-D. Nguyen, D. Wassermann, J.-R. Li  
 [Diffusion MRI simulation of realistic neurons with SpinDoctor and the Neuron Module](https://doi.org/10.1016/j.neuroimage.2020.117198)    
 Neuroimage. 2020.  
 
-[Diffusion MRI simulation of realistic neurons with SpinDoctor and the Neuron Module]: 
-
-
 ==================================
 
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.  
 
-The Neuron Module solves the Bloch-Torrey PDE on neurons. The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations. The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
-
-Paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025
-
-Paper about SpinDoctor NeuronModule can be found at http://arxiv.org/abs/1910.07916
+The Neuron Module solves the Bloch-Torrey PDE on neurons. 
 
 Software requirements
 
 	SpinDoctor NeuronModule is compatible with MATLAB (version R2017b or later).
 
 Getting started
-1) The DISTRIBUTE folder contains a commented general purpose driver called driver_spindoctor_neuronmodule_commented.m. It is highly recommended to read this driver to understand the workflow of SpinDoctor. 
-2) driver_spindoctor_neuronmodule_commented.m does not use saved simulation data, all simulations are run from scratch.
-3) Thirteen driver examples are given in the DISTRIBUTE folder, the simulation details are listed in the table below. These drivers save the simulated data or use previously saved simulation results if they are available.
-4) Six drivers that are used to plot the figures in the paper about SpinDoctor NeuronModule by utilizing the saved data are also given in the repository. The details can be found in the table below.
-5) The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
-6) Other functions are stored in subfolders of DISTRIBUTE/SRC.
-7) Some neuron finite element meshes are stored in DISTRIBUTE/msh_files.
-8) The input files of the drivers are located at DISTRIBUTE/params_files.
-9) The saved simulation data are saved in DISTRIBUTE/saved_simul.
-10) Documentation of the top level functions can be found in DOC/.
-11) User Guide can be found [here](https://github.com/jingrebeccali/SpinDoctor/blob/NeuronModule/User%20Guide.pdf)
+1. The DISTRIBUTE folder contains a commented general purpose driver called driver_spindoctor_neuronmodule_commented.m. It is highly recommended to read this driver to understand the workflow of SpinDoctor. 
+2. driver_spindoctor_neuronmodule_commented.m does not use saved simulation data, all simulations are run from scratch.
+3. Thirteen driver examples are given in the DISTRIBUTE folder, the simulation details are listed in the table below. These drivers save the simulated data or use previously saved simulation results if they are available.
+4. Six drivers that are used to plot the figures in the paper about SpinDoctor NeuronModule by utilizing the saved data are also given in the repository. The details can be found in the table below.
+5. The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
+6. Other functions are stored in subfolders of DISTRIBUTE/SRC.
+7. Some neuron finite element meshes are stored in DISTRIBUTE/msh_files.
+8. The input files of the drivers are located at DISTRIBUTE/params_files.
+9. The saved simulation data are saved in DISTRIBUTE/saved_simul.
+10. Documentation of the top level functions can be found in DOC/.
+11. User Guide can be found [here](https://github.com/jingrebeccali/SpinDoctor/blob/NeuronModule/User%20Guide.pdf.
 
 | Driver name                         	| Simulation details                                                                       	|
 |-------------------------------------	|------------------------------------------------------------------------------------------	|
