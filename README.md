@@ -1,5 +1,15 @@
 # SpinDoctor Neuron Module
 
+This branch contains code and documentation to run some of the examples from the paper 
+
+C. Fang, V.-D. Nguyen, D. Wassermann, J.-R. Li
+Diffusion MRI simulation of realistic neurons with SpinDoctor and the Neuron Module.
+Neuroimage. 2020. 
+https://www.sciencedirect.com/science/article/pii/S1053811920306844?via%3Dihub
+
+
+==================================
+
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.  
 
 The Neuron Module solves the Bloch-Torrey PDE on neurons. The PDEs are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations. The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
