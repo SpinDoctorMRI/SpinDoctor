@@ -16,9 +16,9 @@ SpinDoctor requires no additional MATLAB Toolboxes. However, if the MATLAB Paral
 the simulations can be run in parallel.
 
 
-## Getting started
+## Authors
 
-Authors: Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
+Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
 
 ## How to cite us
 
