@@ -1,5 +1,16 @@
 # SpinDoctor Matrix Formalism Module
 
+==================================
+
+This branch contains code and documentation dating from 2019, which can be used to run some of the examples from the paper 
+
+J.-R. Li, T. N. Tran, V.-D. Nguyen
+[Practical computation of the diffusion MRI signal of realistic neurons based on Laplace eigenfunctions](https://doi.org/10.1002/nbm.4353)
+NMR in Biomedicine. 2020
+
+
+==================================
+
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.  
 
 The Matrix Formalism Module computes a closed form representation of the diffusion MRI signal called Matrix Formalism, that is based on the eigendecomposition of the Laplace operator, defined in the relevant geometry.  
