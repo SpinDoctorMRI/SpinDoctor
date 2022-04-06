@@ -5,7 +5,7 @@
 This branch contains code and documentation dating from 2019, which can be used to run some of the examples from the paper 
 
 J.-R. Li, T. N. Tran, V.-D. Nguyen
-[Practical computation of the diffusion MRI signal of realistic neurons based on Laplace eigenfunctions](https://doi.org/10.1002/nbm.4353)
+[Practical computation of the diffusion MRI signal of realistic neurons based on Laplace eigenfunctions](https://doi.org/10.1002/nbm.4353)  
 NMR in Biomedicine. 2020
 
 
@@ -41,8 +41,6 @@ Getting started
 5. The functions that the user is likely to call directly from the driver are located at the top level of DISTRIBUTE/SRC.
 6. Other functions are stored in subfolders of DISTRIBUTE/SRC.
 7. Documentation of the top level functions can be found in DOC/
-8. User Guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/MatrixFormalismModule/User%20Guide.pdf)
-
 
 There are the following provided drivers
 
