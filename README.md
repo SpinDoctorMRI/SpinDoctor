@@ -48,9 +48,6 @@ The SpinDoctor Toolbox has been developed in the MATLAB R2020b and tested with M
 SpinDoctor requires no additional MATLAB Toolboxes. However, if the MATLAB Parallel Computing Toolbox is available,
 the simulations can be run in parallel.
 
-## Authors
-
-Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
 
 ## Getting started
 
@@ -58,8 +55,6 @@ Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Ng
 2) The input files for the drivers are found in the folder `setups`, and define the structures needed for the simulations.
 3) Multiple neuron meshes are found in the folder `mesh_files`. These can be loaded in the `setups/setup_neuron.m` script.
 4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
-
-
 
 ## Updates March 2021
 
@@ -79,11 +74,15 @@ New features:
 	* or by manually defining a subclass of the `Sequence` class
 
 
+## Authors
+
+Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
+
 ## How to cite us
 
-The paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025.
+The original paper about SpinDoctor can be found at https://arxiv.org/abs/1902.01025.
 
-If you use our software for research, please consider citing us:
+If you use our software for research, please cite us:
 
 ```bibtex
 @article{Li2019,
@@ -99,7 +98,7 @@ If you use our software for research, please consider citing us:
 }
 ```
 
-Citations for the Neuron Module and Matrix Formalism module can be found in the `CITATION.bib` file.
+Citations for further developements such as the Neuron Module and the Matrix Formalism module can be found in the `CITATION.bib` file.
 
 
 
