@@ -1,45 +1,7 @@
-# SpinDoctor Toolbox
+# SpinDoctor Toolbox (Developmental code, not documented)
 
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
 
-SpinDoctor can be used
-
-1) to solve the Bloch-Torrey partial differential equation (BTDPE) to obtain the dMRI signal (the toolbox provides a way of robustly fitting the dMRI signal to obtain the fitted Apparent Diffusion Coefficient (ADC));
-2) to solve the diffusion equation for the homogenized ADC (HADC) model to obtain the ADC;
-3) a short-time approximation formula for the ADC is also included in the toolbox for comparison with the simulated ADC;
-4) Compute the dMRI signal using a matrix formalism (MF) analytical solution based Laplace eigenfunctions.
-
-The PDEs and Laplace eigenvalue decompositions are solved by P1 finite elements combined with built-in MATLAB routines for solving ordinary differential equations.
-The finite element mesh generation is performed using an external package called TetGen that is included in the toolbox.
-
-SpinDoctor has support for the following features:
-1. multiple compartments with compartment-wise constant
-	* initial spin densities,
-	* diffusion coefficients or diffusion tensors, and
-	* T2-relaxation coefficients;
-2. permeable membranes between compartments for the BTPDE and MF (the HADC assumes negligible permeability);
-3. built-in diffusion-encoding pulse sequences, including
-	* the Pulsed Gradient Spin Echo (PGSE) and double-PGSE,
-	* the Ocsillating Gradient Spin Echo (OGSE), or
-	* custom pulse sequences;
-4. uniformly distributed gradient directions in 2D and 3D for high angular resolution diffusion imaging (HARDI)
-
-SpinDoctor also comes with a geometry generation module, allowing for
-1. spherical cells with a nucleus;
-2. cylindrical cells with a myelin layer;
-3. an extra-cellular space (ECS) enclosed in either
-	* a box,
-	* a convex hull, or
-	* a tight wrapping around the cells;
-4. deformation of canonical cells by bending and twisting.
-
-In addition, a variety of neuron meshes is available, whose surface geometries were extracted from [NeuroMopho.org](http://neuromorpho.org). The neurons may also be enclosed in an extracellular space as described above.
-
-### Spinning spindle spins in SpinDoctor
-
-![Spindle](misc/spindle.gif)
-
-The above graphic visualizes the magnetization as a z-displacement for the spindle neuron geometry `03b_spindle4aACC` (extracted from NeuroMorpho). The gradient is a PGSE sequence in the x-direction.
 
 ## Software requirements
 
@@ -57,24 +19,6 @@ the simulations can be run in parallel.
 4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
 
 Authors: Jing-Rebecca Li, Syver Døving Agdestein, Chengran Fang, Van-Dang Nguyen, Try Nguyen Tran.
-
-
-## Updates March 2021
-
-All modules (master, T2, NeuronModule, MatrixFormalismModule) are now merged and found in the `master` branch. The previous versions of the modules are still found in their branches.
-
-New features:
-
-* Code refactoring, change of data structures
-* New input file system, controlled by a structure `setup`
-* Some speed and memory improvements (extensive vectorization, reduced memory usage in ODE solvers)
-* Support for parallel outer loops (solve for multiple directions, amplitudes and sequences in parallel)
-* Diffusion tensors as an alternative to scalar diffusion coefficients
-* Matrix formalism with built in Matlab functions instead of PDE Toolbox
-* Add convex hull ECS + tight wrap ECS for neurons (experimental feature)
-* Simple interface for pulse sequences, the user can add custom sequences
-	* by passing a function handle, for which the integral quantities are computed numerically,
-	* or by manually defining a subclass of the `Sequence` class
 
 
 ## How to cite us
