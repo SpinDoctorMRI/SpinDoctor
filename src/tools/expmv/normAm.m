@@ -15,38 +15,38 @@ t = 1; % Number of columns used by NORMEST1.
 
 n = length(A);
 if isequal(A,abs(A))
-    e = ones(n,1);
-    for j=1:m         % for positive matrices only
-        e = A'*e;
-    end
-    c = norm(e,inf);
-    mv = m;
+      A_prime = A';
+      e = ones(n,1);
+      for j=1:m         % for positive matrices only
+         e = A_prime*e;
+      end
+      c = gather(norm(e,inf));
+      mv = gather(m);
 else
-    [c,v,w,it] = normest1(@afun_power,t);
-    mv = it(2)*t*m;
+      [c,v,w,it] = normest1(@afun_power,t);
+      c = gather(c);
+      mv = gather(it(2)*t*m);
 end
 
-  function Z = afun_power(flag,X)
-       %AFUN_POWER  Function to evaluate matrix products needed by NORMEST1.
+function Z = afun_power(flag,X)
+%AFUN_POWER  Function to evaluate matrix products needed by NORMEST1.
+   if isequal(flag,'dim')
+      Z = n;
+   elseif isequal(flag,'real')
+      Z = isreal(A);
+   else
 
-       if isequal(flag,'dim')
-          Z = n;
-       elseif isequal(flag,'real')
-          Z = isreal(A);
-       else
+      [p,q] = size(X);
+      if p ~= n, error('Dimension mismatch'), end
 
-          [p,q] = size(X);
-          if p ~= n, error('Dimension mismatch'), end
+      if isequal(flag,'notransp')
+         for i = 1:m, X = A*X; end
+      elseif isequal(flag,'transp')
+         for i = 1:m, X = A'*X; end
+      end
 
-          if isequal(flag,'notransp')
-             for i = 1:m, X = A*X; end
-          elseif isequal(flag,'transp')
-             for i = 1:m, X = A'*X; end
-          end
+      Z = X;
+   end
+end
 
-          Z = X;
-
-       end
-
-  end
 end

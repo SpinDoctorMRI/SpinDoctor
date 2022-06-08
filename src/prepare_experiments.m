@@ -161,6 +161,63 @@ function mf = check_mf(mf)
     assert(mf.neig_max >= 1, ...
         "matrix formalism: maximum number of eigenvalues must be greater than 1.");
 
+    if isfield(mf, 'single')
+        if mf.single
+            mf.single = true;
+            msg = "matrix formalism: using single precision.";
+            disp(msg)
+        else
+            mf.single = false;
+        end
+    else
+        mf.single = false;
+    end
+
+    if isfield(mf, 'gpu')
+        if ~mf.gpu
+            mf.gpu = false;
+        else
+            if ~license('test', 'Distrib_Computing_Toolbox')
+                mf.gpu = false;
+                msg = "matrix formalism: Parallel Computing Toolbox is not available, use CPU.";
+                warning(msg)
+            else
+                availableGPUs = gpuDeviceCount("available");
+
+                if availableGPUs==0
+                    mf.gpu = false;
+                    warning("matrix formalism: no GPU is available, use CPU.")
+                else
+                    if isnumeric(mf.gpu) && (numel(mf.gpu) > 1)
+                        mf.gpu = unique(reshape(mf.gpu, 1, []));
+                        if any(mf.gpu<=0, 'all')
+                            msg = "matrix formalism: GPU index starts from 1.";
+                            error(msg)
+                        end
+                        if any(mf.gpu>availableGPUs, 'all')
+                            msg = "matrix formalism: GPU index exceeds the number of GPU devices.";
+                            error(msg)
+                        end
+                    elseif isnumeric(mf.gpu) && (numel(mf.gpu) == 1)
+                        mf.gpu = round(mf.gpu);
+                        if mf.gpu <= 0
+                            msg = "matrix formalism: GPU index starts from 1.";
+                            error(msg)
+                        end
+                        if mf.gpu > availableGPUs
+                            msg = "matrix formalism: GPU index exceeds the number of GPU devices.";
+                            error(msg)
+                        end
+                    else
+                        mf.gpu = true;
+                    end
+                end
+            end
+        end
+    else
+        mf.gpu = false;
+    end % isfield
+
     if isfield(mf, 'length_scale')
         assert(mf.length_scale >= 0, ...
             "matrix formalism: length scale is negative.");

@@ -11,7 +11,7 @@ function lap_eig = load_laplace_eig(eigenpath, mf, diffusivity)
 lap_eig = [];
 if nargin == 1
     % path points to the lap_eig file
-    fprintf("Load Laplace eigenfunctions from %s.\n", eigenpath);
+    fprintf("Load Laplace eigenfunctions from %s\n", eigenpath);
     mfile = matfile(eigenpath, "Writable", false);
     lap_eig = mfile.lap_eig;
 elseif nargin == 3

@@ -1,5 +1,5 @@
 function  [M,mv,alpha,unA] = ...
-           select_taylor_degree(A,b,m_max,p_max,prec,shift,bal,force_estm)
+    select_taylor_degree(A,b,m_max,p_max,prec,shift,bal,force_estm)
 %SELECT_TAYLOR_DEGREE   Select degree of Taylor approximation.
 %   [M,MV,alpha,unA] = SELECT_TAYLOR_DEGREE(A,b,m_max,p_max) forms a matrix M
 %   for use in determining the truncated Taylor series degree in EXPMV
@@ -19,13 +19,16 @@ if nargin < 3 || isempty(m_max), m_max = 55; end
 if p_max < 2 || m_max > 60 || m_max + 1 < p_max*(p_max - 1)
     error('>>> Invalid p_max or m_max.')
 end
-n = length(A);
+
 if nargin < 7 || isempty(bal), bal = false; end
+
 if bal
-    [D B] = balance(A);
+    [D, B] = balance(A);
     if norm(B,1) < norm(A,1), A = B; end
 end
-if nargin < 5 || isempty(prec), prec = class(A); end
+
+if nargin < 5 || isempty(prec), prec = underlyingType(A); end
+
 switch prec
     case 'double'
         load('src/tools/expmv/theta_taylor.mat')
@@ -34,16 +37,22 @@ switch prec
     case 'half'
         load('src/tools/expmv/theta_taylor_half.mat')
 end
+
+n = length(A);
 if shift
-    mu = trace(A)/n;
-    A = A-mu*speye(n);
+    mu = gather(trace(A)/n);
+    % A = A-mu*eye(n);
+    s = size(A);
+    % Indices of the main diagonal
+    index = 1:s(1)+1:s(1)*s(2);
+    A(index) = A(index) - mu;
 end
+
 mv = 0;
-if ~force_estm, normA = norm(A,1); end
+if ~force_estm, normA = gather(norm(A,1)); end
 
 if ~force_estm && normA <= 4*theta(m_max)*p_max*(p_max + 3)/(m_max*size(b,2));
-% if true
-    % Base choice of m on normA, not the alpha_p.
+    % Base choice of m on normA, not the alpha_p
     unA = 1;
     c = normA;
     alpha = c*ones(p_max-1,1);
@@ -51,7 +60,7 @@ else
     unA = 0;
     eta = zeros(p_max,1); alpha = zeros(p_max-1,1);
     for p = 1:p_max
-        [c,k] = normAm(A,p+1);
+        [c,k] = normAm(A, p+1);
         c = c^(1/(p+1));
         mv = mv + k;
         eta(p) = c;
@@ -60,9 +69,10 @@ else
         alpha(p) = max(eta(p),eta(p+1));
     end
 end
+
 M = zeros(m_max,p_max-1);
 for p = 2:p_max
-    for m = p*(p-1)-1 : m_max
+    for m = p*(p-1)-1:m_max
         M(m,p-1) = alpha(p-1)/theta(m);
     end
 end

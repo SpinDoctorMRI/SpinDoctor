@@ -20,12 +20,7 @@ n_lap_eig = length(lap_eig);
 % Initialize output argument
 mf_jn = cell(1, n_lap_eig);
 
-% Check if Parallel Computing Toolbox is licensed
-if license('test', 'Distrib_Computing_Toolbox') && isempty(gcp('nocreate'))
-    parpool('local', [1, 2048]);
-end
-
-parfor ilapeig = 1:n_lap_eig
+for ilapeig = 1:n_lap_eig
     eigvals = lap_eig(ilapeig).values;
     neig = length(eigvals);
     mf_jn_ilapeig = zeros(nsequence, neig);

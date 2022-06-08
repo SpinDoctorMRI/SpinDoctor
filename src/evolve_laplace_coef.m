@@ -1,44 +1,109 @@
-function nu = evolve_laplace_coef(nu0, seq, iqA, LT2, ninterval)
+function nu = evolve_laplace_coef(nu, seq, K, LT2, ninterval)
 %EVOLVE_LAPLACE_COEF Compute Laplace coefficients of final magnetization.
 %   If PGSE, use three intervals; 
 %   if DoublePGSE, use seven intervals; 
-%   otherwise many intervals. TO DO: optimization for OGSE
+%   otherwise many intervals.
 %
-%   nu0: double(neig, 1)
+%   nu: double(neig, 1)
 %   seq: Sequence
-%   iqA: complex(neig, neig)
+%   K: complex(neig, neig) or function handle
 %   LT2: double(neig, neig)
-%   ninterval: int   
+%   ninterval: int
 %
 %   nu: double(neig, 1)
 
 
-% BT operator in Laplace basis
-K = LT2 + iqA;
+LT2_is_matrix = size(LT2, 1) ~= 1;
 
 if isa(seq, "PGSE")
-    % Laplace coefficients of final magnetization
-    nu = expmv(-seq.delta, K, nu0);
-    nu = expm(-(seq.Delta - seq.delta) * LT2) * nu;
-    nu = expmv(-seq.delta, K', nu);
+    % Assemble matrix K
+    if LT2_is_matrix
+        K = K + LT2;
+    else
+        s = size(K);
+        diag_ind = 1:s(1)+1:s(1)*s(2);
+        K(diag_ind) = K(diag_ind) + LT2;
+    end
+    K = -seq.delta*K;
 
-    % edK = expm(-seq.delta * K);
-    % edL = expm(-(seq.Delta - seq.delta) * LT2);
-    % nu = edK' * (edL * (edK * nu0));
+    % Compute Laplace coefficients of final magnetization
+    [cost, K_shift, s, m, mu, tol] = expmv_cost(K, nu);
+    if cost > 1e4
+        clear K_shift;
+        % first pulse
+        K = expm(K);
+        nu = K * nu;
+        % between pulses
+        t = seq.Delta - seq.delta;
+        nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+        % second pulse
+        K = conj(K);
+        nu = K * nu;
+    else
+        clear K;
+        % first pulse
+        nu = expmv(K_shift, nu, s, m, mu, tol);
+        % between pulses
+        t = seq.Delta - seq.delta;
+        nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+        % second pulse
+        K_shift = conj(K_shift);
+        nu = expmv(K_shift, nu, s, m, conj(mu), tol);
+    end
+
 elseif isa(seq, "DoublePGSE")
-    % Laplace coefficients of final magnetization
-    edK = expm(-seq.delta * K);
-    edL = expm(-(seq.Delta - seq.delta) * LT2);
-    etL = expm(-seq.tpause * LT2);
-    nu = edK' * (edL * (edK * (etL * (edK' * (edL * (edK * nu0))))));
+    if LT2_is_matrix
+        K = K + LT2;
+    else
+        s = size(K);
+        diag_ind = 1:s(1)+1:s(1)*s(2);
+        K(diag_ind) = K(diag_ind) + LT2;
+    end
+    
+    % Compute Laplace coefficients of final magnetization
+    % % first pulse
+    % K = expm(-seq.delta * K);
+    % nu = K * nu;
+    % % between pulses
+    % t = seq.Delta - seq.delta;
+    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % % second pulse
+    % K = conj(K);
+    % nu = K * nu;
+    % % between pulses
+    % t = seq.tpause;
+    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % % third pulse
+    % K = conj(K);
+    % nu = K * nu;
+    % % between pulses
+    % t = seq.Delta - seq.delta;
+    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % % fourth pulse
+    % K = conj(K);
+    % nu = K * nu;
 
-    % nu = expmv(-seq.delta, K, nu0);
-    % nu = expm(-(seq.Delta - seq.delta) * LT2) * nu;
-    % nu = expmv(-seq.delta, K', nu);
-    % nu = expm(-seq.tpause * LT2) * nu;
-    % nu = expmv(-seq.delta, K, nu);
-    % nu = expm(-(seq.Delta - seq.delta) * LT2) * nu;
-    % nu = expmv(-seq.delta, K', nu);
+    % first pulse
+    nu = expmv(-seq.delta, K, nu);
+    % between pulses
+    t = seq.Delta - seq.delta;
+    nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % second pulse
+    K = conj(K);
+    nu = expmv(-seq.delta, K, nu);
+    % between pulses
+    t = seq.tpause;
+    nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % third pulse
+    K = conj(K);
+    nu = expmv(-seq.delta, K, nu);
+    % between pulses
+    t = seq.Delta - seq.delta;
+    nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % fourth pulse
+    K = conj(K);
+    nu = expmv(-seq.delta, K, nu);
+
 elseif isa(seq, "SinOGSE") || isa(seq, "CosOGSE")
     % Transform Laplace coefficients using piecewise constant
     % approximation of time profile    
@@ -52,36 +117,65 @@ elseif isa(seq, "SinOGSE") || isa(seq, "CosOGSE")
 
     % Create time intervals for a quater period
     time = linspace(0, quater_period, nsubinterval+1);
-    % BT operator in Laplace basis for a given time profile value
-    K = @(ft) LT2 + ft * iqA;
 
-    nu = nu0;
     % first pulse
     for iquater = 1:n_quater_periods
         itime = time + (iquater-1) * quater_period;
-        nu = riemann_approximation(nu, K, itime, seq);
+        nu = riemann_approximation(nu, @get_K, itime, seq);
     end
-    % pause
-    nu = expm(-(seq.Delta - seq.delta) * LT2) * nu;
+    % between pulses
+    t = seq.Delta - seq.delta;
+    nu = between_pulses(t, nu, LT2, LT2_is_matrix);
     % second pulse
     for iquater = 1:n_quater_periods
         itime = time + seq.Delta + (iquater-1) * quater_period;
-        nu = riemann_approximation(nu, K, itime, seq);
+        nu = riemann_approximation(nu, @get_K, itime, seq);
     end
+
 else
     % Transform Laplace coefficients using piecewise constant
     % approximation of time profile
-    
+
     % Create time intervals for time profile approximation
     time = linspace(0, seq.echotime, ninterval + 1);
-    % BT operator in Laplace basis for a given time profile value
-    K = @(ft) LT2 + ft * iqA;
-    nu = riemann_approximation(nu0, K, time, seq);
+    nu = riemann_approximation(nu, @get_K, time, seq);
 end
+
+function K_prime = get_K(ft)
+    if LT2_is_matrix
+        K_prime = K*ft + LT2;
+    else
+        K_prime = K*ft;
+        s = size(K_prime);
+        diag_ind = 1:s(1)+1:s(1)*s(2);
+        K_prime(diag_ind) = K_prime(diag_ind) + LT2;
+    end
+end
+
 end
 
 
-function nu = riemann_approximation(nu, K, time, seq)
+function nu = between_pulses(t, nu, LT2, LT2_is_matrix)
+    if abs(t) > 1e-16
+        if LT2_is_matrix
+            LT2 = -t*LT2;
+
+            [cost, LT2_shift, s, m, mu, tol] = expmv_cost(LT2, nu);
+            if cost > 1e4
+                clear LT2_shift;
+                nu = expm(LT2) * nu;
+            else
+                clear LT2;
+                nu = expmv(LT2_shift, nu, s, m, mu, tol);
+            end
+        else
+            nu = exp(-t * LT2') .* nu;
+        end
+    end
+end
+
+
+function nu = riemann_approximation(nu, get_K, time, seq)
     ninterval = length(time) - 1;
     for i = 1:ninterval
         % Time step and time profile on given interval
@@ -89,7 +183,7 @@ function nu = riemann_approximation(nu, K, time, seq)
         ft = (seq.call(time(i + 1)) + seq.call(time(i))) / 2;
 
         % Laplace coefficients of magnetization at end of interval
-        nu = expmv(-dt, K(ft), nu);
-        % nu = expm(-dt * K(ft)) * nu;
+        % nu = expm(-dt * get_K(ft)) * nu;
+        nu = expmv(-dt, get_K(ft), nu);
     end
 end

@@ -90,6 +90,8 @@ totaltime_addition = 0;
 
 % Check if results are already available
 if ~rerun && do_save
+    fprintf("Load btpde results from %s\n", savepath);
+
     for iseq = 1:nsequence
         % Extract iteration inputs
         seq = sequences{iseq};
