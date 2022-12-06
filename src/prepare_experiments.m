@@ -8,7 +8,7 @@ function setup = prepare_experiments(setup)
 
 
 % We here assume we are working with water protons
-gamma = 2.67513 * 1e-04;
+gamma = 0.2675222005; 
 
 % Check consistency of gradient sequences
 nsequence = length(setup.gradient.sequences);
@@ -29,7 +29,7 @@ for iseq = 1:nsequence
     bnq = setup.gradient.sequences{iseq}.bvalue_no_q;
     switch setup.gradient.values_type
         case "g"
-            setup.gradient.qvalues(:, iseq) = setup.gradient.values / gamma;
+            setup.gradient.qvalues(:, iseq) = setup.gradient.values* setup.gamma / 1e6;
             setup.gradient.bvalues(:, iseq) = bnq * setup.gradient.qvalues(:, iseq).^2;
         case "q"
             setup.gradient.qvalues(:, iseq) = setup.gradient.values;
