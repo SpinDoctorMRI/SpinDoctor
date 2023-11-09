@@ -1,7 +1,6 @@
-# SpinDoctor Toolbox (developmental code, not documented)
+# SpinDoctor Toolbox for blood flow imaging (based on developmental code, not documented)
 
-SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
-
+Extended version for blood flow imaging using Streamline Upwind Petrov-Galerkin method + theta method, based on developed version
 
 ## Software requirements
 
