@@ -16,34 +16,33 @@ classdef DoublePGSE < Sequence
             %DoublePGSE Construct an instance of the DoublePGSE class.
             % varargin = tpause, optional arguments for indvidual PGSE
             %   `tpause` is the pause between the two PGSE sequences.
-            if nargin ==2
+            if nargin < 3
                 tpause = 0;
-                varargin = {0};
             else 
-                tpause = varargin{1};   
+                tpause = varargin{1};
             end
             assert(tpause >= 0);
             obj@Sequence(delta, Delta);
             obj.tpause = tpause;
-            if length(varargin) == 1
+              if isempty(varargin{2:end)
                   obj.t1 = 0;  
                   obj.TE = obj.echotime;
-            elseif length(varargin) == 2
-                obj.TE = varargin{2};
-                obj.t1 = 0;
-            elseif length(varargin) == 3
-                if isnumeric(varargin{3})
-                    obj.t1 = varargin{2};
-                    obj.TE = obj.echotime;
-                elseif varargin{3} == "Symmetric" || varargin{3} == "symmetric" 
-                    obj.TE = varargin{2};
-                    obj.t1 = (obj.TE - 2 * (Delta + delta) - obj.tpause)/2;
+                elseif nargin == 3
+                    obj.TE = varargin{1};
+                    obj.t1 = 0;
+                elseif nargin == 4
+                    if isnumeric(varargin{2})
+                        obj.t1 = varargin{1};
+                        obj.TE = obj.echotime;
+                    elseif varargin{2} == "Symmetric" || varargin{2} == "symmetric" 
+                        obj.TE = varargin{1};
+                        obj.t1 = (obj.TE - Delta - delta)/2;
+                    else
+                        error("Error: invalid input into Sequence")
+                    end
                 else
                     error("Error: invalid input into Sequence")
                 end
-            else
-                error("Error: invalid input into Sequence")
-            end
             
         end
         
@@ -162,15 +161,14 @@ classdef DoublePGSE < Sequence
             d = obj.delta;
             D = obj.Delta;
             p = obj.tpause;
-            t1 = obj.t1;
-            timelist = [t1, t1+d, t1+D, t1+D+d, t1+p+D+d, t1+p+D+2*d, t1+p+2*D+d, t1+p+2*(D+d)];
-            interval_str = ["[t1,t1+delta]", ...
-                "[t1+delta, t1+Delta]", ...
-                "[t1+Delta, t1+Delta+delta]", ...
-                "[t1+Delta+delta, t1+tpause+Delta+delta]", ...
-                "[t1+tpause+Delta+delta, t1+tpause+Delta+2*delta]", ...
-                "[t1+tpause+Delta+2*delta, t1+tpause+2*Delta+delta]", ...
-                "[t1+tpause+2*Delta+delta, t1+tpause+2*(Delta+delta)]"];
+            timelist = [0 d D D+d p+D+d p+D+2*d p+2*D+d p+2*(D+d)];
+            interval_str = ["[0, delta]", ...
+                "[delta, Delta]", ...
+                "[Delta, Delta+delta]", ...
+                "[Delta+delta, tpause+Delta+delta]", ...
+                "[tpause+Delta+delta, tpause+Delta+2*delta]", ...
+                "[tpause+Delta+2*delta, tpause+2*Delta+delta]", ...
+                "[tpause+2*Delta+delta, tpause+2*(Delta+delta)]"];
             
             timeprofile_str = repmat("f(t) = %d (constant)", 1, 7);
             timeprofile_str = arrayfun(@(s, i) sprintf(s, i), timeprofile_str, ...
@@ -191,17 +189,6 @@ classdef DoublePGSE < Sequence
                 interval_str(2) = [];
                 timeprofile_str(2) = [];
             end
-            if obj.TE > obj.t1 + 2*(obj.Delta+obj.delta) +obj.tpause
-                timelist = [timelist, obj.TE];
-                interval_str = [interval_str,"[t1+tpause+2*(Delta+delta),TE]"];
-                timeprofile_str = [timeprofile_str,"f(t) = 0 (constant)"];
-            end
-            if obj.t1 > 0
-                timelist = [0,timelist];
-                interval_str = ["[0,t1]",interval_str];
-                timeprofile_str = ["f(t) = 0 (constant)",timeprofile_str];
-            end
-
         end
         
         function s = string(obj, simplified)
@@ -210,8 +197,8 @@ classdef DoublePGSE < Sequence
                 s = sprintf("%s_d%g_D%g_tm%g", class(obj), ...
                     obj.delta, obj.Delta, obj.delta+obj.tpause);
             else
-                s = sprintf("%s(delta=%g, Delta=%g, tm=%g,TE=%g, t1=%g)", class(obj), ...
-                    obj.delta, obj.Delta, obj.delta+obj.tpause,obj.TE,obj.t1);
+                s = sprintf("%s(delta=%g, Delta=%g, tm=%g)", class(obj), ...
+                    obj.delta, obj.Delta, obj.delta+obj.tpause);
             end
         end
     end

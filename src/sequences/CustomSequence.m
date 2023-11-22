@@ -8,11 +8,11 @@ classdef CustomSequence < Sequence
     end
     
     methods
-        function obj = CustomSequence(delta, Delta, timeprofile)
+        function obj = CustomSequence(delta, Delta, timeprofile,TE)
             %SEQUENCE Construct an instance of this class
             %   Here it is assumed that the sequence is parametrized by the two
             %   parameters delta and Delta only.
-            obj@Sequence(delta, Delta);
+            obj@Sequence(delta, Delta,TE);
             obj.timeprofile = timeprofile;
         end
         
@@ -34,19 +34,24 @@ classdef CustomSequence < Sequence
             %   between these time steps and a list of strings representing the
             %   behavior of the sequence on each of these intervals.
             %   There is only one interval for the custom sequence.
-            timelist = [0 obj.echotime];
-            interval_str = "[0, Delta+delta]";
+            timelist = [0 obj.TE];
+            interval_str = "[0, TE]";
             timeprofile_str = "custom time profile";
         end
         
-        function s = string(obj)
+        function s = string(obj, simplified)
             %STRING Convert custom sequence to string.
             f = functions(obj.timeprofile).function;
             if ~startsWith(f, "@")
                 f = "@" + f;
             end
-            s = sprintf("%s(%g, %g, %s)", class(obj), ...
-                obj.delta, obj.Delta, f);
+            if nargin == 2 && simplified
+                s = sprintf("%s_%s_d%g_D%g", class(obj), f, ...
+                    obj.delta, obj.Delta);
+            else
+                s = sprintf("%s(delta=%g, Delta=%g, TE =%g, %s)", class(obj), ...
+                    obj.delta, obj.Delta,obj.TE, f);
+            end
         end
     end
 end

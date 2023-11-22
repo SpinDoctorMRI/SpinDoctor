@@ -5,6 +5,8 @@ classdef (Abstract) Sequence
     properties
         delta
         Delta
+        TE
+        t1
     end
     
     methods (Abstract)
@@ -23,16 +25,38 @@ classdef (Abstract) Sequence
     end
     
     methods
-        function obj = Sequence(delta, Delta)
+        function obj = Sequence(delta, Delta,varargin)
             %SEQUENCE Construct an instance of this class.
-            %   Here it is assumed that the sequence is parametrized by the two
-            %   parameters `delta` and `Delta` only. Subclasses may have more
-            %   parameters.
+            %   Here it is assumed that the sequence is parametrized by two
+            %   required parameters `delta` and `Delta`. Optional parameters include:
+            % (TE), (TE,"symmetric"), (t1,t2) where TE is the echotime, t1
+            % a pause before the first pulse, t2 a pause before the second
+            % pulse. Subclasses may have more parameters.
+            assert(delta > 0 && Delta > 0);
             if Delta<delta
                 error('Sequence: delta should be less than or equal to Delta.') 
             else
                 obj.delta = delta;
                 obj.Delta = Delta;
+                if isempty(varargin)
+                    obj.TE = obj.Delta + obj.delta;
+                    obj.t1 = 0;
+                elseif nargin == 3
+                    obj.TE = varargin{1};
+                    obj.t1 = 0;
+                elseif nargin == 4
+                    if isnumeric(varargin{2})
+                        obj.t1 = varargin{1};
+                        obj.TE = obj.t1 + delta +Delta + varargin{2};
+                    elseif varargin{2} == "Symmetric" || varargin{2} == "symmetric" 
+                        obj.TE = varargin{1};
+                        obj.t1 = (obj.TE - Delta - delta)/2;
+                    else
+                        error("Error: invalid input into Sequence")
+                    end
+                else
+                    error("Error: invalid input into Sequence")
+                end
             end
         end
         
@@ -46,7 +70,7 @@ classdef (Abstract) Sequence
             %INTEGRAL Compute the integral of the time profile from `0` to `t`.
             %   Unless overwritten, it computes a numerical approximation.
             F = arrayfun(@(s) integral(@obj.call, 0, s, "AbsTol", 1e-6, ...
-                "RelTol", 1e-3, "Waypoints", [obj.delta, obj.Delta]), t);
+                "RelTol", 1e-3, "Waypoints", [obj.delta+obj.t1, obj.Delta+obj.t1,obj.Delta+obj.t1+obj.delta]), t);
         end
         
         function int = integral_F2(obj)
@@ -68,22 +92,26 @@ classdef (Abstract) Sequence
                 ninterval = 500;
             end
             ntime = ninterval + 1;
-            time = linspace(0, seq.echotime, ntime);
-            dtime = seq.echotime / ntime;
+            time = linspace(0, obj.TE, ntime);
+            dtime = obj.TE / ntime;
             
             fprintf("Use numerical integration to compute the the quantity J(lambda).\n");
             jn = @(t) integral(@(s) exp(lambda * (s - t)) .* obj.call(s), 0, t, ...
-                    "Waypoints", [obj.delta, obj.Delta]);
+                    "Waypoints", [obj.delta+obj.t1, obj.Delta+obj.t1,obj.Delta+obj.t1+obj.delta]);
             jn = lambda * obj.integral(time) .* arrayfun(jn, time);
             jn = dtime * trapz(jn) / obj.integral_F2;
         end
         
-        function s = string(obj)
+        function s = string(obj, simplified)
             %STRING Convert sequence to string.
             %   If there are other parameters than `delta` and `Delta`, this
             %   method should be overwritten.
-            % s = sprintf("%s(delta = %g, Delta = %g)", class(obj), obj.delta, obj.Delta);
-            s = sprintf("%s(%g, %g)", class(obj), obj.delta, obj.Delta);
+            if nargin == 2 && simplified
+                s = sprintf("%s_d%g_D%g", class(obj), obj.delta, obj.Delta);
+            else
+                s = sprintf("%s(delta=%g, Delta=%g, TE=%g, t1=%g)", class(obj), ...
+                    obj.delta, obj.Delta,obj.TE,obj.t1);
+            end
         end
         
         function s = char(obj)

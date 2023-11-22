@@ -79,8 +79,22 @@ setup.pde.permeability_ecs = 0;                         % Permeability ECS bound
 setup.gradient.values = 0:500:10000;                    % g-, q-, or b-values [1 x namplitude]
 setup.gradient.values_type = "b";                       % Type of values: "g", "q", or "b" or "g"
 setup.gradient.sequences = {                            % Gradient sequences {1 x nsequence}
-    PGSE(5000, 10000)
-    PGSE(10000, 100000)
+    % PGSE(5000, 10000)
+    % PGSE(10000, 100000,120000)                          % PGSE with fixed echotime
+    % PGSE(10000, 100000,120000,"symmetric")              % PGSE with fixed echotime and initial pause to make signal symmetric                           
+    % PGSE(200, 1000,100,200)                             % PGSE with pauses of 100 at the start and 200 at the end
+    % CosOGSE(1000, 5000, 4)                              
+    % CosOGSE(1000, 5000, 4,7000 )                        % CosOGSE with period 4  and echotime 700
+    % CosOGSE(1000, 5000, 4,7000, "symmetric")            % CosOGSE with period 4  and echotime 700 and initial pause to make signal symmetric
+    % CosOGSE(1000, 5000, 4,100,200)                      % CosOGSE with period 4  and echotime 700 and initial pause 100 ad final pause 200
+    % SinOGSE(1000, 5000, 4)              
+    % SinOGSE(1000, 5000, 4,7000 ),                       % SinOGSE with period 4  and echotime 700
+    % SinOGSE(1000, 5000, 4,7000, "symmetric")            % SinOGSE with period 4  and echotime 700 and initial pause to make signal symmetric
+    % SinOGSE(1000, 5000, 4,100,200)                      % SinOGSE with period 4  and echotime 700 and initial pause 100 ad final pause 200
+    DoublePGSE(5000, 10000)
+    DoublePGSE(5000, 10000,1000)                        % DoublePGSE with tpause = 1000
+    DoublePGSE(100, 1000,100,3000)                      % DoublePGSE with tpause = 100 and fixed echotime = 30000
+    DoublePGSE(200, 1000,100,200,400)                   % DoublePGSE with tpause = 100 and initial pause 200 and end pause 400
 }';
 setup.gradient.directions = [1.0; 0.0; 0.0];            % Gradient directions [3 x ndirection]
 
@@ -89,9 +103,9 @@ setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
 
-%% BTPDE midpoint experiment parameters (comment block to skip experiment)
-% setup.btpde_midpoint.implicitness = 0.5;              % Theta-parameter: 0.5 for Crank-Nicolson
-% setup.btpde_midpoint.timestep = 5;                    % Time step dt
+% BTPDE midpoint experiment parameters (comment block to skip experiment)
+setup.btpde_midpoint.implicitness = 0.5;              % Theta-parameter: 0.5 for Crank-Nicolson
+setup.btpde_midpoint.timestep = 5;                    % Time step dt
 
 %% HADC experiment parameters (comment block to skip experiment)
 setup.hadc.ode_solver = @ode15s;                        % ODE solver for HADC
@@ -107,15 +121,15 @@ setup.mf.ninterval = 500;                               % Number of intervals to
 setup.analytical.length_scale = 0.3;                    % Minimum length scale of eigenfunctions
 setup.analytical.eigstep = 1e-8;                        % Minimum distance between eigenvalues
 
-%% Karger model parameters (comment block to skip experiment)
-% setup.karger.ndirection = 50;                         % Number of directions to compute diffusion tensor
-% setup.karger.ode_solver = @ode45;                     % ODE solver for BTPDE
-% setup.karger.reltol = 1e-4;                           % Relative tolerance for ODE solver
-% setup.karger.abstol = 1e-6;                           % Absolute tolerance for ODE solver
+% Karger model parameters (comment block to skip experiment)
+setup.karger.ndirection = 50;                         % Number of directions to compute diffusion tensor
+setup.karger.ode_solver = @ode45;                     % ODE solver for BTPDE
+setup.karger.reltol = 1e-4;                           % Relative tolerance for ODE solver
+setup.karger.abstol = 1e-6;                           % Absolute tolerance for ODE solver
 
 %% Custom time profile for magnetic field gradient pulse
 % The function should be defined on the interval [0, Delta+delta].
 % Here we manually define the PGSE sequence, as an example.
-function f = timeprofile(t, delta, Delta)
-f = (t < delta) - (Delta <= t);
-end
+% function f = timeprofile(t, delta, Delta)
+% f = (t < delta) - (Delta <= t);
+% end
