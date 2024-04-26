@@ -601,23 +601,30 @@ if do_save && any(no_result_flag_const, 'all')
         mfile = matfile(filename, "Writable", true);
         for iamp = 1:namplitude
             for idir = 1:ndirection
-                if ~isempty(temp_store{iamp, iseq, idir})
+                if no_result_flag_const(iamp, iseq, idir)
                     % Extract iteration inputs
-                    b = bvalues(iamp, iseq);
-                    ug = directions(:, idir);
-    
+                    data = struct;
+                    data.q = qvalues(iamp,iseq);
+                    data.b = bvalues(iamp, iseq);
+                    data.ug = directions(:, idir);
+                    data.g = gvalues(iamp,iseq);
+                    data.signal = const.signal(:,iamp, iseq, idir);
+                    data.itertimes = const.itertimes(:,iamp,iseq,idir);
+                    if save_magnetization
+                        data.magnetization = const.magnetization(:,iamp,iseq,idir);
+                    end
+
                     % Save results to MAT-file
-                    gradient_field = gradient_fieldstring(ug, b);
-                    mfile.(gradient_field) = temp_store{iamp, iseq, idir};
-    
+                    gradient_field = gradient_fieldstring(data.ug, data.b);
+                    mfile.(gradient_field) = data;
+
                     % dMRI signal is centrosymmetric
-                    ug = -ug;
+                    data.ug = -data.ug;
                     % convert negative zeros to positive zeros
-                    ug(ug == 0) = +0;
-                    gradient_field = gradient_fieldstring(ug, b);
+                    data.ug(data.ug == 0) = +0;
+                    gradient_field = gradient_fieldstring(data.ug, data.b);
                     if ~hasfield(mfile, gradient_field)
-                        temp_store{iamp, iseq, idir}.ug = ug;
-                        mfile.(gradient_field) = temp_store{iamp, iseq, idir};
+                        mfile.(gradient_field) = data;
                     end
                 end
             end

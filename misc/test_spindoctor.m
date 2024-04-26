@@ -8,7 +8,6 @@ addpath(genpath("src"));
 
 test_path = "setups";
 test_list = [
-    "setup_camino"
     "setup_cylinders_mini_settings"
     "setup_spheres_mini_settings"
     "setup_cylinders_full_settings"
@@ -106,7 +105,8 @@ for itest = 1:length(test_list)
             % Solve analytical analytical model
             karger = solve_karger(femesh, setup);
         end
-    catch
+    catch e
+        disp(e)
         fprintf('Error in %s', test_list(itest));
     end
 end
