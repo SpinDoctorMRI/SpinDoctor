@@ -56,6 +56,13 @@ function results = solve_btpde_midpoint(femesh, setup, savepath, save_magnetizat
 %       totaltime: [1 x 1]
 %           Total computational time, including matrix assembly
 
+% TEMPORARY. Camino file sequences not yet implemented for this solver.
+const_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),setup.gradient.sequences,'UniformOutput',true);
+if ~all(const_ind,'all')
+    warning("Currently %s does not support camino file sequences. \n Solving only for non-camino sequences",mfilename);
+    setup.gradient.sequences = setup.gradient.sequences(const_ind);
+    setup.nsequence = sum(const_ind);
+end
 
 % Measure function evaluation time
 starttime = tic;

@@ -1,4 +1,4 @@
-function [f] = expmv(A, b, s, m, mu, tol)
+function [f] = expmv_old(A, b, s, m, mu, tol)
 %EXPMV   Matrix exponential times vector or matrix.
 % MODIFIED BASED ON Higham's ORIGNAL VERSION.
 %   [F,S,M,MV,MVD] = EXPMV(t,A,B,[],PREC) computes EXPM(t*A)*B without

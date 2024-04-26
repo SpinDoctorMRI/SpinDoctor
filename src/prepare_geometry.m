@@ -60,6 +60,12 @@ switch cell_shape
             warning("Deformation is not available for neurons. Set deformation to [0, 0].")
         end
         geometry.deformation=[0, 0];
+        
+        % Check ecs for separate neuron
+        if isfield(geometry,'separate_soma') && geometry.separate_soma
+            assert(ismember(geometry.ecs_shape,["no_ecs"]), ...
+                "ECS layer not supported for neurons separated at soma")
+        end
     otherwise
         error("Do not support cell shape: %s.", cell_shape);
 end

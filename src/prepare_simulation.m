@@ -26,10 +26,12 @@ setup = prepare_experiments(setup);
 % Update setup info
 setup.ncompartment = length(setup.pde.compartments);
 setup.nboundary = length(setup.pde.boundaries);
-setup.namplitude = length(setup.gradient.values);
-setup.nsequence = length(setup.gradient.sequences);
-setup.ndirection = size(setup.gradient.directions, 2);
 
+setup.nsequence = length(setup.gradient.sequences);
+if isfield(setup.gradient,'directions') && isfield(setup.gradient,'values')
+    setup.ndirection = size(setup.gradient.directions, 2);
+    setup.namplitude = length(setup.gradient.values);
+end
 % Create or load finite element mesh
 [femesh, surfaces, cells] = create_geometry(setup);
 

@@ -14,39 +14,43 @@ setup.gradient.sequences = setup.gradient.sequences(:)';
 nsequence = length(setup.gradient.sequences);
 for iseq = 1:nsequence
     seq = setup.gradient.sequences{iseq};
-    assert(isa(seq, "Sequence"), ...
+    assert(isa(seq, "AbsSequence"), ...
         "Gradient sequence must be an instance of Sequence class.")
 end
+const_seq_ind = cellfun(@(s) ~isa(s,'SequenceCamino'),setup.gradient.sequences,'UniformOutput',true);
+nsequence = sum(const_seq_ind);
 
 % Assign b-values, q-values and g-values
-namplitude = length(setup.gradient.values);
-setup.gradient.bvalues = zeros(namplitude, nsequence);
-setup.gradient.qvalues = zeros(namplitude, nsequence);
-setup.gradient.gvalues = zeros(namplitude, nsequence);
-for iseq = 1:nsequence
-    bnq = setup.gradient.sequences{iseq}.bvalue_no_q;
-    switch setup.gradient.values_type
-        case "g"
-            % commonly used magnetic field gradient unit is mT/m
-            setup.gradient.qvalues(:, iseq) = setup.gradient.values * setup.gamma / 1e6;
-            setup.gradient.bvalues(:, iseq) = bnq * setup.gradient.qvalues(:, iseq).^2;
-        case "q"
-            % q = gamma*g, different from the commonly used definition (q=gamma*g*delta)
-            setup.gradient.qvalues(:, iseq) = setup.gradient.values;
-            setup.gradient.bvalues(:, iseq) = bnq * setup.gradient.qvalues(:, iseq).^2;
-        case "b"
-            setup.gradient.bvalues(:, iseq) = setup.gradient.values;
-            setup.gradient.qvalues(:, iseq) = sqrt(setup.gradient.bvalues(:, iseq) / bnq);
-        otherwise
-            error("The values must be of type ""g"", ""q"" or ""b"".");
+if nsequence > 0 
+    const_seq= setup.gradient.sequences(const_seq_ind);
+    namplitude = length(setup.gradient.values);
+    setup.gradient.bvalues = zeros(namplitude, nsequence);
+    setup.gradient.qvalues = zeros(namplitude, nsequence);
+    setup.gradient.gvalues = zeros(namplitude, nsequence);
+    for iseq = 1:nsequence
+        bnq = const_seq{iseq}.bvalue_no_q;
+        switch setup.gradient.values_type
+            case "g"
+                % commonly used magnetic field gradient unit is mT/m
+                setup.gradient.qvalues(:, iseq) = setup.gradient.values * setup.gamma / 1e6;
+                setup.gradient.bvalues(:, iseq) = bnq * setup.gradient.qvalues(:, iseq).^2;
+            case "q"
+                % q = gamma*g, different from the commonly used definition (q=gamma*g*delta)
+                setup.gradient.qvalues(:, iseq) = setup.gradient.values;
+                setup.gradient.bvalues(:, iseq) = bnq * setup.gradient.qvalues(:, iseq).^2;
+            case "b"
+                setup.gradient.bvalues(:, iseq) = setup.gradient.values;
+                setup.gradient.qvalues(:, iseq) = sqrt(setup.gradient.bvalues(:, iseq) / bnq);
+            otherwise
+                error("The values must be of type ""g"", ""q"" or ""b"".");
+        end
     end
+    setup.gradient.gvalues = setup.gradient.qvalues * 1e6 / setup.gamma;
+    
+    % Normalize gradient directions
+    setup.gradient.directions ...
+        = setup.gradient.directions ./ vecnorm(setup.gradient.directions);
 end
-setup.gradient.gvalues = setup.gradient.qvalues * 1e6 / setup.gamma;
-
-% Normalize gradient directions
-setup.gradient.directions ...
-    = setup.gradient.directions ./ vecnorm(setup.gradient.directions);
-
 % Check BTPDE experiment
 if isfield(setup, "btpde")
     setup.btpde = check_btpde(setup.btpde);

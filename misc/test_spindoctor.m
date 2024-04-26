@@ -8,6 +8,7 @@ addpath(genpath("src"));
 
 test_path = "setups";
 test_list = [
+    "setup_camino"
     "setup_cylinders_mini_settings"
     "setup_spheres_mini_settings"
     "setup_cylinders_full_settings"
@@ -24,6 +25,7 @@ test_list = [
     "setup_30axons"
     "setup_200axons"
     "setup_neuron"
+    
 ];
 % Choose whether to save magnetization field
 magnetization_flag = true;

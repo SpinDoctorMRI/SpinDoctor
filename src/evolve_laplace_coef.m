@@ -183,7 +183,7 @@ function nu = riemann_approximation(nu, get_K, time, seq)
         ft = (seq.call(time(i + 1)) + seq.call(time(i))) / 2;
 
         % Laplace coefficients of magnetization at end of interval
-        % nu = expm(-dt * get_K(ft)) * nu;
-        nu = expmv(-dt, get_K(ft), nu);
+        nu = expm(-dt * get_K(ft)) * nu;
+        % nu = expmv(-dt, get_K(ft), nu);
     end
 end
