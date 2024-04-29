@@ -50,6 +50,11 @@ if nsequence > 0
     % Normalize gradient directions
     setup.gradient.directions ...
         = setup.gradient.directions ./ vecnorm(setup.gradient.directions);
+else
+    setup.gradient.qvalues =[]
+    setup.gradient.bvalues =[]
+    setup.gradient.gvalues =[]
+    setup.gradient.directions =[];
 end
 % Check BTPDE experiment
 if isfield(setup, "btpde")

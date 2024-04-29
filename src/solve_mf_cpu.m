@@ -354,7 +354,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
             end
             fprintf("Computing or loading MF magnetization for camino file sequences for compartment %d " ...
                 + "using %d eigenvalues.\n", ilapeig, neig);
-            if any(no_result_flag_const, 'all')
+            if any(no_result_flag_camino, 'all')
                 % save final laplace coefficient in nu_list
                 nu_list = zeros(neig, nsequence_camino, func2str(dtype));
                 for iseq = 1:nsequence_camino
@@ -539,7 +539,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
         end
     
         fprintf("Computing or loading MF magnetization for camino file sequences using %d eigenvalues.\n", neig);
-        if any(no_result_flag_const, 'all')
+        if any(no_result_flag_camino, 'all')
             % save final laplace coefficient in nu_list
             nu_list = zeros(neig, nsequence, func2str(dtype));
             for iseq = 1:nsequence_camino

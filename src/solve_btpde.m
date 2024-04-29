@@ -379,6 +379,7 @@ if any(isinf(camino.signal),'all')
     sequences = sequences_camino;
     magnetization = camino.magnetization;
     itertimes = camino.itertimes;
+    disp(nsequence_camino)
     parfor iseq = 1:nsequence_camino
         % skip, if signal is already there
         if all(~isinf(signal(:, iseq)), 'all')
