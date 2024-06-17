@@ -103,11 +103,11 @@ function [position_data,radius_data, connectivity_data,type_data,preamble]=extra
     FID = fopen(file,'r');
     tline = fgetl(FID);
     preamble = [];
-    while tline(1) == '#' || isempty(str2num(tline))
+    while isempty(tline) || tline(1) == '#' || isempty(str2num(tline))
         preamble = [preamble; string(tline)];
         tline = fgetl(FID);
     end
-    data = fscanf(FID,'%f',[7,Inf])';
+    data = [str2num(tline);fscanf(FID,'%f',[7,Inf])'];
     position_data = data(:,3:5);
     radius_data = data(:,6);
     connectivity_data = [data(:,1),data(:,7)];

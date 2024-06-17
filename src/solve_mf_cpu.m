@@ -129,8 +129,8 @@ sequences_camino=sequences(~const_sequences_ind);
 camino.itertimes = zeros(nsequence_camino, 1);
 % Load if results are already available
 if rerun && do_save
-    fprintf("Load btpde results from %s\n", savepath);
-    
+    fprintf("Load mf results from %s\n", savepath);
+    totaltime_addition = 0;
     % Checking for const sequences
     for iseq = 1:nsequence_const
         % Extract iteration inputs
@@ -152,7 +152,7 @@ if rerun && do_save
             % Check if results are already available
             if hasfield(mfile, gradient_field)
                 % Load results
-                fprintf("Load btpde for %s, %d/%d.\n", seq.string, iall, namplitude*ndirection);
+                fprintf("Load mf for %s, %d/%d.\n", seq.string, iall, namplitude*ndirection);
                 time_temp = totaltime_addition;
                 try
                     savedata = mfile.(gradient_field);
@@ -171,7 +171,7 @@ if rerun && do_save
                             const.magnetization{icmpt, iamp, iseq, idir} = [];
                         end
                     end
-                    warning("btpde: the saved data of experiment %s %s doesn't exist or is broken."...
+                    warning("mf: the saved data of experiment %s %s doesn't exist or is broken."...
                      + " Rerun simulation.", ...
                         seq.string, gradient_field);
                 end
@@ -185,26 +185,27 @@ if rerun && do_save
         mfile = matfile(filename, "Writable", false);
         if hasfield(mfile,seq.string(true))
             % Load results
-            fprintf("Load btpde for %s \n", seq.string);
+            fprintf("Load mf for %s \n", seq.string);
             time_temp = totaltime_addition;
             try
                 savedata = mfile.(seq.string);
                 camino.signal(:,iseq) = savedata.signal;
                 camino.itertimes(iseq) = savedata.itertimes;
                 totaltime_addition = totaltime_addition + savedata.itertimes;
-                    if save_magnetization
-                        camino.magnetization(:, iseq) = savedata.magnetization;
-                    end
-            catch
+                if save_magnetization
+                    camino.magnetization(:, iseq) = savedata.magnetization;
+                end
+            catch e
+                    disp(e)
                     camino.signal(:, iseq) = inf;
-                    const.itertimes( iseq) = 0;
+                    camino.itertimes( iseq) = 0;
                     totaltime_addition = time_temp;
                     if save_magnetization
                         for icmpt = 1:ncompartment
                             camnino.magnetization{icmpt, iseq} = [];
                         end
                     end
-                    warning("btpde: the saved data of experiment %s doesn't exist or is broken."...
+                    warning("mf: the saved data of experiment %s doesn't exist or is broken."...
                      + " Rerun simulation.", ...
                         seq.string);
 
@@ -386,7 +387,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                     nu_list(:, iseq) = nu;
 
                     % Save computational time
-                    camino.itertimes(ilapeig, iseq) = toc(itertime);
+                    camino.itertimes(iseq) = toc(itertime);
                 end
 
                 % Compute final magnetization
@@ -568,7 +569,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                 nu_list(:, iseq) = nu;
 
                 % Save computational time
-                camino.itertimes(:, iseq) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
+                camino.itertimes(iseq) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
             end
                 % end
             % Compute final magnetization
@@ -609,7 +610,7 @@ if do_save && any(no_result_flag_const, 'all')
                     data.ug = directions(:, idir);
                     data.g = gvalues(iamp,iseq);
                     data.signal = const.signal(:,iamp, iseq, idir);
-                    data.itertimes = const.itertimes(:,iamp,iseq,idir);
+                    data.itertimes = const.itertimes(iamp,iseq,idir);
                     if save_magnetization
                         data.magnetization = const.magnetization(:,iamp,iseq,idir);
                     end
@@ -645,7 +646,7 @@ if do_save && any(no_result_flag_camino, 'all')
             data.seq= seq;
             data.signal = camino.signal(:,  iseq);
             data.sequence = seq;
-            data.itertimes = camino.itertimes(:,  iseq);
+            data.itertimes = camino.itertimes(iseq);
             if save_magnetization
                 data.magnetization = camino.magnetization(:, iseq);
             end
@@ -662,8 +663,11 @@ const.signal_allcmpts(:) = sum(const.signal, 1);
 % Create output structure
 results.totaltime = toc(starttime);
 if nsequence_camino == 0
+    results.signal_weighted = const.signal./femesh.volumes;
+    results.signal_allcmpts_weighted = const.signal_allcmpts;
     results.signal = const.signal;
     results.signal_allcmpts = const.signal_allcmpts;
+
     results.itertimes = const.itertimes;
     if save_magnetization
         results.magnetization = const.magnetization;
@@ -672,6 +676,8 @@ if nsequence_camino == 0
 elseif nsequence_const == 0
     results.signal = camino.signal;
     results.signal_allcmpts = camino.signal_allcmpts;
+    results.signal_weighted = camino.signal./femesh.volumes;
+    results.signal_allcmpts_weighted = camino.signal_allcmpts/femesh.total_volume;
     results.itertimes = camino.itertimes;
     if save_magnetization
         results.magnetization = camino.magnetization;
@@ -681,7 +687,13 @@ elseif nsequence_const == 0
 else
     results.camino.signal = camino.signal;
     results.camino.signal_allcmpts = camino.signal_allcmpts;
+    
+    results.camino.signal_weighted = camino.signal./femesh.volumes;
+    results.camino.signal_allcmpts_weighted = camino.signal_allcmpts/femesh.total_volume;
     results.camino.itertimes = camino.itertimes;
+
+    results.const.signal = const.signal;
+    results.const.signal_allcmpts = const.signal_allcmpts;
     results.const.signal = const.signal;
     results.const.signal_allcmpts = const.signal_allcmpts;
     results.const.itertimes = const.itertimes;
@@ -693,6 +705,6 @@ else
         results.const.magnetization_avg = average_magnetization(const.magnetization);
     end
 
-end
+end 
 % Display function evaluation time
 toc(starttime);

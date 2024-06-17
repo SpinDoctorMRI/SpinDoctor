@@ -1,8 +1,7 @@
-%DRIVER_SPINDOCTOR Solve BTPDE or MF for a sequence inputted from a camino file.
-%   Compare different ADC. Plot results in many directions.
+%DRIVER_CAMINO Solve BTPDE or MF for a sequence inputted from a camino file.
 %
-%   It is highly recommended to read this driver to understand the workflow
-%   of SpinDoctor.
+%   Provides a template to demonstrate how camino scheme sequences can be
+%   integrated into SpinDoctor
 %
 %   The user is advised to read the latest version
 %   from \url{https://github.com/jingrebeccali/SpinDoctor}
@@ -16,6 +15,10 @@ addpath(genpath("src"));
 % Get setup
 addpath(genpath("setups"));
 setup_camino;
+
+[~,cellname,~] = fileparts(setup.name);
+save_path = sprintf("saved_simul/%s",cellname);
+fprintf('Saving to %s\n',save_path);
 
 if ~isdir(save_path)
     mkdir(save_path)
@@ -44,7 +47,10 @@ if isfield(setup,"mf")
 lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
     
 % Compute MF magnetization
-mf = solve_mf_cpu(femesh, setup, lap_eig);
+mf = solve_mf(femesh, setup, lap_eig,save_path,false);
 end
 toc
+
+disp("Camino sequence results are stored in btpde.camino and mf.camino");
+disp("PGSE sequence results are stored in btpde.const and mf.const (const for constant direction vector).");
 

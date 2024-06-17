@@ -146,6 +146,10 @@ end
 
 % save laplace eigendecomposition
 if do_save && no_result
+    if ~isdir(savepath)
+        warning('%s does not exist. Creating it to store eigenfunctions\n',savepath);
+        mkdir(savepath)
+    end
     % file for saving
     filename = sprintf( ...
         "%s/lap_eig_lengthscale%.4f_neigmax%g.mat", ...
