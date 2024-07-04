@@ -25,7 +25,7 @@ if ~isdir(save_path)
 end
 
 %% Prepare simulation
-[setup, femesh, ~, ~]  = prepare_simulation(setup);
+[setup, femesh, surfaces, cells]  = prepare_simulation(setup);
 
 %% Perform small experiments
 % Short time approximation (STA) of the ADC
@@ -54,3 +54,49 @@ toc
 disp("Camino sequence results are stored in btpde.camino and mf.camino");
 disp("PGSE sequence results are stored in btpde.const and mf.const (const for constant direction vector).");
 
+%% Plots
+do_plots = true;
+
+if ~do_plots
+    return
+end
+
+% Plot surface triangulation
+plot_surface_triangulation(surfaces);
+
+% Plot the finite element mesh
+plot_femesh(femesh, setup.pde.compartments);
+% plot_femesh_everywhere(femesh, "");
+
+% Plot information about the geometry
+plot_geometry_info(setup, femesh);
+
+
+% Plot BTPDE magnetization in some directions
+if isfield(setup, "btpde")
+
+    for iseq = 1:setup.nsequence
+         field = btpde.magnetization(iseq);
+         title_str = sprintf(...
+                    "BTPDE magnetization. Sequence %d of %d", ...
+                    iseq, setup.nsequence);
+         plot_field_everywhere(femesh, field, title_str);
+    end
+    clear field
+end
+
+if isfield(setup, "mf")
+    % Relative error between BTPDE and MF signal
+    signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
+        ./ max(abs(btpde.signal_allcmpts), [], 3);
+
+    % Difference between BTPDE and MF signal, normalized by initial signal
+    signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ setup.pde.initial_signal;
+    
+    % Display difference
+    disp("Error (normalized by initial signal)");
+    disp(signal_allcmpts_abserr_vol);
+    disp("Relative error:");
+    disp(signal_allcmpts_relerr);
+
+end

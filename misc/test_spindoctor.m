@@ -23,11 +23,11 @@ test_list = [
     "setup_30axons_flat"
     "setup_30axons"
     "setup_200axons"
-    "setup_neuron"
-    
+    "setup_neuron" 
 ];
 % Choose whether to save magnetization field
 magnetization_flag = true;
+Errors = 0; failed_tests = [];
 for itest = 1:length(test_list)
     try
         run(fullfile(test_path, test_list(itest) + ".m"));
@@ -40,11 +40,13 @@ for itest = 1:length(test_list)
             disp("Computing or loading the BTPDE signals");
             savepath = create_savepath(setup, "btpde");
             btpde = solve_btpde(femesh, setup, savepath, magnetization_flag);
-            btpde2 = load_btpde(setup, savepath, magnetization_flag);
+            btpde2 = load_btpde_new(setup, savepath, magnetization_flag);
             
             % test
             btpde = rmfield(btpde, 'totaltime');
             btpde2 = rmfield(btpde2, 'totaltime');
+            btpde = rmfield(btpde,'itertimes');
+            btpde2 = rmfield(btpde2,'itertimes');
             assert(all(DataHash(btpde) ==  DataHash(btpde2)));
         end
 
@@ -60,6 +62,7 @@ for itest = 1:length(test_list)
             % test
             btpde_mp = rmfield(btpde_mp, 'totaltime');
             btpde_mp2 = rmfield(btpde_mp2, 'totaltime');
+            btpde_mp = rmfield(btpde_mp,'itertimes');btpde_mp2 = rmfield(btpde_mp2,'itertimes');
             assert(all(DataHash(btpde_mp) ==  DataHash(btpde_mp2)));
         end
 
@@ -73,6 +76,8 @@ for itest = 1:length(test_list)
             % test
             hadc = rmfield(hadc, 'totaltime');
             hadc2 = rmfield(hadc2, 'totaltime');
+            hadc = rmfield(hadc,'itertimes');
+            hadc2 = rmfield(hadc2,'itertimes');
             assert(all(DataHash(hadc) ==  DataHash(hadc2)));
         end
 
@@ -91,6 +96,8 @@ for itest = 1:length(test_list)
             % test
             mf = rmfield(mf, 'totaltime');
             mf2 = rmfield(mf2, 'totaltime');
+            mf = rmfield(mf,'itertimes');
+            mf2 = rmfield(mf2,'itertimes');
             assert(all(DataHash(mf) ==  DataHash(mf2)));
 
             mf_hadc = solve_mf_hadc(femesh, setup, lap_eig);
@@ -105,8 +112,21 @@ for itest = 1:length(test_list)
             % Solve analytical analytical model
             karger = solve_karger(femesh, setup);
         end
+        fid= fopen('test_results.txt','a');
+        fprintf(fid,'No errors in %s:\n', test_list(itest));
+        fclose(fid);
     catch e
+        Errors = Errors + 1;
+        failed_tests =[failed_tests;itest];
         disp(e)
         fprintf('Error in %s', test_list(itest));
+        fid= fopen('test_results.txt','a');
+        fprintf(fid,'Error in %s:\n', test_list(itest));
+        fclose(fid);
     end
+end
+fprintf('Number of Erros = %d\n',Errors);
+if Errors > 0
+    disp('Failed at :');
+    disp(failed_tests);
 end

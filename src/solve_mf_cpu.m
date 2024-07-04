@@ -65,8 +65,11 @@ end
 if nargin < nargin(@solve_mf_cpu)
     save_magnetization = true;
 end
-rerun = setup.mf.rerun;
-
+if isfield(setup.mf,'rerun')
+    rerun = setup.mf.rerun;
+else
+    rerun = false;
+end
 % Extract domain parameters
 initial_density = setup.pde.initial_density;
 relaxation = setup.pde.relaxation;
@@ -128,9 +131,9 @@ camino.signal_allcmpts = zeros(nsequence_camino,1);
 sequences_camino=sequences(~const_sequences_ind);
 camino.itertimes = zeros(nsequence_camino, 1);
 % Load if results are already available
-if rerun && do_save
+totaltime_addition = 0;
+if ~rerun && do_save
     fprintf("Load mf results from %s\n", savepath);
-    totaltime_addition = 0;
     % Checking for const sequences
     for iseq = 1:nsequence_const
         % Extract iteration inputs
@@ -202,7 +205,7 @@ if rerun && do_save
                     totaltime_addition = time_temp;
                     if save_magnetization
                         for icmpt = 1:ncompartment
-                            camnino.magnetization{icmpt, iseq} = [];
+                            camino.magnetization{icmpt, iseq} = [];
                         end
                     end
                     warning("mf: the saved data of experiment %s doesn't exist or is broken."...
@@ -284,7 +287,6 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
             else
                 LT2 = dtype(diag(values)+T2);
             end
-
             % save final laplace coefficient in nu_list
             nu_list_const = zeros(neig, namplitude, nsequence_const, ndirection, func2str(dtype));
 
@@ -502,7 +504,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                         + "  Amplitude %d of %d: g = %g, q = %g, b = %g\n", ...
                         neig, ...
                         idir, ndirection, ug, ...
-                        iseq, nsequence_camino, seq, ...
+                        iseq, nsequence_const, seq, ...
                         iamp, namplitude, g, q, b);
     
                         % Compute final laplace coefficient
@@ -512,7 +514,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                         nu_list_const(:, iamp, iseq, idir) = nu;
     
                         % Save computational time
-                        const.itertimes(:, iamp, iseq, idir) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
+                        const.itertimes(:, iamp, iseq, idir) = toc(itertime);% * npoint_cmpts / sum(npoint_cmpts);
                     end
                 end
             end % iterations
@@ -661,50 +663,8 @@ end
 camino.signal_allcmpts(:) = sum(camino.signal, 1);
 const.signal_allcmpts(:) = sum(const.signal, 1);
 % Create output structure
-results.totaltime = toc(starttime);
-if nsequence_camino == 0
-    results.signal_weighted = const.signal./femesh.volumes;
-    results.signal_allcmpts_weighted = const.signal_allcmpts;
-    results.signal = const.signal;
-    results.signal_allcmpts = const.signal_allcmpts;
+totaltime = totaltime_addition + toc(starttime);
+results = merge_results(camino,const,nsequence_camino,nsequence_const,totaltime,save_magnetization);
 
-    results.itertimes = const.itertimes;
-    if save_magnetization
-        results.magnetization = const.magnetization;
-        results.magnetization_avg = average_magnetization(const.magnetization);
-    end
-elseif nsequence_const == 0
-    results.signal = camino.signal;
-    results.signal_allcmpts = camino.signal_allcmpts;
-    results.signal_weighted = camino.signal./femesh.volumes;
-    results.signal_allcmpts_weighted = camino.signal_allcmpts/femesh.total_volume;
-    results.itertimes = camino.itertimes;
-    if save_magnetization
-        results.magnetization = camino.magnetization;
-        results.magnetization_avg = average_magnetization(camino.magnetization);
-    end
-
-else
-    results.camino.signal = camino.signal;
-    results.camino.signal_allcmpts = camino.signal_allcmpts;
-    
-    results.camino.signal_weighted = camino.signal./femesh.volumes;
-    results.camino.signal_allcmpts_weighted = camino.signal_allcmpts/femesh.total_volume;
-    results.camino.itertimes = camino.itertimes;
-
-    results.const.signal = const.signal;
-    results.const.signal_allcmpts = const.signal_allcmpts;
-    results.const.signal = const.signal;
-    results.const.signal_allcmpts = const.signal_allcmpts;
-    results.const.itertimes = const.itertimes;
-
-    if save_magnetization
-        results.camino.magnetization = camino.magnetization;
-        results.camino.magnetization_avg = average_magnetization(camino.magnetization);
-        results.const.magnetization = const.magnetization;
-        results.const.magnetization_avg = average_magnetization(const.magnetization);
-    end
-
-end 
 % Display function evaluation time
 toc(starttime);

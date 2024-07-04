@@ -58,7 +58,7 @@ setup.geometry.in_ratio = 0.7;                          % Ratio Rin/R, within ra
 setup.geometry.ecs_shape = "no_ecs";                    % Shape of ECS: "no_ecs", "box", "convex_hull", or "tight_wrap".
 setup.geometry.ecs_ratio = 0.2;                         % ECS gap; percentage in side length
 % setup.geometry.refinement = 10;                       % Tetgen refinement parameter (comment for automatic)
-setup.geometry.tetgen_options = "-pqAVCn";              % Tetgen options (priority is inferior to refinement)
+setup.geometry.tetgen_options = "-pqa1.0AVCn";              % Tetgen options (priority is inferior to refinement)
 
 %% PDE parameters
 setup.pde.diffusivity_in = 0.002;                       % Diffusion coefficient IN (scalar or 3x3-tensor)
@@ -90,20 +90,20 @@ setup.gradient.directions=unitcircle(12);
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
-setup.btpde.rerun = true;
+setup.btpde.rerun = false;
 %% BTPDE midpoint experiment parameters (comment block to skip experiment)
 % setup.btpde_midpoint.implicitness = 0.5;                % Theta-parameter: 0.5 for Crank-Nicolson
 % setup.btpde_midpoint.timestep = 5;                      % Time step dt
 
 %% HADC experiment parameters (comment block to skip experiment)
-% setup.hadc.ode_solver = @ode15s;                        % ODE solver for HADC
-% setup.hadc.reltol = 1e-4;                               % Relative tolerance for ODE solver
-% setup.hadc.abstol = 1e-6;                               % Absolute tolerance for ODE solver
+setup.hadc.ode_solver = @ode15s;                        % ODE solver for HADC
+setup.hadc.reltol = 1e-4;                               % Relative tolerance for ODE solver
+setup.hadc.abstol = 1e-6;                               % Absolute tolerance for ODE solver
 
-% %% MF experiment parameters (comment block to skip experiment)
-% setup.mf.length_scale = 3;                              % Minimum length scale of eigenfunctions
-% setup.mf.neig_max = 250;                                % Requested number of eigenvalues
-% setup.mf.ninterval = 100;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
+%% MF experiment parameters (comment block to skip experiment)
+setup.mf.length_scale = 3;                              % Minimum length scale of eigenfunctions
+setup.mf.neig_max = 250;                                % Requested number of eigenvalues
+setup.mf.ninterval = 100;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 
 %% Analytical experiment parameters (comment block to skip experiment)
 % setup.analytical.length_scale = 1;                    % Minimum length scale of eigenfunctions

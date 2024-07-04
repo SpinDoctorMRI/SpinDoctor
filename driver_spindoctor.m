@@ -20,12 +20,12 @@ addpath(genpath("src"));
 addpath(genpath("setups"));
 
 % setup_1axon_analytical;
-% setup_1sphere_analytical;
+setup_1sphere_analytical;
 % setup_15spheres;
 % setup_2axons_deform;
 % setup_5axons_myelin_relax;
 % setup_neuron;
-setup_4axons_flat;
+% setup_4axons_flat;
 % setup_30axons_flat;
 % setup_30axons;
 % setup_200axons;

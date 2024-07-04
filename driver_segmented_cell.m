@@ -91,9 +91,12 @@ if isfield(setup,'mf')
     disp('MF results stored in mf_cell, mf_soma, mf_dendrites')
 end
 %% Post-process
-
+addpath(genpath('drivers_postprocess'))
 % Plot information about the geometry
 plot_geometry_info(setup, femesh);
+
+plot_dendrites_soma(femesh_soma,femesh_dendrites);
+
 
 if isfield(setup, "btpde")
     % Fit ADC from signal
@@ -103,6 +106,13 @@ if isfield(setup, "btpde")
     for i =1:ndendrites
         btpde_dendrites_fit{i} = fit_signal(btpde_dendrites{i}.signal, btpde_dendrites{i}.signal_allcmpts, setup.gradient.bvalues);
     end
+    
+    % Insert weighted signals
+    btpde_cell.signal_weighted = btpde_cell.signal./femesh.volumes;
+    btpde_soma.signal_weighted = btpde_soma.signal./femesh_soma.volumes;
+    for i =1:ndendrites
+        btpde_dendrites{i}.signal_weighted = btpde_dendrites{i}.signal./femesh_dendrites{i}.volumes;
+    end
 
 end
 
@@ -110,10 +120,17 @@ end
 if isfield(setup, "mf")
     % Fit ADC from MF signal
     mf_cell_fit = fit_signal(mf_cell.signal, mf_cell.signal_allcmpts, setup.gradient.bvalues);
-    mf_cell_fit = fit_signal(mf_cell.signal, mf_cell.signal_allcmpts, setup.gradient.bvalues);
+    mf_soma_fit = fit_signal(mf_soma.signal, mf_soma.signal_allcmpts, setup.gradient.bvalues);
     mf_dendrites_fit = cell(ndendrites,1);
     for i =1:ndendrites
         mf_dendrites_fit{i} = fit_signal(mf_dendrites{i}.signal, mf_dendrites{i}.signal_allcmpts, setup.gradient.bvalues);
+    end
+
+     % Insert weighted signals
+    mf_cell.signal_weighted = mf_cell.signal./femesh.volumes;
+    mf_soma.signal_weighted = mf_soma.signal./femesh_soma.volumes;
+    for i =1:ndendrites
+        mf_dendrites{i}.signal_weighted = mf_dendrites{i}.signal./femesh_dendrites{i}.volumes;
     end
 end
 
@@ -175,7 +192,7 @@ if isfield(setup, "mf")
                     "MF magnetization dendrite %d. Sequence %d of %d, b=%.2f", ...
                         i,iseq, setup.nsequence, b);
                     field = mf_dendrites{i}.magnetization(:, iamp, iseq, idir);
-                    plot_field_everywhere(femesh_dendries{i}, field, title_str);
+                    plot_field_everywhere(femesh_dendrites{i}, field, title_str);
                 end
             end
         end
@@ -240,8 +257,8 @@ else
         title_str = "BTPDE soma total magnetization (normalized)";
         plot_hardi(setup.gradient.directions, btpde_soma.signal_weighted, title_str);
         for i =1:ndendrites
-        plot_hardi(setup.gradient.directions, sta_adc_dendrites_allcmpts{i}, "STA ADC dendrite "+string(i));
-        title_str = sprintf("BTPDE dendrites %d total magnetization (normalized)",i);
+        plot_hardi(setup.gradient.directions, sta_adc_dendrites{i}, "STA ADC dendrite "+string(i));
+        title_str = sprintf("BTPDE dendrite %d total magnetization (normalized)",i);
         plot_hardi(setup.gradient.directions, btpde_dendrites{i}.signal_weighted , title_str);
         end
     end

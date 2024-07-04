@@ -1,15 +1,21 @@
+function plot_mesh(femesh)
 
-zoom = false;
-plot_femesh_everywhere(femesh, "");
-x = [-12 7];
-y = [2 8];
-if zoom
-    xlim(x);
-    ylim(y);
-    title(sprintf("H = %g", setup.geometry.refinement), "fontsize", 18);
-else
-    line([x(1) x(2) x(2) x(1) x(1)], [y(1) y(1) y(2) y(2) y(1)], 0.5*ones(1,5), "color", "r", "linewidth", 2);
-    title(sprintf("Finite element mesh, H = %g", setup.geometry.refinement), "fontsize", 18);
-end
 
-% exportgraphics(gca, sprintf("output/%g.png", setup.pde.refinement));
+% Determine limits of domain
+pmin = min([femesh.points{:}], [], 2);
+pmax = max([femesh.points{:}], [], 2);
+axis_vec = [pmin(1) pmax(1) pmin(2) pmax(2) pmin(3) pmax(3)];
+facets = [femesh.facets{1, :}];
+points = femesh.points{1};
+h = trisurf(facets', points(1, :), points(2, :), points(3, :));
+set(h, "LineWidth", 0.01);
+set(h, "facecolor", "interp");
+set(h, "edgealpha", 0.15);
+xlabel("x");
+ylabel("y");
+zlabel("z");
+view(3);
+grid on;
+axis equal;
+axis(axis_vec);
+title("Finite element mesh");

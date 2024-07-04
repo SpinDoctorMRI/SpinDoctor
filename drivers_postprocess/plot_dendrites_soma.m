@@ -44,7 +44,7 @@ xlabel("x");
 ylabel("y");
 zlabel("z");
 grid on;
-title("Soma vs dendrite meshes");
+title("Soma and dendrite meshes");
 a = gca;
 a.FontSize = 20;
 view(3);

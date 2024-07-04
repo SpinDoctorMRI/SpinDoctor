@@ -22,23 +22,23 @@ function results = solve_btpde(femesh, setup, savepath, save_magnetization)
 %   If only const or only camino sequences are present, then this
 %   additional struct layer is removed.
 %   
-%       camino.magnetization: {ncompartment x nsequeunce}[npoint x 1]
-%          Magnetization field at final timestep
 %       camino.signal: [ncompartment x nsequence]
 %           Compartmentwise total magnetization at final timestep
 %       camino.signal_allcmpts: [nsequence x 1]
 %           Total magnetization at final timestep
 %       camino.itertimes: [nsequence x 1]
 %           Computational time for each iteration
-%       const.magnetization: {ncompartment x namplitude x nsequence x
-%                       ndirection}[npoint x 1]
-%           Magnetization field at final timestep
+%       camino.magnetization: {ncompartment x nsequence}[npoint x 1]
+%          Magnetization field at final timestep
 %       const.signal: [ncompartment x namplitude x nsequence x ndirection]
 %           Compartmentwise total magnetization at final timestep
 %       const.signal_allcmpts: [namplitude x nsequence x ndirection]
 %           Total magnetization at final timestep
 %       const.itertimes: [namplitude x nsequence x ndirection]
 %           Computational time for each iteration
+%       const.magnetization: {ncompartment x namplitude x nsequence x
+%                       ndirection}[npoint x 1]
+%           Magnetization field at final timestep
 %       totaltime: [1 x 1]
 %           Total computational time, including matrix assembly
 
@@ -78,7 +78,7 @@ solver_str = func2str(solve_ode);
 % Sizes
 ncompartment = setup.ncompartment;
 namplitude = setup.namplitude;
-nsequence = setup.nsequence;
+% nsequence = setup.nsequence;
 ndirection = setup.ndirection;
 
 if do_save
@@ -117,7 +117,7 @@ camino.itertimes = zeros(nsequence_camino, 1);
 totaltime_addition = 0;
 
 % Check if results are already available
-if rerun && do_save
+if ~rerun && do_save
     fprintf("Load btpde results from %s\n", savepath);
     
     % Checking for const sequences
@@ -190,7 +190,7 @@ if rerun && do_save
                     totaltime_addition = time_temp;
                     if save_magnetization
                         for icmpt = 1:ncompartment
-                            camnino.magnetization{icmpt, iseq} = [];
+                            camino.magnetization{icmpt, iseq} = [];
                         end
                     end
                     warning("btpde: the saved data of experiment %s doesn't exist or is broken."...
@@ -347,7 +347,6 @@ if any(isinf(const.signal), 'all')
             for iamp = 1:namplitude
                 for idir = 1:ndirection
                     if ~isempty(temp_store{iamp, iseq, idir})
-
                         % Extract iteration inputs
                         b = bvalues(iamp, iseq);
                         ug = directions(:, idir);
@@ -364,6 +363,7 @@ if any(isinf(const.signal), 'all')
                             temp_store{iamp, iseq, idir}.ug = ug;
                             mfile.(gradient_field) = temp_store{iamp, iseq, idir};
                         end
+                        % const.itertimes(iamp,iseq,idir) = temp_store{iamp, iseq, idir}.itertimes;
                     end
                 end
             end
@@ -437,55 +437,21 @@ if any(isinf(camino.signal),'all')
     end
 
 end
-
 % Total magnetization (sum over compartments)
 camino.signal_allcmpts(:) = sum(camino.signal, 1);
 const.signal_allcmpts(:) = sum(const.signal, 1);
-% Create output structure
-results.totaltime = toc(starttime) + totaltime_addition;
-if nsequence_camino == 0
-    results.signal_weighted = const.signal./femesh.volumes;
-    results.signal_allcmpts_weighted = const.signal_allcmpts;
-    results.signal = const.signal;
-    results.signal_allcmpts = const.signal_allcmpts;
 
-    results.itertimes = const.itertimes;
-    if save_magnetization
-        results.magnetization = const.magnetization;
-        results.magnetization_avg = average_magnetization(const.magnetization);
-    end
-elseif nsequence_const == 0
-    results.signal = camino.signal;
-    results.signal_allcmpts = camino.signal_allcmpts;
-    results.signal_weighted = camino.signal./femesh.volumes;
-    results.signal_allcmpts_weighted = camino.signal_allcmpts/femesh.total_volume;
-    results.itertimes = camino.itertimes;
-    if save_magnetization
-        results.magnetization = camino.magnetization;
-        results.magnetization_avg = average_magnetization(camino.magnetization);
-    end
+% Volume weighted signal
+% camino.signal_weighted = camino.signal./femesh.volumes;
+% camino.signal_allcmpts_weighted = camino.signal_allcmpts./femesh.total_volume;
+% 
+% const.signal_weighted = const.signal./femesh.volumes;
+% const.signal_allcmpts_weighted = const.signal_allcmpts./femesh.total_volume;
 
-else
-    results.camino.signal = camino.signal;
-    results.camino.signal_allcmpts = camino.signal_allcmpts;
-    
-    results.camino.signal_weighted = camino.signal./femesh.volumes;
-    results.camino.signal_allcmpts_weighted = camino.signal_allcmpts/femesh.total_volume;
-    results.camino.itertimes = camino.itertimes;
 
-    results.const.signal = const.signal;
-    results.const.signal_allcmpts = const.signal_allcmpts;
-    results.const.signal = const.signal;
-    results.const.signal_allcmpts = const.signal_allcmpts;
-    results.const.itertimes = const.itertimes;
 
-    if save_magnetization
-        results.camino.magnetization = camino.magnetization;
-        results.camino.magnetization_avg = average_magnetization(camino.magnetization);
-        results.const.magnetization = const.magnetization;
-        results.const.magnetization_avg = average_magnetization(const.magnetization);
-    end
+totaltime = totaltime_addition + toc(starttime);
+results = merge_results(camino,const,nsequence_camino,nsequence_const,totaltime,save_magnetization);
 
-end
 % Display function evaluation time
 toc(starttime);
