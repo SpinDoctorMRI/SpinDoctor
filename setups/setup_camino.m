@@ -74,13 +74,12 @@ setup.pde.permeability_ecs = 0;                         % Permeability ECS bound
 
 %% Gradient sequences
 seq = read_scheme('camino_sequences/test_scheme.scheme');
-
-if isfile('camino_sequences/test_scheme.txt')           % Load tensors, unneccessary for simulations
-    b_tensors = read_b_tensors('camino_sequences/test_scheme.txt');
-    for i = 1:length(seq)
-        seq{i}.b_tensor = b_tensors(:,i);
-    end
-end
+% if isfile('camino_sequences/test_scheme.txt')           % Load tensors, unneccessary for simulations
+%     b_tensors = read_b_tensors('camino_sequences/test_scheme.txt');
+%     for i = 1:length(seq)
+%         seq{i}.b_tensor = b_tensors(:,i);
+%     end
+% end
 setup.gradient.sequences =seq;
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
