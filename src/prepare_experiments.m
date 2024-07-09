@@ -18,16 +18,16 @@ for iseq = 1:nsequence
         "Gradient sequence must be an instance of Sequence class.")
 end
 const_seq_ind = cellfun(@(s) ~isa(s,'SequenceCamino'),setup.gradient.sequences,'UniformOutput',true);
-nsequence = sum(const_seq_ind);
+nsequence_const = sum(const_seq_ind);
 
 % Assign b-values, q-values and g-values
-if nsequence > 0 
+if nsequence_const > 0 
     const_seq= setup.gradient.sequences(const_seq_ind);
     namplitude = length(setup.gradient.values);
-    setup.gradient.bvalues = zeros(namplitude, nsequence);
-    setup.gradient.qvalues = zeros(namplitude, nsequence);
-    setup.gradient.gvalues = zeros(namplitude, nsequence);
-    for iseq = 1:nsequence
+    setup.gradient.bvalues = zeros(namplitude, nsequence_const);
+    setup.gradient.qvalues = zeros(namplitude, nsequence_const);
+    setup.gradient.gvalues = zeros(namplitude, nsequence_const);
+    for iseq = 1:nsequence_const
         bnq = const_seq{iseq}.bvalue_no_q;
         switch setup.gradient.values_type
             case "g"
