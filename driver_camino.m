@@ -40,6 +40,15 @@ if isfield(setup, "btpde")
     btpde = solve_btpde(femesh, setup,save_path,true);
 end
 toc
+
+tic
+% Perform BTPDE midpoint experiments
+if isfield(setup, "btpde_midpoint")
+    % Solve BTPDE
+    btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path,true);
+end
+toc
+
 % Perform MF experiments
 % Perform Laplace eigendecomposition
 tic
@@ -51,8 +60,7 @@ mf = solve_mf(femesh, setup, lap_eig,save_path,false);
 end
 toc
 
-disp("Camino sequence results are stored in btpde.camino and mf.camino");
-disp("PGSE sequence results are stored in btpde.const and mf.const (const for constant direction vector).");
+disp("Camino sequence results are stored in btpde, btpde_midpoint and mf");
 
 %% Plots
 do_plots = true;

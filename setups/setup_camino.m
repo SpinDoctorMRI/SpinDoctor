@@ -81,6 +81,10 @@ seq = read_scheme('camino_sequences/test_scheme.scheme');
 %     end
 % end
 setup.gradient.sequences =seq;
+%% BTPDE midpoint experiment parameters (comment block to skip experiment)
+setup.btpde_midpoint.implicitness = 0.5;                % Theta-parameter: 0.5 for Crank-Nicolson
+setup.btpde_midpoint.timestep = 2;                      % Time step dt
+setup.btpde.rerun = true;    
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
 char_length_scale = sqrt(2*3*setup.pde.diffusivity_in*1000*101);

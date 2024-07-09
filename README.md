@@ -18,6 +18,16 @@ the simulations can be run in parallel.
 3) Multiple neuron meshes are found in the folder `mesh_files`. These can be loaded in the `setups/setup_neuron.m` script.
 4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
 
+## Updates July 2024
+
+New features:
+
+* Simulation of general gradient sequences is now supported. These sequences can be read directly from a Camino .scheme file. Simulations can be run for solve_btpde, solve_btpde_midpoint, and solve_mf.
+* Segmenting a finite element mesh into soma and processes/dendrites when the mesh comes from a swc file.
+* Code refactoring, to incorporate the new features.
+
+
+
 ## Updates March 2021
 
 All modules (master, T2, NeuronModule, MatrixFormalismModule) are now merged and found in the `master` branch. The previous versions of the modules are still found in their branches.
