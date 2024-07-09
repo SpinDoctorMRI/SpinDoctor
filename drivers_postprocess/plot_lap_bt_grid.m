@@ -67,7 +67,7 @@ for iseq = 1:nsequence
             values = bt_eig_values(bt_eig_significant);
             % values = bt_eig_values;
             % values = 1000 * values;
-            values = values / mean_diffusivity;
+            values = values / setup.pde.mean_diffusivity;
             h = plot(real(values), imag(values), color_vec{iamp} + marker_vec{iamp});
             set(h, "markersize", 20 - iamp * 3);
             set(h, "linewidth", 1 + iamp / 2);

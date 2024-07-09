@@ -129,7 +129,7 @@ klim = ~klim;
 if any(klim(:))
   % have we loaded the appropriate spline?
   if isempty(FSspl)
-    load('./src/sequences/Fresnelspl.mat', 'FSspl')
+    load('src/tools/fresnel/Fresnelspl.mat', 'FSspl')
   end
   
   % do the interpolation itself using ppval. This will be

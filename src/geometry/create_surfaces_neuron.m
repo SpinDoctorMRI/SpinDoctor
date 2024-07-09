@@ -16,7 +16,13 @@ function surfaces = create_surfaces_neuron(filename, setup)
 ndiscretize = 100;
 
 ecs_shape = setup.geometry.ecs_shape;
-ecs_ratio = setup.geometry.ecs_ratio;
+include_ecs = ecs_shape ~= "no_ecs";
+if include_ecs
+    ecs_ratio = setup.geometry.ecs_ratio;
+else
+    % the default ecs_ratio is used to find a point inside neuron
+    ecs_ratio = 0.1;
+end
 
 if endsWith(filename, ".1")
     femesh = read_tetgen(filename);
@@ -78,7 +84,7 @@ if ecs_shape ~= "no_ecs"
             y2 = x2 + ecs_gap * n2;
             y = [y1; y2];
             DT = delaunayTriangulation(y);
-            
+
             pmin = pmin - 10 * ecs_gap;
             pmax = pmax + 10 * ecs_gap;
             p = pmin + (pmax - pmin) .* linspace(0, 1, ndiscretize);
@@ -90,7 +96,7 @@ if ecs_shape ~= "no_ecs"
             V = reshape(markers, ndiscretize, ndiscretize, ndiscretize);
             FV = isosurface(X, Y, Z, V, 0);
             points_ecs = FV.vertices';
-            
+
             shp_ecs = alphaShape(points_ecs');
             shp_ecs.HoleThreshold = prod(pmax - pmin);
             shp_ecs.Alpha = 2.5 * shp_ecs.criticalAlpha("one-region");
@@ -105,13 +111,15 @@ if ecs_shape ~= "no_ecs"
             [tri, xyz] = boundaryFacets(shp);
             TR = triangulation(tri,xyz);
             V = vertexNormal(TR);
-            P = incenter(TR);
-            F = faceNormal(TR);
+            % P = incenter(TR);
+            % F = faceNormal(TR);
             
             points_ecs = [(xyz + 0.5*ecs_gap * V)',...
-                          (xyz + ecs_gap * V)',...
-                          (P + 0.5*ecs_gap * F)',...
-                          (P + ecs_gap * F)'];
+                          (xyz + ecs_gap * V)'];
+            % points_ecs = [(xyz + 0.5*ecs_gap * V)',...
+            %               (xyz + ecs_gap * V)',...
+            %               (P + 0.5*ecs_gap * F)',...
+            %               (P + ecs_gap * F)'];
             shp2 = alphaShape([points,points_ecs]', 'HoleThreshold', (4/3)*pi*20^3);
             shp2.Alpha = 1.5*shp2.criticalAlpha("one-region");
             [tri, xyz] = boundaryFacets(shp2);

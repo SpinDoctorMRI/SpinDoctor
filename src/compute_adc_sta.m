@@ -7,6 +7,13 @@ function [adc, adc_allcmpts] = compute_adc_sta(femesh, setup)
 %   adc: double(ncompartment, nsequence, ndirection)
 %   adc_allcmpts: double(nsequence, ndirection)
 
+% TEMPORARY. Camino file sequences not yet implemented for this solver.
+const_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),setup.gradient.sequences,'UniformOutput',true);
+if ~all(const_ind,'all')
+    warning("Currently %s does not support camino file sequences. \n Solving only for non-camino sequences",mfilename);
+    setup.gradient.sequences = setup.gradient.sequences(const_ind);
+    setup.nsequence = sum(const_ind);
+end
 
 % Extract domain parameters
 diffusivity = setup.pde.diffusivity;
@@ -53,7 +60,7 @@ for icmpt = 1:ncompartment
     end
 end
 
-adc_flag = any(adc<0, [1,3]);
+adc_flag = any(adc<0, [1, 3]);
 for iflag = 1:nsequence
     if adc_flag(iflag)
         seq = ['Sequence ', num2str(iflag), ': '];

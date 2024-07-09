@@ -1,0 +1,5 @@
+Eq. \ref{eq:hadc_pde} can be discretized similarly as described for the Bloch-Torrey PDE and has the matrix form
+\begin{equation}\label{eq:H_ADC_model}
+    \mat{M} \frac{\partial \zeta}{\partial t} = -\mat{S}\zeta + \mat{Q}\bar{\zeta}
+\end{equation}
+where $\zeta$ is the approximation of $w$ and $\bar{\zeta}_i=\sigma_i\, F(t)\,\vec{u}_{\vec{g}}\cdot\bn(\bx_i)$. We note that the matrices here are assembled and solved separately for each compartment. SpinDoctor calls MATLAB built-in ODE routine ode23t to solve the semi-discretized equation.

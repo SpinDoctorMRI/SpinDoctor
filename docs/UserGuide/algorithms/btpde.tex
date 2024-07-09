@@ -1,0 +1,28 @@
+FE matrices are generated for each compartment by the finite element method with continuous piecewise linear basis functions (known as $P_1$). The basis functions are denoted as $\varphi_k$ for $k=1,\dots, N_\text{node}$, where $N_\text{node}$ denotes the number of mesh nodes (vertices). All matrices are sparse matrices. $\mat{M}$ and $\mat{S}$ are known in the FEM literature as mass and stiffness matrices which are defined as follows:
+\begin{equation*}
+    M_{ij} =\int_\Omega \varphi_i \varphi_j \,\mathrm{d}\bx, \qquad \qquad S_{ij} =\int_\Omega \sigma_{i}\,\nabla \varphi_i \cdot \nabla \varphi_j \,\mathrm{d}\bx.
+\end{equation*}
+$\mat{J}(\vec{g})$ has a similar form as the mass matrix but it is scaled with the coefficient $\bg\cdot\bx$, we therefore call it the scaled-mass matrix
+\begin{equation*}
+    J_{ij}(\vec{g}) = \int_\Omega \bg\cdot\bx\, \varphi_i \varphi_j \,\mathrm{d}\bx.
+\end{equation*}
+We construct the matrix based on the flux matrix $\mat{Q}$
+\begin{equation*}
+    Q_{ij} = \int_{\partial \Omega} w \,\varphi_i \varphi_j \,\mathrm{d}s
+\end{equation*}
+where a scalar function $w$ is used as an interface marker. The matrices are assembled from local element matrices and the assembly process is based on vectorized routines of \cite{RahmanValdman2013}, which replace expensive loops over elements by operations with 3-dimensional arrays. All local elements matrices in the assembly of $\mat{S}, \mat{M}, \mat{J}$ are evaluated at once and stored in a full matrix of size $4 \times 4 \times N_\text{element}$, where $N_\text{element}$ denotes the number of tetrahedral elements. The assembly of $\mat{Q}$ is even simpler; all local matrices are stored in a full matrix of size $3 \times 3 \times N_\text{facet}$, where $N_\text{facet}$ denotes the number of boundary triangles.
+
+Double nodes are placed at the interfaces between compartments connected by permeable membrane. $\overline{\mat{Q}}$ is used to impose the interface conditions and it is associated with the {\it interface (ghost) elements}. Specifically, assume that the double nodes are defined in a pair of indices $\{i,\bar{i}\}$, $\overline{\mat{Q}}$ is defined as the following
+\begin{equation*}
+    \overline{Q}_{ij} =
+    \begin{cases}
+        Q_{ij},             & \mbox{if vertex $i$ and $j$ belong to one interface}            \\
+        -Q_{\bar{i}\bar{j}} & \mbox{if vertex $i$ and $j$ belong to two different interfaces}
+    \end{cases}
+\end{equation*}
+
+The fully coupled linear system has the following form
+\be{eq:BTPDE_Matrixform}
+\mat{M} \frac{\partial \vec{\xi}}{\partial t} = -\Bigl(I\gamma f(t)\mat{J}+\mat{S}+\overline{\mat{Q}}\Bigl)\, \vec{\xi}(t)
+\ee
+where $\vec{\xi}$ is the approximation of the magnetization $M$. SpinDoctor calls MATLAB built-in ODE routine ode23t to solve the semi-discretized system of equations.

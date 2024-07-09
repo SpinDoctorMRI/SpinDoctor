@@ -2,3 +2,4 @@
 output
 saved_simul
 mesh_files
+*.mex*

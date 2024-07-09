@@ -1,7 +1,6 @@
 function [femesh, surfaces, cells] = create_geometry(setup)
 %CREATE_GEOMETRY Create cells, surfaces and finite element mesh.
 %   This function does the following:
-%   - Check geometry setup consistency
 %   - Create or load cell configuration
 %   - Create or load surface triangulation
 %   - Call TetGen
@@ -32,31 +31,16 @@ function [femesh, surfaces, cells] = create_geometry(setup)
 % Extract parameters
 filename = setup.name;
 cell_shape = setup.geometry.cell_shape;
-ncompartment = length(setup.pde.compartments);
-nboundary = length(setup.pde.boundaries);
-
-% Check correct input format
-assert(ismember(cell_shape, ["sphere" "cylinder" "neuron"]))
-if cell_shape == "neuron"
-    % We do not deform the finite elements mesh if in the Neuron module. We do
-    % deform the finite elements mesh if in SpinDoctor White Matter mode.
-    if isfield(setup.geometry, "deformation") && any(setup.geometry.deformation ~= 0)
-        error("Deformation is not available for neurons. Set deformation to [0; 0].")
-    end
-    if setup.geometry.ncell ~= 1
-        error("Neuron cell type is only available for ncell=1.")
-    end
-end
-assert(ismember(setup.geometry.ecs_shape, ["no_ecs" "box" "convex_hull" "tight_wrap"]))
+ncompartment = setup.ncompartment;
+nboundary = setup.nboundary;
 
 % Check that folder exists
-parts = split(filename, "/");
-if length(parts) >= 2
-    folder = join(parts(1:end-1), "/");
-    if ~isfolder(folder)
-        mkdir(folder);
-    end
+[filepath, name, ext] = fileparts(filename);
+if ~isfolder(filepath) && ~isempty(filepath)
+    mkdir(filepath);
 end
+% is public polyhedral file formats (STL, PLY, OFF)
+is_ply = ismember(lower(ext), [".stl", ".ply", ".off"]);
 
 % File name to save or load cell description
 cellfilename = filename + "_cells";
@@ -67,7 +51,6 @@ if isfile(cellfilename)
 elseif ismember(cell_shape, ["sphere" "cylinder"])
     % Create cells
     cells = create_cells(setup);
-    
     % Save cell configuration
     save_cells(cells, cellfilename);
 else
@@ -76,34 +59,39 @@ else
 end
 
 % Make directory for storing finite elements mesh
-is_stl = endsWith(filename, ".stl");
-if is_stl
-    parts = split(filename, ".stl");
-    filename = parts(1) + "_stl";
-end
-save_meshdir_path = filename + "_dir";
+meshdir_name = name + replace(ext, '.', '_') + "_dir";
+save_meshdir_path = fullfile(filepath, meshdir_name);
 if ~isfolder(save_meshdir_path)
     mkdir(save_meshdir_path);
 end
-if is_stl
-    parts_tmp = split(parts(1), "/");
-    filename_stl = save_meshdir_path + "/" + parts_tmp(end) + ".stl";
-    if ~isfile(filename_stl)
-        copyfile(parts(1) + ".stl", save_meshdir_path);
-        call_tetgen(filename_stl);
+if is_ply
+    filename_new = save_meshdir_path + "/" + name + ext;
+    if ~isfile(filename_new)
+        copyfile(filename, save_meshdir_path);
+        if isfield(setup.geometry, "tetgen_options")
+            call_tetgen(filename_new, setup.geometry.tetgen_options);
+        else    
+            call_tetgen(filename_new);
+        end
     end
-    fname_stl = replace(filename_stl,'.stl','.1');
+    tetgen_ply = replace(filename_new, ext, '.1');
 end
 
 % Use an existing finite elements mesh. 
 % The name of the finite elements mesh is stored in the string fname_tetgen_femesh
 refinement_str = "";
 if isfield(setup.geometry, "refinement")
-    refinement_str = sprintf("_refinement%g", setup.geometry.refinement);
+    refinement_str = sprintf("_refine%g", setup.geometry.refinement);
 end
-ecs_str = sprintf("_%s%g", setup.geometry.ecs_shape, setup.geometry.ecs_ratio);
-parts = split(filename, "/");
-fname_tetgen = save_meshdir_path + "/" + parts(end) + ecs_str + refinement_str + "_mesh";
+if isfield(setup.geometry, "tetgen_options")
+    refinement_str = sprintf("_tet%s", setup.geometry.tetgen_options);
+end
+ecs_str = sprintf("_%s", setup.geometry.ecs_shape);
+if isfield(setup.geometry, 'ecs_ratio') && setup.geometry.ecs_shape ~= "no_ecs"
+    ecs_str = ecs_str + sprintf("%g", setup.geometry.ecs_ratio);
+end
+
+fname_tetgen = save_meshdir_path + "/" + name + ecs_str + refinement_str + "_mesh";
 
 % Read or create surface triangulation
 if isfile(fname_tetgen + ".node") && isfile(fname_tetgen + ".poly")
@@ -117,8 +105,8 @@ else
             % Create surface geometry of cylinders
             surfaces = create_surfaces_cylinder(cells, setup);
         case "neuron"
-            if is_stl
-                surfaces = create_surfaces_neuron(fname_stl, setup);
+            if is_ply
+                surfaces = create_surfaces_neuron(tetgen_ply, setup);
             else
                 surfaces = create_surfaces_neuron(filename, setup);
             end
@@ -129,10 +117,10 @@ end
 % Add ".1" suffix to output file name, since this is what Tetgen does
 fname_tetgen_femesh = fname_tetgen + ".1";
 
-if isfield(setup.geometry, "refinement")
-    tetgen_params = {setup.geometry.refinement};
-elseif isfield(setup.geometry, "tetgen_options")
+if isfield(setup.geometry, "tetgen_options")
     tetgen_params = {setup.geometry.tetgen_options};
+elseif isfield(setup.geometry, "refinement")
+    tetgen_params = {setup.geometry.refinement};
 else
     tetgen_params = {};
 end
@@ -164,3 +152,13 @@ end
 
 % Split mesh into compartments
 femesh = split_mesh(femesh_all);
+
+% Get volume and surface area quantities from mesh
+[volumes, areas] = get_vol_sa(femesh);
+femesh.volumes = volumes;
+femesh.total_volume = sum(volumes, 'all');
+femesh.areas = areas;
+femesh.total_area = sum(areas, 'all');
+
+surfaces.areas = areas;
+surfaces.total_area = sum(areas, 'all');

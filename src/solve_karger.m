@@ -11,6 +11,13 @@ function results = solve_karger(femesh, setup, effective_difftensors)
 %       itertimes: [namplitude x nsequence x ndirection]
 %       totaltime: [1 x 1]
 
+% TEMPORARY. Camino file sequences not yet implemented for this solver.
+const_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),setup.gradient.sequences,'UniformOutput',true);
+if ~all(const_ind,'all')
+    warning("Currently %s does not support camino file sequences. \n Solving only for non-camino sequences",mfilename);
+    setup.gradient.sequences = setup.gradient.sequences(const_ind);
+    setup.nsequence = sum(const_ind);
+end
 
 % Measure function evaluation time
 starttime = tic;
@@ -36,9 +43,9 @@ solver_str = func2str(solve_ode);
 % Sizes
 ncompartment = femesh.ncompartment;
 nboundary = femesh.nboundary;
-namplitude = size(qvalues, 1);
-nsequence = length(sequences);
-ndirection = size(directions, 2);
+namplitude = setup.namplitude;
+nsequence = setup.nsequence;
+ndirection = setup.ndirection;
 
 % Compute volumes and surface areas
 volumes = zeros(1, ncompartment);
@@ -105,10 +112,7 @@ itertimes = zeros(namplitude, nsequence, ndirection);
 % Cartesian indices (for parallel looping with linear indices)
 allinds = [namplitude nsequence ndirection];
 
-% Iterate over gradient amplitudes, sequences and directions. If the Matlab
-% PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
-% parallel, otherwise it should work like a normal loop. If that is not the
-% case, replace the `parfor` keyword by the normal `for` keyword.
+% Iterate over gradient amplitudes, sequences and directions.
 for iall = 1:prod(allinds)
     
     % Measure iteration time

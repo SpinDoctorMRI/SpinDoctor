@@ -1,0 +1,24 @@
+\begin{tabular}{|l|p{10cm}|} \hline
+    Function name           & Purpose                                                                                                                                                                                                     \\ \hline
+    \verb+prepare_experiments+  & Prepare magnetic gradient sequences, directions, and BTPDE, HADC and MF experiments                                                                                                                         \\ \hline
+    \verb+prepare_pde+  & Set up the PDE model in the geometrical compartments                                                                                                                                                        \\ \hline
+    % \verb+create_cells+ & Create the geometrical configuration. \\ \hline
+    \verb+create_geometry+  & Create or load cells, surface geometry and finite element mesh                                                                                                                                              \\ \hline
+    % \verb+read_tetgen+ & Read the finite elements mesh \\ \hline
+    % \verb+get_volume_sa+ & Get the volume and the surface area quantities from the finite elements mesh. \\ \hline
+    % \verb+create_directions+ & Provide gradient directions uniformly distributed in unit 3D sphere or 2D circle. \\ \hline
+    \verb+solve_btpde+  & Compute the BTPDE magnetization and signal                                                                                                                                                                  \\ \hline
+    \verb+solve_hadc+  & Compute the ADC from the HADC model                                                                                                                                                                         \\ \hline
+    \verb+fit_signal+ & Fit the ADC and signal for zero b-weighting from the BTPDE signal.                                                                                                                                          \\ \hline
+    \verb+compute_adc_sta+ & Compute the short time approximation in one diffusion-encoding direction.                                                                                                                                   \\ \hline
+    \verb+compute_free_diffusion+ & Compute the free diffusion ADC and signal.                                                                                                                                                                  \\ \hline
+    \verb+plot_cells+ &                                                                                                                                                                                                             \\ \hline
+    \verb+plot_surface_triangulation+ &                                                                                                                                                                                                             \\ \hline
+    \verb+plot_femesh+ & Display the finite elements mesh.                                                                                                                                                                           \\ \hline
+    \verb+plot_geometry_info+ &                                                                                                                                                                                                             \\ \hline
+    \verb+plot_signal+ & Display the simulated signal in one diffusion-encoding direction.                                                                                                                                           \\ \hline
+    \verb+plot_timing+ &                                                                                                                                                                                                             \\ \hline
+    \verb+plot_adc+ & Display the simulated ADC in one diffusion-encoding direction.                                                                                                                                              \\ \hline
+    \verb+plot_field+ & Display the PDE solution on the finite elements mesh. If the finite elements mesh is too large, the magnetization should not be outputted from the solution of the BTPDE, and this function cannot be used. \\ \hline
+    \verb+plot_hardi+ & Display simulation results in multiple diffusion-encoding directions.                                                                                                                                       \\ \hline
+\end{tabular}

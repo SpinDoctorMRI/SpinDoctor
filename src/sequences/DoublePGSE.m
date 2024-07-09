@@ -23,7 +23,6 @@ classdef DoublePGSE < Sequence
                 tpause = varargin{1};   
             end
             assert(tpause >= 0);
-            obj@Sequence(delta, Delta);
             obj.tpause = tpause;
             if length(varargin) == 1
                   obj.t1 = 0;  
@@ -212,6 +211,17 @@ classdef DoublePGSE < Sequence
             else
                 s = sprintf("%s(delta=%g, Delta=%g, tm=%g,TE=%g, t1=%g)", class(obj), ...
                     obj.delta, obj.Delta, obj.delta+obj.tpause,obj.TE,obj.t1);
+            end
+        end
+        
+        function s = string(obj, simplified)
+            %STRING Convert sequence to string.
+            if nargin == 2 && simplified
+                s = sprintf("%s_d%g_D%g_tm%g", class(obj), ...
+                    obj.delta, obj.Delta, obj.delta+obj.tpause);
+            else
+                s = sprintf("%s(delta=%g, Delta=%g, tm=%g)", class(obj), ...
+                    obj.delta, obj.Delta, obj.delta+obj.tpause);
             end
         end
     end

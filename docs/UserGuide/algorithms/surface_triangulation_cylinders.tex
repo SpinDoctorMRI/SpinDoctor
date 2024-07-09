@@ -1,0 +1,15 @@
+Suppose we have $N_\text{cell}$ cylindrical cells with a myelin layer, all with height $H$. Denote a disk with center $c$ and radius $R$ by $D(c, R)$, and the circle with the same center and radius by $C(c, R)$. Let the radii of the axons be $r_1, \dots, r_{N_\text{cell}}$ and the radii of the cells be $R_1, \dots, R_{N_\text{cell}}$, meaning the thickness of the myelin layer is $R_i - r_i$.
+
+The boundary between the axon and the myelin layer is:
+$$C(c_i,r_i)\times [-H/2,H/2]$$
+We discretize $C(c_i,r_i)$ as a polygon $P(c_i,r_i)$ and place one at $z = -H/2$ and one at $z = H/2$. Then we connect the corresponding vertices of $P(c_i,r_i)\times\{-H/2\}$ and $P(c_i,r_i)\times\{H/2\}$ and add a diagonal on each panel to get a surface triangulation $\Gamma_i$.
+
+Between the myelin layer and the ECS we discretize $C(c_i,R_i)$ as a polygon and place one at $z=-H/2$ and one at $z = H/2$ to get a surface triangulation $\Sigma_i$.
+
+For the box ECS, we find the coordinate limits of the union of $D(c_i,r_i)$ and add a gap to make a rectangle in two dimensions. Then we place the rectangle at $z=-H/2$ and at $z=H/2$ to get a box. Finally, the box is given a surface triangulation with 12 triangles.
+
+For tight-wrap ECS, we increase the cell radius by a gap size and take the union
+$$W = \bigcup_{i=1}^{N_\text{cell}} D(c_i, R_i + k R_\text{mean}).$$
+We use the alphaShape function in MATLAB to find a two dimensional polygon $Q$ that contains $W$. We place $Q$ at $z=-H/2$ and at $z=H/2$ and connect corresponding vertices, adding a diagonal on each panel. Suppose $Q$ is a polygon with $n$ vertices, then the surface triangulation of the side of the ECS will have $2n$ triangles.
+
+The above procedure produces a surface triangulation for the boundaries that are parallel to $z$-axis. We now must close the top and bottom. The top and bottom boundaries is just the interior of $Q$. However, the surface triangulation cannot be done on $Q$ directly. We must cut out $D(c_i,r_i)$, the disk which touches the axon, and $A_i = D(c_i,R_i)-D(c_i,r_i)$, the annulus which touches the myelin. Then we triangulate $Q-\bigcup_{i=1}^{N_\text{cell}} D(c_i,R_i)$ using the MATLAB built-in function that triangulates a polygon with holes to get the boundary that touches the ECS. The surface triangulation for $A_i$ and $D(c_i,r_i)$ is straightforward.

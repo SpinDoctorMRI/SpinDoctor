@@ -75,14 +75,11 @@ setup.pde.permeability_in = 0;                          % Permeability IN bounda
 setup.pde.permeability_out = 0;                         % Permeability OUT boundary
 setup.pde.permeability_ecs = 0;                         % Permeability ECS boundary
 
-%% Gradient sequences
-setup.gradient.values = 0:500:10000;                    % g-, q-, or b-values [1 x namplitude]
-setup.gradient.values_type = "b";                       % Type of values: "g", "q", or "b" or "g"
-setup.gradient.sequences = {                            % Gradient sequences {1 x nsequence}
-    PGSE(5000, 10000)
-    PGSE(10000, 100000)
-}';
-setup.gradient.directions = [1.0; 0.0; 0.0];            % Gradient directions [3 x ndirection]
+%% Gradient sequencesdr
+setup.gradient.sequences = {PGSE(8000,49000)};
+setup.gradient.directions = unitsphere(64);
+setup.gradient.values = [31, 105, 179, 253];
+setup.gradient.values_type  = "g";        % Gradient directions [3 x ndirection]
 
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
@@ -99,9 +96,9 @@ setup.hadc.reltol = 1e-4;                               % Relative tolerance for
 setup.hadc.abstol = 1e-4;                               % Absolute tolerance for ODE solver
 
 %% MF experiment parameters (comment block to skip experiment)
-setup.mf.length_scale = 2;                              % Minimum length scale of eigenfunctions
-setup.mf.neig_max = 400;                                % Requested number of eigenvalues
-setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE)
+% setup.mf.length_scale = 2;                              % Minimum length scale of eigenfunctions
+% setup.mf.neig_max = 400;                                % Requested number of eigenvalues
+% setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE)
 
 %% Analytical experiment parameters (comment block to skip experiment)
 setup.analytical.length_scale = 1;                      % Minimum length scale of eigenfunctions

@@ -2,7 +2,7 @@ function results = load_btpde(setup, savepath, load_magnetization)
 %LOAD_BTPDE Load the results saved by SOLVE_BTPDE.
 %
 %   LOAD_BTDPE(SETUP, SAVEPATH) loads the results of each iteration from
-%   "<SAVEPATH>/BTPDE_<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT".
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
 %
 %   LOAD_BTDPE(SETUP, SAVEPATH, LOAD_MAGNETIZATION) also omits loading
 %   the magnetization field if LOAD_MAGNETIZATION is set to FALSE.
@@ -11,15 +11,28 @@ function results = load_btpde(setup, savepath, load_magnetization)
 %   savepath: string
 %   load_magnetization (optional): logical. Defaults to true.
 %   
-%   results: struct with fields
-%       magnetization: {ncompartment x namplitude x nsequence x
+%   results: struct with fields. Split into the experiments for constant
+%   direction vector sequences (const) and those with varying direction
+%   (camino) from camino files. 
+%   If only const or only camino sequences are present, then this
+%   additional struct layer is removed.
+%   
+%       camino.magnetization: {ncompartment x nsequeunce}[npoint x 1]
+%          Magnetization field at final timestep
+%       camino.signal: [ncompartment x nsequence]
+%           Compartmentwise total magnetization at final timestep
+%       camino.signal_allcmpts: [nsequence x 1]
+%           Total magnetization at final timestep
+%       camino.itertimes: [nsequence x 1]
+%           Computational time for each iteration
+%       const.magnetization: {ncompartment x namplitude x nsequence x
 %                       ndirection}[npoint x 1]
 %           Magnetization field at final timestep
-%       signal: [ncompartment x namplitude x nsequence x ndirection]
+%       const.signal: [ncompartment x namplitude x nsequence x ndirection]
 %           Compartmentwise total magnetization at final timestep
-%       signal_allcmpts: [namplitude x nsequence x ndirection]
+%       const.signal_allcmpts: [namplitude x nsequence x ndirection]
 %           Total magnetization at final timestep
-%       itertimes: [namplitude x nsequence x ndirection]
+%       const.itertimes: [namplitude x nsequence x ndirection]
 %           Computational time for each iteration
 %       totaltime: [1 x 1]
 %           Total computational time, including matrix assembly
@@ -34,78 +47,88 @@ if nargin < nargin(@load_btpde)
 end
 
 % Extract experiment parameters
-values = setup.gradient.values;
-amptype = setup.gradient.values_type;
-qvalues = setup.gradient.qvalues;
 bvalues = setup.gradient.bvalues;
 sequences = setup.gradient.sequences;
 directions = setup.gradient.directions;
 reltol = setup.btpde.reltol;
 abstol = setup.btpde.abstol;
+solve_ode = setup.btpde.ode_solver;
+solver_str = func2str(solve_ode);
 
 % Sizes
-ncompartment = length(setup.pde.initial_density);
-namplitude = size(qvalues, 1);
-nsequence = length(sequences);
-ndirection = size(directions, 2);
+ncompartment = setup.ncompartment;
+namplitude = setup.namplitude;
+nsequence = setup.nsequence;
+ndirection = setup.ndirection;
 
 % Folder for saving
 savepath = sprintf( ...
-    "%s/btpde_abstol%g_reltol%g_magnetization%d", ...
-    savepath, abstol, reltol, load_magnetization ...
+    "%s/%s_abstol%g_reltol%g", ...
+    savepath, solver_str, abstol, reltol ...
 );
-    
+
 % Initialize output arguments
-magnetization = cell(ncompartment, namplitude, nsequence, ndirection);
-signal = zeros(ncompartment, namplitude, nsequence, ndirection);
-signal_allcmpts = zeros(namplitude, nsequence, ndirection);
-itertimes = zeros(namplitude, nsequence, ndirection);
+const_sequences_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),sequences,'UniformOutput',true);
+nsequence_const = sum(const_sequences_ind);
+sequences_const = sequences(const_sequences_ind);
+const = struct;
+const.magnetization = cell(ncompartment, namplitude, nsequence_const, ndirection);
+const.signal = inf(ncompartment, namplitude, nsequence_const, ndirection);
+const.signal_allcmpts = zeros(namplitude, nsequence_const, ndirection);
+const.itertimes = zeros(namplitude, nsequence_const, ndirection);
 
-% Cartesian indices (for parallel looping with linear indices)
-allinds = [namplitude nsequence ndirection];
+nsequence_camino = sum(~const_sequences_ind);
+camino = struct;
+camino.magnetization = cell(ncompartment,nsequence_camino, 1);
+camino.signal = inf(ncompartment, nsequence_camino);
+camino.signal_allcmpts = zeros(nsequence_camino,1);
+sequences_camino=sequences(~const_sequences_ind);
+camino.itertimes = zeros(nsequence_camino, 1);
 
-% Iterate over gradient amplitudes, sequences and directions. If the Matlab
-% PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
-% parallel, otherwise it should work like a normal loop. If that is not the
-% case, replace the `parfor` keyword by the normal `for` keyword.
-parfor iall = 1:prod(allinds)
-
-    % Extract Cartesian indices
-    [iamp, iseq, idir] = ind2sub(allinds, iall);
-
+inds = [namplitude ndirection];
+% Iterate over gradient amplitudes, sequences and directions.
+% Checking for const sequences
+for iseq = 1:nsequence_const
     % Extract iteration inputs
-    amp = values(iamp);
-    q = qvalues(iamp, iseq);
-    b = bvalues(iamp, iseq);
-    seq = sequences{iseq};
-    g = directions(:, idir);
-    
-    % File name for saving or loading iteration results
-    filename = sprintf("%s/%s.mat", savepath, gradient_string(amp, amptype, seq, g));
-    
-    % Load results
-    fprintf("Load %s\n", filename);
+    seq = sequences_const{iseq};
+    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
     mfile = matfile(filename, "Writable", false);
-    signal(:, iall) = mfile.signal;
-    itertimes(iall) = mfile.itertime;
-    if load_magnetization
-        for icmpt = 1:ncompartment
-            magnetization{icmpt, iall} = mfile.magnetization;
+
+    for iall = 1:prod(inds)   
+        % Extract Cartesian indices
+        [iamp, idir] = ind2sub([namplitude, ndirection], iall);
+    
+        % Extract iteration inputs
+        b = bvalues(iamp, iseq);
+        ug = directions(:, idir);
+        data = mfile.(gradient_fieldstring(ug, b));
+        const.signal(:, iamp, iseq, idir) = data.signal;
+        const.itertimes(iamp, iseq, idir) = data.itertimes;
+        if load_magnetization
+            const.magnetization(:, iamp, iseq, idir) = data.magnetization;
         end
     end
-end % iterations
+end
+% Checking for camino sequences
+for iseq = 1:nsequence_camino
+    seq = sequences_camino{iseq};
+    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+    mfile = matfile(filename, "Writable", false);
+    fprintf("Load btpde for %s \n", seq.string);
+    savedata = mfile.(seq.string);
+    camino.signal(:,iseq) = savedata.signal;
+    camino.itertimes(iseq) = savedata.itertimes;
+    if load_magnetization
+        camino.magnetization(:, iseq) = savedata.magnetization;
+    end
+end
 
 % Total magnetization (sum over compartments)
-signal_allcmpts(:) = sum(signal, 1);
+camino.signal_allcmpts(:) = sum(camino.signal, 1);
+const.signal_allcmpts(:) = sum(const.signal, 1);
 
-% Create output structure
-if load_magnetization
-    results.magnetization = magnetization;
-end
-results.signal = signal;
-results.signal_allcmpts = signal_allcmpts;
-results.itertimes = itertimes;
-results.totaltime = sum(itertimes, "all");
+totaltime = sum(camino.itertimes,"all") + sum(const.itertimes,"all");
+results = merge_results(camino,const,nsequence_camino,nsequence_const,totaltime,load_magnetization);
 
 % Display function evaluation time
 toc(starttime);

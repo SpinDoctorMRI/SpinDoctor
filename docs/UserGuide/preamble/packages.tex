@@ -1,0 +1,93 @@
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amstext,amsmath,amsxtra,amssymb,latexsym,amscd,amsthm}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{indentfirst}
+\usepackage[mathscr]{eucal}
+\usepackage{graphicx}
+\usepackage{enumitem}
+
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\usepackage{float}
+% \usepackage{floatrow}
+\usepackage{layout}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{authblk}
+
+\usepackage{mathrsfs}
+\setlength{\parindent}{0pt} \setlength{\parskip}{5pt}
+\renewcommand{\baselinestretch}{1.0}
+\usepackage{fancyhdr}
+
+\usepackage[framed,numbered]{matlab-prettifier}
+\usepackage{listings}             % Include the listings-package
+\lstset{language=Matlab}
+\lstdefinestyle{myCustomMatlabStyle}{
+    language=Matlab,
+    numbers=left,
+    stepnumber=1,
+    numbersep=10pt,
+    tabsize=4,
+    showspaces=false,
+    showstringspaces=false,
+}
+\lstset{basicstyle=\tiny,style=myCustomMatlabStyle}
+
+\usepackage[normalem]{ulem}
+\usepackage{url}
+\usepackage{subfig}
+\usepackage{hyperref}
+
+
+\usepackage{algorithm2e}
+\RestyleAlgo{boxed}
+\RestyleAlgo{boxruled}
+
+
+
+\usepackage{tikz}
+\usetikzlibrary{matrix,shapes,arrows,positioning,chains}
+% Define block styles
+\tikzset{
+    block/.style={
+            rectangle,
+            draw,
+            text width=12em,
+            text centered,
+        },
+    decision/.style={
+            rectangle,
+            draw,
+            text width=12em,
+            text centered,
+            rounded corners
+        },
+    cloud/.style={
+            draw,
+            ellipse,
+            minimum height=2em
+        },
+    descr/.style={
+            fill=white,
+            inner sep=2.5pt
+        },
+    connector/.style={
+            -latex,
+            font=\scriptsize
+        },
+    rectangle connector/.style={
+            connector,
+            to path={(\tikztostart) -- ++(#1,0pt) \tikztonodes |- (\tikztotarget) },
+            pos=0.5
+        },
+    rectangle connector/.default=-2cm,
+    straight connector/.style={
+            connector,
+            to path=--(\tikztotarget) \tikztonodes
+        }
+}

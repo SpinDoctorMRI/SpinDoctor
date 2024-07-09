@@ -1,0 +1,21 @@
+\begin{tabular}{|l|l|p{8cm}|} \hline
+    Field name              & Example                 & Explanation                                                               \\ \hline
+
+    \verb+initial_density_in+  & \verb+1+  & \multirow{3}{*}{Initial spin density $\rho$}                              \\ \cline{1-2}
+    \verb+initial_density_out+  & \verb+1+  &                                                                           \\ \cline{1-2}
+    \verb+initial_density_ecs+  & \verb+1+  &                                                                           \\ \hline
+
+    \verb+diffusivity_in+  & \verb+0.002+  & \multirow{3}{*}{Diffusion coefficient $\sigma$. Can also be a 3x3-tensor} \\ \cline{1-2}
+    \verb+diffusivity_out+  & \verb+0.002+ &                                                                           \\ \cline{1-2}
+    \verb+diffusivity_ecs+ & \verb+0.002+ &                                                                           \\ \hline
+
+    \verb+relaxation_in+ & \verb+Inf+ & \multirow{3}{*}{$T_2$-relaxation times (for no relaxation: Inf)}          \\ \cline{1-2}
+    \verb+relaxation_out+ & \verb+5000+ &                                                                           \\ \cline{1-2}
+    \verb+relaxation_ecs+ & \verb+5000+ &                                                                           \\ \hline
+
+    \verb+permeability_in_out+ & \verb+1e-3+ & \multirow{5}{*}{Permeability coefficient $\kappa$}                        \\ \cline{1-2}
+    \verb+permeability_out_ecs+ & \verb+1e-4+ &                                                                           \\ \cline{1-2}
+    \verb+permeability_in+ & \verb+0+ &                                                                           \\ \cline{1-2}
+    \verb+permeability_out+ & \verb+0+ &                                                                           \\ \cline{1-2}
+    \verb+permeability_ecs+ & \verb+0+ &                                                                           \\ \hline
+\end{tabular}

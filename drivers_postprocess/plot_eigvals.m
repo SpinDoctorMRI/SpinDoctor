@@ -1,6 +1,7 @@
 %% Save Laplace eigenvalues for given kappa (do this for all kappas)
 idomain = 1;
 lapeigvals_1eminusx = lap_eig.values{idomain};
+mean_diffusivity = setup.pde.mean_diffusivity;
 
 save("output/lapeigvals_1eminusx.mat", "lapeigvals_1eminusx");
 

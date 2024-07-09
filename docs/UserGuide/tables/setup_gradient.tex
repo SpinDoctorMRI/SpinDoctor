@@ -1,0 +1,9 @@
+\begin{tabular}{|l|l|p{6cm}|} \hline
+
+    Field name              & Example                 & Explanation                                                                                                                                                               \\ \hline
+
+    \verb+values+  & \verb+[10 100 400 1000]+  & $\|\vec{g}\|$-values, q-values or b-values to consider                                                                                                                    \\ \hline
+    \verb+values_type+  & \verb+"b"+  & \verb+"g"+, \verb+"q"+ or \verb+"b"+                                                                                                  \\ \hline
+    \verb+sequences+  & \verb+{PGSE(100, 5000)}+  & Gradient sequences; \verb+PGSE(delta, Delta)+, \verb+DoublePGSE(delta, Delta, tpause)+, \verb+CosOGSE(delta, Delta, nperiod)+, \verb+SinOGSE(delta, Delta, nperiod)+ or \verb+CustomSequence(delta, Delta,+ \verb+@timeprofile)+ \\ \hline
+    \verb+directions+ & \verb+[1.0; 0.0; 0.0]+ & Gradient directions of size \verb+[3 x ndirection]+ (no need to normalize)                                                                                                \\ \hline
+\end{tabular}

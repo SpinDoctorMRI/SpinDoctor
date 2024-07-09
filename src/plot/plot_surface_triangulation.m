@@ -22,4 +22,3 @@ title("Surface triangulation of canonical configuration");
 xlabel("x");
 ylabel("y");
 zlabel("z");
-

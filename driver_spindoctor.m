@@ -17,142 +17,75 @@ addpath(genpath("src"));
 %% Define inputs
 
 % Get setup
-addpath setups
+addpath(genpath("setups"));
 
 % setup_1axon_analytical;
-% setup_1sphere_analytical;
+setup_1sphere_analytical;
 % setup_15spheres;
 % setup_2axons_deform;
 % setup_5axons_myelin_relax;
 % setup_neuron;
-setup_4axons_flat;
+% setup_4axons_flat;
 % setup_30axons_flat;
 % setup_30axons;
 % setup_200axons;
 
-% Choose to see some of the typical plots or not
-do_plots = true;
-
-
-%% Prepare experiments
-
-% Set up the PDE model in the geometrical compartments.
-setup.pde = prepare_pde(setup);
-
-% Prepare experiments (gradient sequence, bvalues, qvalues, solvers)
-setup = prepare_experiments(setup);
-
-% Create or load finite element mesh
-[femesh, surfaces, cells] = create_geometry(setup);
-
-% Get volume and surface area quantities from mesh
-[volumes, surface_areas] = get_vol_sa(femesh);
-
-% Compute volume weighted mean of diffusivities over compartments
-% Take trace of each diffusion tensor, divide by 3
-mean_diffusivity = trace(sum(setup.pde.diffusivity .* shiftdim(volumes, -1), 3)) ...
-    / (3 * sum(volumes));
-
-% Initial total signal
-initial_signal = setup.pde.initial_density * volumes';
-
-% Get sizes
-ncompartment = length(setup.pde.compartments);
-namplitude = length(setup.gradient.values);
-nsequence = length(setup.gradient.sequences);
-ndirection = size(setup.gradient.directions, 2);
-
+%% Prepare simulation
+[setup, femesh, surfaces, cells]  = prepare_simulation(setup);
 
 %% Perform small experiments
-
 % Short time approximation (STA) of the ADC
-[sta_adc, sta_adc_allcmpts] = compute_adc_sta(femesh, setup);
-
+% [sta_adc, sta_adc_allcmpts] = compute_adc_sta(femesh, setup);
 % Free diffusion signal
 free = compute_free_diffusion(setup.gradient.bvalues, setup.pde.diffusivity, ...
-    volumes, setup.pde.initial_density);
+    femesh.volumes, setup.pde.initial_density);
 
-
-%% Perform analytical experiment
-if isfield(setup, "analytical")
-    % Solve analytical analytical model
-    analytical_signal = solve_analytical(setup, volumes); % With FE volumes
-    % analytical_signal = solve_analytical(setup); % With pure volumes
-end
-
-
-%% Solve Karger model
-if isfield(setup, "karger")
-    % Solve analytical analytical model
-    karger = solve_karger(femesh, setup);
-end
-
-
-%% Perform BTPDE experiments
+% Perform BTPDE experiments
 if isfield(setup, "btpde")
     % Solve BTPDE
     btpde = solve_btpde(femesh, setup);
-
-    % Fit ADC from signal
-    btpde_fit = fit_signal(btpde.signal, btpde.signal_allcmpts, setup.gradient.bvalues);
-
-    % BTPDE direction averaged magnetization
-    btpde.magnetization_avg = average_magnetization(btpde.magnetization);
 end
 
-
-%% Perform BTPDE midpoint experiments
+% Perform BTPDE midpoint experiments
 if isfield(setup, "btpde_midpoint")
     % Solve BTPDE
     btpde_midpoint = solve_btpde_midpoint(femesh, setup);
-
-    % Fit ADC from signal
-    btpde_midpoint_fit = fit_signal(btpde_midpoint.signal, ...
-        btpde_midpoint.signal_allcmpts, setup.gradient.bvalues);
-
-    % BTPDE direction averaged magnetization
-    btpde_midpoint.magnetization_avg = average_magnetization(btpde_midpoint.magnetization);
 end
 
-
-%% Perform HADC experiment
+% Perform HADC experiment
 if isfield(setup, "hadc")
     % Solve HADC model
     hadc = solve_hadc(femesh, setup);
 end
 
-
-%% Perform MF experiments
+% Perform MF experiments
 if isfield(setup, "mf")
     % Perform Laplace eigendecomposition
-    eiglim = length2eig(setup.mf.length_scale, mean_diffusivity);
-    lap_eig = compute_laplace_eig(femesh, setup.pde, eiglim, setup.mf.neig_max);
-
-    % Compute length scales of eigenvalues
-    lap_eig.length_scales = eig2length(lap_eig.values, mean_diffusivity);
-
-    % Compute the JN value that relates the eigenmodes to their contribution
-    % to the Matrix Formalism signal for a diffusion-encoding sequence
-    mf_jn = compute_mf_jn(lap_eig.values, setup);
-
-    % Compute the Matrix Formalism effective diffusion tensor
-    diffusion_tensor = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
-
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf);
+    
     % Compute MF magnetization
     mf = solve_mf(femesh, setup, lap_eig);
-
-    % Fit ADC from MF signal
-    mf_fit = fit_signal(mf.signal, mf.signal_allcmpts, setup.gradient.bvalues);
-
-    % MF direction averaged magnetization
-    mf.magnetization_avg = average_magnetization(mf.magnetization);
     
-    % Compute MFGA signal
-    mfga = compute_mfga_signal(setup, initial_signal, diffusion_tensor);
+    % Compute the Matrix Formalism HADC model
+    mf_hadc = solve_mf_hadc(femesh, setup, lap_eig);
 end
 
+% Solve Karger model
+if isfield(setup, "karger")
+    % Solve analytical analytical model
+    karger = solve_karger(femesh, setup);
+end
+
+% WIP: Perform analytical experiment
+if isfield(setup, "analytical")
+    % Solve analytical analytical model
+%     volumes = compute_cmptwise_volume(femesh.volumes, setup.pde.compartments);
+%     analytical_signal = solve_analytical(setup, volumes); % With FE volumes
+    analytical_signal = solve_analytical(setup); % With pure volumes
+end
 
 %% Postprocess
+do_plots = true;
 
 if ~do_plots
     return
@@ -173,15 +106,31 @@ plot_femesh(femesh, setup.pde.compartments);
 % Plot information about the geometry
 plot_geometry_info(setup, femesh);
 
+if isfield(setup, "btpde")
+    % Fit ADC from signal
+    btpde_fit = fit_signal(btpde.signal, btpde.signal_allcmpts, setup.gradient.bvalues);
+end
+
+if isfield(setup, "btpde_midpoint")
+    % Fit ADC from signal
+    btpde_midpoint_fit = fit_signal(btpde_midpoint.signal, ...
+        btpde_midpoint.signal_allcmpts, setup.gradient.bvalues);
+end
+
+if isfield(setup, "mf")
+    % Fit ADC from MF signal
+    mf_fit = fit_signal(mf.signal, mf.signal_allcmpts, setup.gradient.bvalues);
+end
+
 % Plot BTPDE magnetization in some directions
 if isfield(setup, "btpde")
-    for idir = 1 % :ndirection
-        for iseq = 1 % :nsequence
-            for iamp = 1 % :namplitude
+    for idir = 1 % :setup.ndirection
+        for iseq = 1 % :setup.nsequence
+            for iamp = 1 % :setup.namplitude
                 b = setup.gradient.bvalues(iamp, iseq);
                 title_str = sprintf(...
                     "BTPDE magnetization. Sequence %d of %d, b=%.2f", ...
-                    iseq, nsequence, b);
+                    iseq, setup.nsequence, b);
                 field = btpde.magnetization(:, iamp, iseq, idir);
                 % plot_field(femesh, field, setup.pde.compartments, title_str);
                 plot_field_everywhere(femesh, field, title_str);
@@ -193,7 +142,7 @@ if isfield(setup, "btpde")
 end
 
 % Plot results in one or many directions
-if ndirection == 1
+if setup.ndirection == 1
     % Plot ADC short time approximation
     plot_adc(sta_adc, sta_adc_allcmpts, "STA");
 
@@ -225,40 +174,37 @@ else
 
     % Plot BTPDE signal in all directions
     if isfield(setup, "btpde")
-        % Signal before applying the gradient pulse sequence
-        S0 = sum(setup.pde.initial_density .* volumes);
-
         % Plot normalized signals
         title_str = "BTPDE total magnetization (normalized)";
-        plot_hardi(setup.gradient.directions, btpde.signal_allcmpts / S0, title_str);
+        plot_hardi(setup.gradient.directions, btpde.signal_allcmpts / setup.pde.initial_signal, title_str);
     end
 
     % Plot HADC in all directions
     if isfield(setup, "hadc")
         % Plot normalized ADC (ADC/D0)
         title_str = sprintf("HADC all compartments");
-        plot_hardi(setup.gradient.directions, hadc.adc_allcmpts / mean_diffusivity, title_str);
+        plot_hardi(setup.gradient.directions, hadc.adc_allcmpts / setup.pde.mean_diffusivity, title_str);
     end
 end % One or many directions
 
 
 if isfield(setup, "mf")
     % Plot Matrix Formalism effective diffusion tensor
-    plot_diffusion_tensor(diffusion_tensor, mean_diffusivity);
+    plot_diffusion_tensor(mf_hadc.diffusion_tensor_allcmpts, setup.pde.mean_diffusivity);
 
     % Relative error between BTPDE and MF signal
     signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
         ./ max(abs(btpde.signal_allcmpts), [], 3);
 
     % Difference between BTPDE and MF signal, normalized by initial signal
-    signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ initial_signal;
+    signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ setup.pde.initial_signal;
     
-    if ndirection == 1
+    if setup.ndirection == 1
         % Plot BTPDE, MF and MFGA signals
         plot_signal(setup.gradient.bvalues, btpde.signal_allcmpts, free.signal_allcmpts, btpde_fit.S0_allcmpts, btpde_fit.adc, "BTPDE signal");
         plot_signal(setup.gradient.bvalues, mf.signal_allcmpts, free.signal_allcmpts, mf_fit.S0_allcmpts, mf_fit.adc, "MF signal");
-        % plot_signal(setup.gradient.bvalues, mfga.signal_allcmpts, free.signal_allcmpts, initial_signal, mfga.adc_allcmpts, "MFGA signal");
-        plot_signal_btpde_mf(setup, btpde.signal_allcmpts, mf.signal_allcmpts, mfga.signal_allcmpts);
+        % plot_signal(setup.gradient.bvalues, mfga.signal_allcmpts, free.signal_allcmpts, setup.pde.initial_signal, mfga.adc_allcmpts, "MFGA signal");
+        plot_signal_btpde_mf(setup, btpde.signal_allcmpts, mf.signal_allcmpts, mf_hadc.signal_allcmpts);
 
         % Display difference
         disp("Error (normalized by initial signal)");
@@ -267,8 +213,8 @@ if isfield(setup, "mf")
         disp(signal_allcmpts_relerr);
     else
         % Plot HARDI signal
-        plot_hardi(setup.gradient.directions, real(btpde.signal_allcmpts) / initial_signal, "BTPDE signal")
-        plot_hardi(setup.gradient.directions, real(mf.signal_allcmpts) / initial_signal, "MF signal")
+        plot_hardi(setup.gradient.directions, real(btpde.signal_allcmpts) / setup.pde.initial_signal, "BTPDE signal")
+        plot_hardi(setup.gradient.directions, real(mf.signal_allcmpts) / setup.pde.initial_signal, "MF signal")
 
         % Plot relative difference
         fig_title = "Rel diff between BTPDE and MF";
@@ -281,4 +227,6 @@ if isfield(setup, "mf")
 end
 
 %%
-plot_hardi(setup.gradient.directions, karger.signal_allcmpts / initial_signal, "Karger signal")
+if isfield(setup, "karger")
+    plot_hardi(setup.gradient.directions, karger.signal_allcmpts / setup.pde.initial_signal, "Karger signal");
+end

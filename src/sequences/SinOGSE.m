@@ -172,8 +172,8 @@ classdef SinOGSE < Sequence
                 s = sprintf("%s_d%g_D%g_n%g", class(obj), ...
                     obj.delta, obj.Delta, obj.nperiod);
             else
-                s = sprintf("%s(delta=%g, Delta=%g, nperiod=%g, TE=%g, t1=%g)", class(obj), ...
-                    obj.delta, obj.Delta, obj.nperiod, obj.TE, obj.t1);
+                s = sprintf("%s(delta=%g, Delta=%g, nperiod=%g)", class(obj), ...
+                    obj.delta, obj.Delta, obj.nperiod);
             end
         end
     end

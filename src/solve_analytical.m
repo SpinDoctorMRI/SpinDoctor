@@ -25,6 +25,13 @@ function signal = solve_analytical(setup, volumes)
 %
 %   signal: [namplitude x nsequence x ndirection]
 
+% TEMPORARY. Camino file sequences not yet implemented for this solver.
+const_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),setup.gradient.sequences,'UniformOutput',true);
+if ~all(const_ind,'all')
+    warning("Currently %s does not support camino file sequences. \n Solving only for non-camino sequences",mfilename);
+    setup.gradient.sequences = setup.gradient.sequences(const_ind);
+    setup.nsequence = sum(const_ind);
+end
 
 % Extract parameters
 qvalues = setup.gradient.qvalues;
@@ -32,8 +39,8 @@ sequences = setup.gradient.sequences;
 rmean = (setup.geometry.rmin + setup.geometry.rmax) / 2;
 
 % Sizes
-namplitude = length(setup.gradient.values);
-nsequence = length(setup.gradient.sequences);
+namplitude = setup.namplitude;
+nsequence = setup.nsequence;
 
 if setup.geometry.cell_shape == "cylinder"
     dim = 2;
@@ -219,5 +226,3 @@ for iseq = 1:nsequence
         signal(iamp, iseq) = E * S0;
     end
 end
-
-disp(5);

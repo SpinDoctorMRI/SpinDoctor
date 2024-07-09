@@ -26,13 +26,18 @@ ncell = setup.geometry.ncell;
 rmin = setup.geometry.rmin;
 rmax = setup.geometry.rmax;
 include_in = setup.geometry.include_in;
-in_ratio = setup.geometry.in_ratio;
 ecs_shape = setup.geometry.ecs_shape;
-ecs_ratio = setup.geometry.ecs_ratio;
-
 include_ecs = ecs_shape ~= "no_ecs";
-rmean = (rmin + rmax) / 2;
+if include_in
+    in_ratio = setup.geometry.in_ratio;
+else
+    in_ratio = 0;
+end
+if include_ecs
+    ecs_ratio = setup.geometry.ecs_ratio;
+end
 
+rmean = (rmin + rmax) / 2;
 % Number of points to discretize space for creating tight wrap ECS
 if ncell == 1
     ndiscretize = 30;
@@ -103,12 +108,12 @@ if include_ecs
     elseif ncell == 1
         facets_ecs = convhull(points_ecs')';
     elseif ecs_shape == "convex_hull"
-        %             facets_ecs = convhull(points_ecs')';
-        %             inds = unique(facets_ecs);
-        %             points_ecs = points_ecs(:, inds);
-        %             tmp = facets_ecs == shiftdim(inds, -2);
-        %             [i, j, k] = ind2sub(size(tmp), find(tmp));
-        %             facets_ecs(sub2ind(size(facets_ecs), i, j)) = k;
+        % facets_ecs = convhull(points_ecs')';
+        % inds = unique(facets_ecs);
+        % points_ecs = points_ecs(:, inds);
+        % tmp = facets_ecs == shiftdim(inds, -2);
+        % [i, j, k] = ind2sub(size(tmp), find(tmp));
+        % facets_ecs(sub2ind(size(facets_ecs), i, j)) = k;
         
         DT = delaunayTriangulation(points_ecs');
         

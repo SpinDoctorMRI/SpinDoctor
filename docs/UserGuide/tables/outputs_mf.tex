@@ -1,0 +1,13 @@
+\begin{tabular}{|l|l|p{5.4cm}|}
+    \hline
+    Variable name                 & Size                                                          & Explanation                                                        \\ \hline
+    \verb+lap_eig+.values & [neig $\times$ 1]                                             & Laplace eigenvalues                                                \\ \hline
+    \verb+lap_eig.funcs+        & [nnode $\times$ neig]                                         & Laplace eigenfunctions                                             \\ \hline
+    \verb+lap_eig.moments+        & [neig $\times$ neig $\times$ 3]                               & First order moments of the product pairs of Laplace eigenfunctions \\ \hline
+    \verb+diffusion_tensor+        & [3 $\times$ 3 $\times$ nseq]                                  & Effective diffusion tensors                                        \\ \hline
+    \verb+mf.magnetization+        & \{ncmpt$\times$namp$\times$nseq$\times$ndir\}[nnode$\times$1] & Resulting magnetization fields                                     \\ \hline
+    \verb+mf.signal+        & [ncmpt $\times$ namp $\times$ nseq $\times$ ndir]             & MF signal in the compartments                                      \\ \hline
+    \verb+mf.signal_allcmpts+        & [namp $\times$ nseq $\times$ ndir]                            & MF signal summed over all compartments                             \\ \hline
+    \verb+mfga.signal+        & [ncmpt $\times$ namp $\times$ nseq $\times$ ndir]             & MFGA signal in the compartments.                                   \\ \hline
+    \verb+mfga.signal_allcmpts+        & [namp $\times$ nseq $\times$ ndir]                            & MFGA signal summed over all compartments                           \\ \hline
+\end{tabular}

@@ -1,0 +1,12 @@
+\begin{tabular}{|l|l|p{5cm}|} \hline
+    Variable name          & Size                                                       & Explanation                                                                         \\ \hline
+    \verb+magnetization+ & \{ncmpt $\times$ namp $\times$ nseq $\times$ ndir\}[nnode] & Solution of the BTPDE for each compartment                                          \\ \hline
+    \verb+signal+ & [ncmpt $\times$ namp $\times$ nseq $\times$ ndir]          & Signal (integral of magnetization) at $T_\text{echo}$ in each compartment.          \\ \hline
+    \verb+signal_allcmpts+ & [namp $\times$ nseq $\times$ ndir]                         & Signal (integral of magnetization) at $T_\text{echo}$ summed over all compartments. \\ \hline
+    \verb+adc+ & [ncmpt $\times$ nseq $\times$ ndir]                        & ADC in each compartment.                                                            \\ \hline
+    \verb+adc_allcmpts+ & [nseq $\times$ ndir]                                       & ADC accounting for all compartments.                                                \\ \hline
+    \verb+lap_eig.values+ & [neig $\times$ 1]                                          & Laplace eigenvalues                                                                 \\ \hline
+    \verb+lap_eig.funcs+ & [nnode $\times$ neig]                                      & Laplace eigenfunctions                                                              \\ \hline
+    \verb+lap_eig.moments+ & [neig $\times$ neig $\times$ 3]                            & First order moments of the product pairs of Laplace eigenfunctions                  \\ \hline
+    \verb+diffusion_tensor+ & [3 $\times$ 3 $\times$ nseq]                               & Effective diffusion tensors                                                         \\ \hline
+\end{tabular}

@@ -1,0 +1,27 @@
+\begin{tabular}{|c|c|c|c|}
+
+	\multicolumn{4}{c}{Spherical cells without nucleus}                                                          \\ \hline
+	Cmpt   &                             & Nucleus                                       & ECS                   \\ \hline
+	Label  &                             & out                                           & ecs                   \\ \hline
+	Number &                             & $[1, \dots, n_\text{cell}]$                   & $n_\text{cell} + 1$   \\ \hline
+
+	\multicolumn{4}{c}{Spherical cells with nucleus}                                                             \\ \hline
+	Cmpt   & Nucleus                     & Cytoplasm                                     & ECS                   \\ \hline
+	Label  & in                          & out                                           & ecs                   \\ \hline
+	Number & $[1, \dots, n_\text{cell}]$ & $[n_\text{cell} + 1, \dots, 2 n_\text{cell}]$ & $2 n_\text{cell} + 1$ \\ \hline
+
+	\multicolumn{4}{c}{Cylindrical cells without myelin}                                                         \\ \hline
+	Cmpt   &                             & Axon                                          & ECS                   \\ \hline
+	Label  &                             & out                                           & ecs                   \\ \hline
+	Number &                             & $[1, \dots, n_\text{cell}]$                   & $n_\text{cell} + 1$   \\ \hline
+
+	\multicolumn{4}{c}{Cylindrical cells with myelin}                                                            \\ \hline
+	Cmpt   & Axon                        & Myelin                                        & ECS                   \\ \hline
+	Label  & in                          & out                                           & ecs                   \\ \hline
+	Number & $[1, \dots, n_\text{cell}]$ & $[n_\text{cell} + 1, \dots, 2 n_\text{cell}]$ & $2 n_\text{cell}+1$   \\ \hline
+
+	\multicolumn{4}{c}{Neuron}                                                                                   \\ \hline
+	Cmpt   &                             & Neuron                                        & ECS                   \\ \hline
+	Label  &                             & out                                           & ecs                   \\ \hline
+	Number &                             & 1                                             & 2                     \\ \hline
+\end{tabular}

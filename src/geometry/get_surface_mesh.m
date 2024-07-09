@@ -1,7 +1,7 @@
 function [total_area, areas, centers, normals] = get_surface_mesh(points, facets)
 %GET_SURFACE_MESH Compute surface areas, centers and normals for each facet.
 %
-%   points: double(3, npoints)
+%   points: double(3, npoint)
 %   facets: int(3, nfacet)
 %
 %   total_area: double

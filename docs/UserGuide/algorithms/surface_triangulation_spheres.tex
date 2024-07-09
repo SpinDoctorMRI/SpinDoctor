@@ -1,0 +1,13 @@
+Suppose we have $N_\text{cell}$ spherical cells with nucleus. Denote a sphere with center $c$ and radius $R$ by $S(c, R)$, we use the built-in functions (convex hull, delaunay triangulation) in MATLAB to get its surface triangulation, $T(c, R)$. Call the radii of the nucleus $r_1, \dots, r_{N_\text{cell}}$ and the radii of the cells $R_1, \dots, R_{N_\text{cell}}$. Then the boundaries between the cytoplasm and the nucleus are
+$$\{\Gamma_i = T(c_i, r_i)\}, \quad i = 1, \dots, N_\text{cell};$$
+and between the cytoplasm and the ECS
+$$\{\Sigma_i = T(c_i, R_i)\}, \quad i = 1, \dots, N_\text{cell};$$
+For the box ECS, we find the coordinate limits of the set
+$$\bigcup_{i=1}^{N_\text{cell}} S(c_i,R_i) \subset [x_0,x_f]\times [y_0,y_f] \times [z_0,z_f]$$
+and add a gap $k = \text{ecs\_gap}\times \max\{x_f-x_0,y_f-y_0,z_f-z_0\}$ to make a box
+$$B = [x_0 - k, x_f + k]\times [y_0 - k, y_f + k] \times [z_0 - k, z_f + k].$$
+We put 2 triangles on each face of $B$ to make a surface triangulation $\Psi$ with 12 triangles.
+
+For the tight-wrap ECS, we increase the cell radius by a gap size and take the union
+$$W = \bigcup_{i=1}^{N_\text{cell}} S(c_i,R_i+\text{ecs\_gap}\times R_\text{mean}),$$
+where $R_\text{mean}=\frac{R_\text{min}+R_\text{max}}{2}$. We use the alphaShape function in MATLAB to find a surface triangulation $\Psi$ that contains $W$.

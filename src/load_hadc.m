@@ -1,7 +1,7 @@
 function results = load_hadc(femesh, setup, savepath)
 %LOAD_HADC Load the results saved by SOLVE_HADC.
 %   The results of each iteration are loaded from
-%   "<SAVEPATH>/HADC_<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT".
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/hadc/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
 %
 %   setup: struct
 %   savepath: string
@@ -21,6 +21,8 @@ sequences = setup.gradient.sequences;
 directions = setup.gradient.directions;
 reltol = setup.hadc.reltol;
 abstol = setup.hadc.abstol;
+solve_ode = setup.hadc.ode_solver;
+solver_str = func2str(solve_ode);
 
 initial_density = setup.pde.initial_density;
 
@@ -30,49 +32,37 @@ nsequence = length(sequences);
 ndirection = size(directions, 2);
 
 % Volumes
-volumes = zeros(1, ncompartment);
-for icmpt = 1:ncompartment
-    points = femesh.points{icmpt};
-    elements = femesh.elements{icmpt};
-    volumes(icmpt) = get_volume_mesh(points, elements);
-end
+volumes = femesh.volumes;
 
 % Folder for loading
 savepath = sprintf( ...
-    "%s/hadc_abstol%g_reltol%g", ...
-    savepath, abstol, reltol ...
+    "%s/%s_abstol%g_reltol%g", ...
+    savepath, solver_str, abstol, reltol ...
 );
-    
+
 % Initialize output arguments
 adc = zeros(ncompartment, nsequence, ndirection);
 adc_allcmpts = zeros(nsequence, ndirection);
 itertimes = zeros(ncompartment, nsequence, ndirection);
 
-% Cartesian indices (for parallel looping with linear indices)
-allinds = [ncompartment nsequence ndirection];
-
-% Iterate over gradient amplitudes, sequences and directions. If the Matlab
-% PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
-% parallel, otherwise it should work like a normal loop. If that is not the
-% case, replace the `parfor` keyword by the normal `for` keyword.
-parfor iall = 1:prod(allinds)
-
-    % Extract indices
-    [icmpt, iseq, idir] = ind2sub(allinds, iall);
-
-    % Extract parameters for iteration
+inds = [ncompartment ndirection];
+for iseq = 1:nsequence
     seq = sequences{iseq};
-    g = directions(:, idir);
-
-    % File name for saving or loading iteration results
-    filename = sprintf("%s/%s.mat", savepath, adc_string(icmpt, seq, g));
-    
     % Load results
-    fprintf("Load %s\n", filename);
-    mfile = matfile(filename, "Writable", false);
-    adc(iall) = mfile.adc;
-    itertimes(iall) = mfile.itertime;
-end % iterations
+    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+    fprintf("Load hadc %d/%d.\n", iseq, nsequence);
+    mfile = load(filename);
+    for iall = 1:prod(inds)
+        [icmpt, idir] = ind2sub(inds, iall);
+        % Extract parameters for iteration
+        ug = directions(:, idir);
+        gradient_field = sprintf("cmpt%d_", icmpt) + gradient_fieldstring(ug);
+        data = mfile.(gradient_field);
+
+        adc(icmpt, iseq, idir) = data.adc;
+        itertimes(icmpt, iseq, idir) = data.itertimes;
+    end
+end
 
 % Compute total HADC (weighted sum over compartments)
 weights = initial_density .* volumes;

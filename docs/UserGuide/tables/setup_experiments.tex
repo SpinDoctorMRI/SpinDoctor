@@ -1,0 +1,33 @@
+\begin{tabular}{|l|l|p{6cm}|} \hline
+
+    Field name              & Example                 & Explanation                                                                                                  \\ \hline
+
+    \verb+btpde+  & \verb+struct+  & Substructure for solving the BTPDE (comment out to skip)                                                     \\ \hline
+    \verb+btpde.ode_solver+  & \verb+@ode15s+  & Function handle for ODE solver (comment to use default)                                                      \\ \hline
+    \verb+btpde.reltol+  & \verb+1e-4+  & Relative tolerance for ODE solver                                                                            \\ \hline
+    \verb+btpde.abstol+  & \verb+1e-6+  & Absolute tolerance for ODE solver                                                                            \\ \hline
+
+    \verb+btpde_midpoint+  & \verb+struct+ & Substructure for solving the BTPDE using Crank-Nicolson solver (comment out to skip)                         \\ \hline
+    \verb+btpde_midpoint.implicitness+ & \verb+0.5+ & Implicitness parameter $\theta$: 0.5 for Crank-Nicolson (second order), 1.0 for Implicit Euler (first order) \\ \hline
+    \verb+btpde_midpoint.timestep+ & \verb+5.0+ & Uniform time step $\mathrm{d} t$                                                                             \\ \hline
+
+    \verb+hadc+ & \verb+struct+ & Substructure for solving the HADC model (comment out to skip)                                                \\ \hline
+    \verb+hadc.ode_solver+ & \verb+@ode15s+ & Function handle for ODE solver (comment to use default)                                                      \\ \hline
+    \verb+hadc.reltol+ & \verb+1e-4+ & Relative tolerance for ODE solver                                                                            \\ \hline
+    \verb+hadc.abstol+ & \verb+1e-4+ & Absolute tolerance for ODE solver                                                                            \\ \hline
+
+    \verb+mf+ & \verb+struct+ & Substructure for solving for the Matrix Formalism (comment out to skip)                                      \\ \hline
+    \verb+mf.length_scale+ & \verb+3+ & Minimum length scale of Laplace eigenfunctions                                                               \\ \hline
+    \verb+mf.neig_max+ & \verb+100+ & Maximum number of eigenvalues. To compute all: \verb+Inf+                                       \\ \hline
+    \verb+mf.ninterval+ & \verb+50+ & Number of intervals to discretize time profile (if not PGSE)                                                 \\ \hline
+
+    \verb+analytical+ & \verb+struct+ & Substructure for solving for the analytical model (comment out to skip)                                      \\ \hline
+    \verb+analytical.length_scale+ & \verb+3+ & Minimum length scale of radial Laplace eigenfunctions                                                        \\ \hline
+    \verb+analytical.eigstep+ & \verb+1e-6+ & Minimium distance between two radial eigenvalues                                                             \\ \hline
+
+    \verb+karger+ & \verb+struct+ & Substructure for solving for the FPK model (comment out to skip)                                             \\ \hline
+    \verb+karger.ndirection+ & 50                      & Number of direction to compute effective diffusion tensor                                                    \\ \hline
+    \verb+karger.ode_solver+ & \verb+@ode23t+ & Function handle for ODE solver (comment to use default)                                                      \\ \hline
+    \verb+karger.reltol+ & \verb+1e-4+ & Relative tolerance for ODE solver                                                                            \\ \hline
+    \verb+karger.abstol+ & \verb+1e-6+ & Absolute tolerance for ODE solver                                                                            \\ \hline
+\end{tabular}

@@ -6,12 +6,17 @@ function [areas, facet_centers, normals] = get_surfacenormal_mesh(points, elemen
 
 % Find elements to which the facets belong
 neumann2element = match_boundary_facets_with_elements(facets', elements');
-elements_match = elements(:, neumann2element);
+
+% %  26/02 Bug fix
+elements_match = elements(:, neumann2element(neumann2element > 0));
+
+
 nelement_match = size(elements_match, 2);
 
 % Identify centers of matching elements
 x = reshape(points(:, elements_match), 3, 4, nelement_match);
 element_centers = squeeze(mean(x, 2));
+
 
 % Create outward directed vectors (from cell center to outer facet)
 outwards_vectors = facet_centers - element_centers;

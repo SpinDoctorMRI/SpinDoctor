@@ -12,6 +12,12 @@ function call_tetgen(filename, options)
 if ispc
     tetgen_cmd = "src\tetgen\win64\tetgen";
 elseif ismac
+    out = system("chmod 775 src/tetgen/mac64/tetgen");
+    if out ~= 0
+        error_msg = join(["permission denied: src/tetgen/mac64/tetgen,",...
+        " please grant 'src/tetgen/mac64/tetgen' executable permission."]);
+        error(error_msg)
+    end
     tetgen_cmd = "src/tetgen/mac64/tetgen";
 elseif isunix
     out = system("chmod 775 src/tetgen/lin64/tetgen");

@@ -35,12 +35,27 @@ facetmarkers = vec(5, :);
 % Read elements and their associated compartments
 fid = fopen(filename + ".ele", "r");
 if fid ~= -1
-    fscanf(fid, "%d", [3, 1]);
-    vec = fscanf(fid, "%f", [6, inf]);
+    line= fscanf(fid, "%d", [3, 1]);
+    has_elementmarkers = line(3) == 1;
+    if has_elementmarkers
+        vec = fscanf(fid, "%f", [6, inf]);
+    else
+        vec = fscanf(fid, "%f", [5, inf]);
+    end
 end
 fclose(fid);
 elements = vec(2:5, :);
-elementmarkers = vec(6, :);
+if has_elementmarkers
+    elementmarkers = vec(6, :);
+else
+    elementmarkers = zeros(length(elements),1);
+end
+
+if ismember(0, facets)
+   % reorder index
+   facets = facets + 1;
+   elements = elements + 1;
+end
 
 % Create output structure
 femesh_all.points = points;

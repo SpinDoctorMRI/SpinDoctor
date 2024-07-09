@@ -1,104 +1,221 @@
-function lap_eig = compute_laplace_eig(femesh, pde, eiglim, neig_max)
-%COMPUTE_LAPLACE_EIG Compute Laplace eigenvalues, functions and product moments.
+function lap_eig = compute_laplace_eig(femesh, pde, mf, savepath)
+%COMPUTE_LAPLACE_EIG Compute Laplace eigenvalues and eigenfunctions.
 %
 %   femesh: struct
 %   pde: struct
-%   eiglim: [1 x 1]
-%   neig_max: [1 x 1]
+%   mf: struct
+%   savepath: path string
 %
 %   lap_eig: struct with fields
 %       values: [neig x 1]
 %       funcs: [npoint x neig]
-%       moments: [neig x neig x 3]
-%       massrelax: [neig x neig]
+%       length_scales: [neig x 1]
 %       totaltime: [1 x 1]
 
 
 % Measure computational time of eigendecomposition
 starttime = tic;
 
+% Check if a save path has been provided (this toggers saving)
+do_save = nargin == nargin(@compute_laplace_eig);
+
+% Extract mf parameters
+rerun = mf.rerun_eigen;
+if mf.surf_relaxation
+    % surface relaxation is on, use lap_eig with zero Neumann condition
+    pde.permeability = 0;
+end
+
 % Solver parameters
 params = {};
-% params = [params {"Tolerance" 1e-12}];
+
+% set eigs' sigma
+if isfield(mf, 'eigs')
+    params = [params {mf.eigs.sigma}];
+else
+    params = [params {-1e-8}];
+end
+
+% Display algorithm iteration details
 params = [params {"Display" true}];
 
-% Check if user has provided a requested number of eigenvalues
-if nargin < nargin(@compute_laplace_eig)
-    % Compute all eigenvalues
-    neig_max = Inf;
+if isfield(mf, 'eigs')
+    % Convergence tolerance of eigs
+    if isfield(mf.eigs, 'tolerance') && isnumeric(mf.eigs.tolerance)
+        params = [params {"Tolerance" mf.eigs.tolerance}];
+    end
+    % Maximum number of eigs algorithm iterations
+    if isfield(mf.eigs, 'maxiter') && isnumeric(mf.eigs.maxiter)
+        params = [params {"MaxIterations" mf.eigs.maxiter}];
+    elseif isfield(mf.eigs, 'maxiterations') && isnumeric(mf.eigs.maxiterations)
+        params = [params {"MaxIterations" mf.eigs.maxiterations}];
+    end
 end
 
 % Extract domain parameters
 diffusivity = pde.diffusivity;
-relaxation = pde.relaxation;
+mean_diffusivity = pde.mean_diffusivity;
+
+% Compute the upper bound of the eigenvalue interval
+eiglim = length2eig(mf.length_scale, mean_diffusivity);
 
 % Sizes
 ncompartment = femesh.ncompartment;
 
-% Assemble finite element matrices
-disp("Setting up FEM matrices");
-M_cmpts = cell(1, ncompartment);
-K_cmpts = cell(1, ncompartment);
-R_cmpts = cell(1, ncompartment);
-Jx_cmpts = repmat({cell(1, ncompartment)}, 1, 3);
-for icmpt = 1:ncompartment
-    % Finite elements
-    points = femesh.points{icmpt};
-    facets = femesh.facets(icmpt, :);
-    elements = femesh.elements{icmpt};
-    [~, volumes] = get_volume_mesh(points, elements);
-
-    % Assemble mass, stiffness, and T2-relaxation matrices in compartment
-    M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
-    K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
-    R_cmpts{icmpt} = 1 / relaxation(icmpt) * M_cmpts{icmpt};
-    
-    % Assemble moment matrices (coordinate weighted mass matrices)
-    for idim = 1:3
-        Jx_cmpts{idim}{icmpt} = mass_matrixP1_3D(elements', volumes', points(idim, :)');
+% Check if saved lap_eig exists
+no_result = true;
+if do_save && ~rerun
+    lap_eig = load_laplace_eig(savepath, mf, mean_diffusivity);
+    if ~isempty(lap_eig)
+        no_result = false;
     end
 end
 
-% Create global mass, stiffness, relaxation, flux, and moment matrices (sparse)
-disp("Coupling FEM matrices");
-M = blkdiag(M_cmpts{:});
-K = blkdiag(K_cmpts{:});
-R = blkdiag(R_cmpts{:});
-Jx = cellfun(@(J) blkdiag(J{:}), Jx_cmpts, "UniformOutput", false);
-Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
-Q = couple_flux_matrix(femesh, pde, Q_blocks, false);
+if no_result
+    if isinf(mf.neig_max)
+        warning("Computing all eigenvalues using EIG requires much more memory than EIGS." ...
+                + " Eigenvalues out of the interval defined by length scale will be removed.");
+    end
 
-fprintf("Eigendecomposition of FE matrices: size %d x %d\n", size(M));
+    % Assemble finite element matrices
+    disp("Setting up FEM matrices");
+    M_cmpts = cell(1, ncompartment);
+    K_cmpts = cell(1, ncompartment);
+    for icmpt = 1:ncompartment
+        % Finite elements
+        points = femesh.points{icmpt};
+        elements = femesh.elements{icmpt};
+        [~, volumes] = get_volume_mesh(points, elements);
 
-% % Solve explicit eigenvalue problem, computing all eigenvalues after
-% % inverting the mass matrix
-% tic
-% [funcs, values] = eig(full(M \ (K + Q)));
-% toc
+        % Assemble mass and stiffness matrices in compartment
+        M_cmpts{icmpt} = mass_matrixP1_3D(elements', volumes');
+        K_cmpts{icmpt} = stiffness_matrixP1_3D(elements', points', diffusivity(:, :, icmpt));
+    end
 
-% % Solve generalized eigenvalue problem, computing all eigenvalues
-% tic
-% [funcs, values] = eig(full(K + Q), full(M));
-% toc
+    if all(pde.permeability==0)    % All compartments are uncorrelated
+        % Initialize output results
+        lap_eig = struct();
 
-% Compute at most all eigenvalues in the given domain
-neig_max = min(neig_max, size(M, 1));
-% ssdim = 4 * neig_max;
-% if ssdim < size(M, 1)
-%     params = [params {"SubspaceDimension" ssdim}];
-% end
+        for icmpt = 1:ncompartment
+            starttime_icmpt = tic;
+
+            % Get mass and stiffness matrices (sparse)
+            M = M_cmpts{icmpt};
+            K = K_cmpts{icmpt};
+
+            fprintf("Eigendecomposition of FE matrices of compartment %d/%d: size %d x %d\n", ...
+                icmpt, ncompartment, size(M));
+
+            [eigvals, eigfuncs] = eigendecompose(K, M, params, mf, eiglim);
+
+            % Save eigendecomposition
+            lap_eig(icmpt).values = eigvals;
+            lap_eig(icmpt).funcs = eigfuncs;
+            lap_eig(icmpt).totaltime = toc(starttime_icmpt);
+        end
+
+    else    % One compartment or some compartments are connected by permeable interfaces
+        % Create global mass, stiffness, and flux matrices (sparse)
+        disp("Coupling FEM matrices");
+        M = blkdiag(M_cmpts{:});
+        K = blkdiag(K_cmpts{:});
+        Q_blocks = assemble_flux_matrix(femesh.points, femesh.facets);
+        Q = couple_flux_matrix(femesh, pde, Q_blocks, false);
+
+        fprintf("Eigendecomposition of FE matrices: size %d x %d\n", size(M));
+
+        [eigvals, eigfuncs] = eigendecompose(K + Q, M, params, mf, eiglim);
+
+        % Create output structure
+        lap_eig.values = eigvals;
+        lap_eig.funcs = eigfuncs;
+        lap_eig.totaltime = toc(starttime);
+    end
+    
+    % add length scales
+    lap_eig = add_eig_length(lap_eig, mean_diffusivity);
+end
+
+% get actual length scale
+if isinf(mf.neig_max)
+    ls = mf.length_scale;
+else
+    ls_min = cellfun(@(x) min(x), {lap_eig(:).length_scales});
+    ls = max(ls_min);
+end
+
+% save laplace eigendecomposition
+if do_save && no_result
+    if ~isdir(savepath)
+        warning('%s does not exist. Creating it to store eigenfunctions\n',savepath);
+        mkdir(savepath)
+    end
+    % file for saving
+    filename = sprintf( ...
+        "%s/lap_eig_lengthscale%.4f_neigmax%g.mat", ...
+        savepath, ls, mf.neig_max ...
+    );
+
+    disp("save " + filename + " -v7.3 lap_eig");
+    save(filename, "-v7.3", "lap_eig");
+end
+
+% reset lap_eig according to eiglim
+if ls < mf.length_scale
+    disp("Remove eigenvalues above interval defined by length scale.");
+    lap_eig = reset_lapeig(lap_eig, eiglim, Inf);
+end
+
+% Display function evaluation time
+disp("Done with eigendecomposition.");
+toc(starttime);
+end
+
+function [values, funcs] = eigendecompose(KQ, M, params, mf, eiglim)
+%EIGENDECOMPOSE Solve the generalized eigenvalue problem KQ*V = M*V*D.
+%
+%   KQ: matrix [npoint x npoint]
+%   M: matrix [npoint x npoint]
+%   params: cell - parameters of eigs
+%   mf: struct
+%   eiglim: double - maximal eigenvalues
+%
+%   values: [neig x 1]
+%   funcs: [npoint x neig]
+
+
+% Set number of eigenvalues to compute
+neig_max = min([mf.neig_max, size(M, 1)]);
+% Set maximum size of Krylov subspace
+if isfield(mf, 'eigs') && isfield(mf.eigs, 'subspacedimension') ...
+    && isnumeric(mf.eigs.subspacedimension)
+
+    ssdim = max([neig_max+2, mf.eigs.subspacedimension]);
+    if ssdim < size(M, 1)
+        params = [params {"SubspaceDimension" ssdim}];
+    else
+        warning("SubspaceDimension is invalid (> dim of mass matrix).")
+    end
+elseif isfield(mf, 'eigs') && isfield(mf.eigs, 'ssdim') ...
+    && isnumeric(mf.eigs.ssdim)
+
+    ssdim = max([neig_max+2, mf.eigs.ssdim]);
+    if ssdim < size(M, 1)
+        params = [params {"SubspaceDimension" ssdim}];
+    else
+        warning("SubspaceDimension is invalid (> dim of mass matrix).")
+    end
+end
 
 % Solve generalized eigenproblem, computing the smallest eigenvalues only.
 % If 2 * neig_max >= nnode, a full decomposition is performed,
 % calling the eig function inside eigs
 tic
-[funcs, values] = eigs(K + Q, M, neig_max, "smallestreal", ...
-    "IsSymmetricDefinite", true, params{:}); % "smallestabs"
+[funcs, values] = eigs(KQ, M, neig_max, params{:}, ...
+    "IsSymmetricDefinite", true);
 toc
 
-disp("Done with eigendecomposition");
-
-% Order eigenvalues in increasing order
+% Sort eigenvalues in increasing order
 [values, indices] = sort(diag(values));
 funcs = funcs(:, indices);
 
@@ -110,43 +227,26 @@ if any(values < 0)
     values(i) = 0;
 end
 
-% Remove eigenvalues above interval defined by length scale
-neig_all = length(values);
-inds_keep = values <= eiglim;
-values = values(inds_keep);
-funcs = funcs(:, inds_keep);
-neig = length(values);
+if isinf(mf.neig_max)
+    % Remove eigenvalues above interval defined by length scale
+    inds_keep = values <= eiglim;
+    values = values(inds_keep);
+    funcs = funcs(:, inds_keep);
+    neig = length(values);
+else
+    % keep all eigenvalues if mf.neig_max is not inf
+    inds_keep = values <= eiglim;
+    neig = length(values);
+end
 
 % Check that the entire interval was explored
-if neig == neig_all && ~isinf(eiglim)
+if all(inds_keep) && ~isinf(eiglim)
     warning("No eigenvalues were outside the interval. Consider increasing neig_max " ...
         + "if there are more eigenvalues that may not have been found in the interval.");
 end
 
-fprintf("Found %d eigenvalues on [%g, %g]\n", neig, 0, eiglim);
+fprintf("Found %d eigenvalues on [%g, %g].\n", neig, 0, max(values));
 
 % Normalize eigenfunctions with mass weighting
-disp("Normalizing eigenfunctions");
 funcs = funcs ./ sqrt(dot(funcs, M * funcs));
-
-% Compute first order moments of of eigenfunction products
-tic
-disp("Computing first order moments of products of eigenfunction pairs");
-moments = zeros(neig, neig, 3);
-for idim = 1:3
-    moments(:, :, idim) = funcs' * Jx{idim} * funcs;
 end
-disp("Computing T2-weighted Laplace mass matrix");
-massrelax = funcs' * R * funcs;
-toc
-
-% Create output structure
-lap_eig.values = values;
-lap_eig.funcs = funcs;
-lap_eig.moments = moments;
-lap_eig.massrelax = massrelax;
-lap_eig.totaltime = toc(starttime);
-
-% Display function evaluation time
-disp("Done with eigendecomposition.");
-toc(starttime);

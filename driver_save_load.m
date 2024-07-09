@@ -14,7 +14,6 @@ addpath(genpath("src"));
 
 
 %% Define inputs
-
 % Get setup
 addpath setups
 
@@ -30,149 +29,60 @@ setup_30axons;
 % setup_200axons;
 
 % Choose whether to save magnetization field
-save_magnetization = false;
+magnetization_flag = true;
 
-% Choose to see some of the typical plots or not
-do_plots = true;
-
-
-%% Prepare experiments
-
-% Set up the PDE model in the geometrical compartments
-setup.pde = prepare_pde(setup);
-
-% Prepare experiments (gradient sequence, bvalues, qvalues)
-setup = prepare_experiments(setup);
-
-% Get sizes
-ncompartment = length(setup.pde.compartments);
-namplitude = length(setup.gradient.values);
-nsequence = length(setup.gradient.sequences);
-ndirection = size(setup.gradient.directions, 2);
-
-% Create or load finite element mesh
-[femesh, surfaces, cells] = create_geometry(setup);
-
-% Get volume and surface area quantities from mesh
-[volumes, surface_areas] = get_vol_sa(femesh);
-
-% Compute volume weighted mean of diffusivities over compartments
-% Take trace of each diffusion tensor, divide by 3
-mean_diffusivity = trace(sum(setup.pde.diffusivity .* shiftdim(volumes, -1), 3)) ...
-    / (3 * sum(volumes));
-
-% Initial total signal
-initial_signal = setup.pde.initial_density * volumes';
-
-% Create folder for saving results
-tmp = split(setup.name, "/");
-tmp = tmp(end);
-if endsWith(tmp, ".stl")
-    tmp = split(tmp, ".stl");
-    tmp = tmp(1);
-end
-refinement_str = "";
-if isfield(setup.geometry, "refinement")
-    refinement_str = sprintf("_refinement%g", setup.geometry.refinement);
-end
-save_dir_path_spindoctor = "saved_simul/" + tmp + refinement_str;
-couple_str = sprintf("kappa%g_%g", setup.pde.permeability_in_out, ...
-    setup.pde.permeability_out_ecs);
-dir_str = sprintf("ndir%d", ndirection);
-save_dir_path_spindoctor = save_dir_path_spindoctor + "/" + couple_str;
-
-if ~isfolder(save_dir_path_spindoctor)
-    mkdir(save_dir_path_spindoctor);
-end
+% Prepare simulation
+[setup, femesh, surfaces]  = prepare_simulation(setup);
 
 
 %% Solve BTPDE
 if isfield(setup, "btpde")
     disp("Computing or loading the BTPDE signals");
-    btpde = solve_btpde(femesh, setup, save_dir_path_spindoctor, save_magnetization);
-    btpde.magnetization_avg = average_magnetization(btpde.magnetization);
+    savepath = create_savepath(setup, "btpde");
+    btpde = solve_btpde(femesh, setup, savepath, magnetization_flag);
+%     btpde = load_btpde(setup, savepath, magnetization_flag);
 end
 
 
 %% Solve BTPDE using midpoint method
-if isfield(setup, "btpde")
+if isfield(setup, "btpde_midpoint")
     disp("Computing or loading the BTPDE midpoint signals");
+    savepath = create_savepath(setup, "btpde_midpoint", 'saved_simul');
     btpde_midpoint = solve_btpde_midpoint( ...
-        femesh, setup, save_dir_path_spindoctor, save_magnetization ...
+        femesh, setup, savepath, magnetization_flag ...
     );
-    btpde_midpoint.magnetization_avg ...
-        = average_magnetization(btpde_midpoint.magnetization);
+    % btpde_midpoint = load_btpde_midpoint(setup, savepath, magnetization_flag);
 end
 
 
 %% Solve HADC model
 if isfield(setup, "hadc")
     disp("Computing or loading the homogenized apparent diffusion coefficient");
-    hadc = solve_hadc(femesh, setup, save_dir_path_spindoctor);
+    savepath = create_savepath(setup, "hadc");
+    hadc = solve_hadc(femesh, setup, savepath);
+    % hadc = load_hadc(femesh, setup, savepath);
 end
 
 
 %% Laplace eigendecomposition
 if isfield(setup, "mf")
-    disp("Computing or loading the Laplace eigenfunctions");
+    % Laplace eigendecomposition
+    eigenpath = create_savepath(setup, "lap_eig");
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf, eigenpath);
+    % lap_eig = load_laplace_eig(eigenpath, setup.mf, setup.pde.mean_diffusivity);
 
-    % Filename
-    fname = sprintf("lap_eig_lengthscale%g.mat", setup.mf.length_scale);
-    fname = save_dir_path_spindoctor + "/" + fname;
-    
-    % Save or load
-    if isfile(fname)
-        % Load eigendecomposition
-        disp("load " + fname);
-        load(fname);
-
-        % Store eigendecomposition
-        lap_eig.values = values;
-        lap_eig.funcs = funcs;
-        lap_eig.moments = moments;
-        lap_eig.massrelax = massrelax;
-        lap_eig.totaltime = totaltime;
-    else
-        % Perform eigendecomposition
-        eiglim = length2eig(setup.mf.length_scale, mean_diffusivity);
-        lap_eig = compute_laplace_eig(femesh, setup.pde, eiglim, setup.mf.neig_max);
-
-        % Save eigendecomposition
-        disp("save " + fname + " -v7.3 -struct lap_eig");
-        save(fname, "-v7.3", "-struct", "lap_eig");
-    end
-
-    % Clear temporary variables
-    clear values funcs moments totaltime
-    clear fname
-
-    % Compute length scales of eigenvalues
-    lap_eig.length_scales = eig2length(lap_eig.values, mean_diffusivity);
-end
-
-
-%% MF effective diffusion tensor
-if isfield(setup, "mf")
-    % Compute the JN value that relates the eigenmodes to their contribution
-    % to the Matrix Formalism signal for a diffusion-encoding sequence
-    mf_jn = compute_mf_jn(lap_eig.values, setup);
-
-    % Compute the Matrix Formalism effective diffusion tensor
-    diffusion_tensor = compute_mf_diffusion_tensor(femesh, lap_eig, mf_jn);
-end
-
-
-%% Compute MF magnetization
-if isfield(setup, "mf")
     % Compute MF magnetization and signal
-    mf = solve_mf(femesh, setup, lap_eig);
+    savepath = create_savepath(setup, "mf");
+    mf = solve_mf(femesh, setup, lap_eig, savepath, magnetization_flag);
+%     mf = load_mf(setup, savepath, magnetization_flag);
 
-    % MF direction averaged magnetization
-    mf.magnetization_avg = average_magnetization(mf.magnetization);
+    mf_hadc = solve_mf_hadc(femesh, setup, lap_eig);
 end
 
 
 %% Postprocess results
+% Choose to see some of the typical plots or not
+do_plots = false;
 
 % Stop here if plotting is detoggled
 if ~do_plots
@@ -188,43 +98,76 @@ end
 % plot_femesh(femesh, cmpts_in, cmpts_out, cmpts_ecs);
 plot_femesh_everywhere(femesh, refinement_str);
 
-% Plot Matrix Formalism effective diffusion tensor
-plot_diffusion_tensor(diffusion_tensor, mean_diffusivity);
+% if isfield(setup, 'mf')
+%     % Plot Matrix Formalism effective diffusion tensor
+%     plot_diffusion_tensor(diffusion_tensor_all, setup.pde.mean_diffusivity);
+% 
+%     % Plot some Laplace eigenfunctions
+%     if length(lap_eig) == 1
+%         neig = length(lap_eig.values);
+%         nshow = min(10, neig);
+%         for ieig = nshow:nshow
+%             diffdir = squeeze(lap_eig.moments(1, ieig, :));
+%             diffdir = diffdir / norm(diffdir, 2);
+%             title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
+%                 ieig, lap_eig.length_scales(ieig), round(diffdir' * 100) / 100);
+% 
+%             % Split Laplace eigenfunctions into compartments
+%             npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+%             lap_eig_funcs_sep = mat2cell(lap_eig.funcs, npoint_cmpts);
+%             % plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
+%             plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
+%         end
+%     else
+%         % Plot the ieig-th eigenfunction for the compartment icmpt
+%         icmpt = 7;
+%         ncompartment = length(lap_eig);
+%         icmpt = min(icmpt, ncompartment);
+%         
+%         ieig = 4;
+%         neig = length(lap_eig(icmpt).values);
+%         ieig = min(ieig, neig);
+% 
+%         diffdir = squeeze(lap_eig(icmpt).moments(1, ieig, :));
+%         diffdir = diffdir / norm(diffdir, 2);
+%         title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
+%             icmpt, ieig, lap_eig(icmpt).length_scales(ieig), round(diffdir' * 100) / 100);
+% 
+%         % Split Laplace eigenfunctions into compartments
+%         lap_eig_funcs_sep = cell(ncompartment, 1);
+%         for jcmpt = 1:ncompartment
+%             if jcmpt == icmpt
+%                 lap_eig_funcs_sep{icmpt} = lap_eig(icmpt).funcs(:, ieig);
+%             else
+%                 lap_eig_funcs_sep{jcmpt} = lap_eig(jcmpt).funcs(:, 1) * 0;
+%             end
+%         end
+%         plot_field_compartment(femesh, lap_eig_funcs_sep, icmpt, title_str, 1, false);
+% %         plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str);
+%         plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str);
+%     end
+% end
 
-% Plot some Laplace eigenfunctions
-neig = length(lap_eig.values);
-nshow = min(10, neig);
-for ieig = nshow:nshow
-    diffdir = squeeze(lap_eig.moments(1, ieig, :));
-    diffdir = diffdir / norm(diffdir, 2);
-    title_str = sprintf("Laplace eigenfunction %d, l_s=%g, diffusion direction=[%.2f %.2f %.2f]",...
-        ieig, lap_eig.length_scales(ieig), round(diffdir' * 100) / 100);
+if isfield(setup, 'mf') && isfield(setup, 'btpde')
+    % Relative error between BTPDE and MF signal
+    signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
+        ./ max(abs(btpde.signal_allcmpts), [], 3);
 
-    % Split Laplace eigenfunctions into compartments
-    npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
-    lap_eig_funcs_sep = mat2cell(lap_eig.funcs, npoint_cmpts);
-    % plot_field(femesh, lap_eig_funcs_sep, setup.pde.compartments, title_str, ieig);
-    plot_field_everywhere(femesh, lap_eig_funcs_sep, title_str, ieig);
-end
+    % Difference between BTPDE and MF signal, normalized by initial signal
+    signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ setup.pde.initial_signal;
 
-% Relative error between BTPDE and MF signal
-signal_allcmpts_relerr = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ...
-    ./ max(abs(btpde.signal_allcmpts), [], 3);
+    % Plot quantities over many directions
+    if setup.ndirection > 1
+        % Plot HARDI signal
+        plot_hardi(setup.gradient.directions, real(btpde.signal_allcmpts) / femesh.total_volume, "BTPDE signal")
+        plot_hardi(setup.gradient.directions, real(mf.signal_allcmpts) / femesh.total_volume, "MF signal")
 
-% Difference between BTPDE and MF signal, normalized by initial signal
-signal_allcmpts_abserr_vol = abs(mf.signal_allcmpts - btpde.signal_allcmpts) ./ initial_signal;
+        % Plot relative difference
+        fig_title = "Rel diff between BTPDE and MF";
+        plot_hardi(setup.gradient.directions, signal_allcmpts_relerr, fig_title);
 
-% Plot quantities over many directions
-if ndirection > 1
-    % Plot HARDI signal
-    plot_hardi(setup.gradient.directions, real(btpde.signal_allcmpts) / sum(volumes), "BTPDE signal")
-    plot_hardi(setup.gradient.directions, real(mf.signal_allcmpts) / sum(volumes), "MF signal")
-
-    % Plot relative difference
-    fig_title = "Rel diff between BTPDE and MF";
-    plot_hardi(setup.gradient.directions, signal_allcmpts_relerr, fig_title);
-
-    % Plot difference normalized by volume
-    fig_title = "Diff between BTPDE and MF normalized by volume";
-    plot_hardi(setup.gradient.directions, signal_allcmpts_abserr_vol, fig_title);
+        % Plot difference normalized by volume
+        fig_title = "Diff between BTPDE and MF normalized by volume";
+        plot_hardi(setup.gradient.directions, signal_allcmpts_abserr_vol, fig_title);
+    end
 end

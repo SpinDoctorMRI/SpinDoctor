@@ -49,10 +49,9 @@ classdef CustomSequence < Sequence
                 s = sprintf("%s_%s_d%g_D%g", class(obj), f, ...
                     obj.delta, obj.Delta);
             else
-                s = sprintf("%s(delta=%g, Delta=%g, TE =%g, %s)", class(obj), ...
-                    obj.delta, obj.Delta,obj.TE, f);
+                s = sprintf("%s(delta=%g, Delta=%g, %s)", class(obj), ...
+                    obj.delta, obj.Delta, f);
             end
         end
     end
 end
-

@@ -4,9 +4,9 @@ function results = solve_hadc(femesh, setup, savepath)
 %   SOLVE_HADC(FEMESH, SETUP) solves the HADC and returns results.
 %
 %   SOLVE_HADC(FEMESH, SETUP, SAVEPATH) saves the results of each iteration at
-%   "<SAVEPATH>/HADC_<SOLVER_OPTIONS>/<ITERATION_INFO>.MAT". If an
-%   iteration file is already present, the solver loads the results instead of
-%   solving for that iteration.
+%   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/hadc/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
+%   If a result is already present in the iteration file, the solver loads
+%   the results instead of solving for that iteration.
 %
 %   femesh: struct
 %   setup: struct
@@ -18,9 +18,22 @@ function results = solve_hadc(femesh, setup, savepath)
 %       itertimes: double(ncompartment, nsequence, ndirection)
 %       totaltime: double(ncompartment, nsequence, ndirection)
 
+% TEMPORARY. Camino file sequences not yet implemented for this solver.
+const_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),setup.gradient.sequences,'UniformOutput',true);
+if ~all(const_ind,'all')
+    warning("Currently %s does not support camino file sequences. \n Solving only for non-camino sequences",mfilename);
+    setup.gradient.sequences = setup.gradient.sequences(const_ind);
+    setup.nsequence = sum(const_ind);
+end
+
 
 % Check if a save path has been provided (this toggers saving)
 do_save = nargin == nargin(@solve_hadc);
+if isfield(setup.hadc, 'rerun')
+    rerun = setup.hadc.rerun;
+else
+    rerun = false;
+end
 
 % Measure function evaluation time
 starttime = tic;
@@ -49,8 +62,8 @@ npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
 if do_save
     % Folder for saving
     savepath = sprintf( ...
-        "%s/hadc_abstol%g_reltol%g", ...
-        savepath, abstol, reltol ...
+        "%s/%s_abstol%g_reltol%g", ...
+        savepath, solver_str, abstol, reltol ...
     );
     if ~isfolder(savepath)
         mkdir(savepath)
@@ -107,8 +120,16 @@ allinds = [ncompartment nsequence ndirection];
 % PARALLEL COMPUTING TOOLBOX is available, the iterations may be done in
 % parallel, otherwise it should work like a normal loop. If that is not the
 % case, replace the `parfor` keyword by the normal `for` keyword.
-parfor iall = 1:prod(allinds)
 
+% Temporarily save results in temp_store to avoid I/O error
+temp_store = cell(allinds);
+
+% Check if Parallel Computing Toolbox is licensed
+if license('test', 'Distrib_Computing_Toolbox') && isempty(gcp('nocreate'))
+    parpool('local', [1, 2048]);
+end
+
+parfor iall = 1:prod(allinds)
     % Measure iteration time
     itertime = tic;
 
@@ -117,40 +138,52 @@ parfor iall = 1:prod(allinds)
 
     % Extract parameters for iteration
     seq = sequences{iseq};
-    g = directions(:, idir);
+    ug = directions(:, idir);
 
     % File name for saving or loading iteration results
-    filename = sprintf("%s/%s.mat", savepath, adc_string(icmpt, seq, g));
+    filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+    mfile = matfile(filename, "Writable", false);
+    gradient_field = sprintf("cmpt%d_", icmpt) + gradient_fieldstring(ug);
+    no_result = true;
     
     % Check if results are already available
-    if do_save && isfile(filename)
+    if ~rerun && do_save && hasfield(mfile, gradient_field)
         % Load results
-        fprintf("Load %s\n", filename);
-        mfile = matfile(filename, "Writable", false);
-        adc(iall) = mfile.adc;
-        itertimes(iall) = mfile.itertime;
-        totaltime_addition = totaltime_addition + mfile.itertime;
-    else
-        % Free diffusivity in direction g
-        D0 = g' * diffusivity(:, :, icmpt) * g;
+        fprintf("Load hadc %d/%d.\n", iall, prod(allinds));
+        try
+            data = mfile.(gradient_field);
+            adc(iall) = data.adc;
+            itertimes(iall) = data.itertimes;
+            totaltime_addition = totaltime_addition + data.itertimes;
+            no_result = false;
+        catch
+            no_result = true;
+            warning("hadc: the saved data of experiment %s %s is broken. Rerun simulation.", ...
+                seq.string, gradient_field);
+        end
+    end
+
+    % Run simulation if no result is saved or results are not available
+    if no_result
+        % Free diffusivity in direction ug
+        D0 = ug' * diffusivity(:, :, icmpt) * ug;
 
         % Compute surface integrals in gradient direction
-        surfint = G{icmpt} * (diffusivity(:, :, icmpt) * g);
+        surfint = G{icmpt} * (diffusivity(:, :, icmpt) * ug);
 
         % Display state of iterations
         fprintf( ...
             join([
                 "Solving HADC model of size %d using %s:"
-                "  Direction %d of %d: g = [%.2f; %.2f; %.2f]"
+                "  Direction %d of %d: ug = [%.2f; %.2f; %.2f]"
                 "  Sequence  %d of %d: f = %s"
                 "  Compartment %d of %d: %s\n"
             ], newline), ...
             sum(npoint_cmpts), solver_str, ...
-            idir, ndirection, g, ...
+            idir, ndirection, ug, ...
             iseq, nsequence, seq, ...
             icmpt, ncompartment, compartments(icmpt) ...
         );
-        
         
         % We only keep two points in tlist to output solution at all time
         % steps
@@ -185,13 +218,45 @@ parfor iall = 1:prod(allinds)
         itertimes(iall) = toc(itertime);
         
         if do_save
+            data.ug = ug;
+            data.adc = adc(iall);
+            data.itertimes = itertimes(iall);
+            
             % Save iteration results
-            fprintf("Save %s\n", filename);
-            mfile = matfile(filename, "Writable", true);
-            mfile.adc = adc(iall);
-            mfile.itertime = itertimes(iall);
+            temp_store{iall} = data;
         end
-    end % save or load results
+    end
+end
+
+if do_save
+    for iseq = 1:nsequence
+        seq = sequences{iseq};
+        filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+        fprintf("Save %s\n", filename);
+        mfile = matfile(filename, "Writable", true);
+        for icmpt = 1:ncompartment
+            for idir = 1:ndirection
+                if ~isempty(temp_store{icmpt, iseq, idir})
+                    % Extract iteration inputs
+                    ug = directions(:, idir);
+
+                    % Save results to MAT-file
+                    gradient_field = sprintf("cmpt%d_", icmpt) + gradient_fieldstring(ug);
+                    mfile.(gradient_field) = temp_store{icmpt, iseq, idir};
+
+                    % adc is centrosymmetric
+                    ug = -ug;
+                    % convert negative zeros to positive zeros
+                    ug(ug == 0) = +0;
+                    gradient_field = sprintf("cmpt%d_", icmpt) + gradient_fieldstring(ug);
+                    if ~hasfield(mfile, gradient_field)
+                        temp_store{icmpt, iseq, idir}.ug = ug;
+                        mfile.(gradient_field) = temp_store{icmpt, iseq, idir};
+                    end
+                end
+            end
+        end
+    end
 end
 
 % Compute total HADC (weighted sum over compartments)
