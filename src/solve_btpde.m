@@ -441,15 +441,6 @@ end
 camino.signal_allcmpts(:) = sum(camino.signal, 1);
 const.signal_allcmpts(:) = sum(const.signal, 1);
 
-% Volume weighted signal
-% camino.signal_weighted = camino.signal./femesh.volumes;
-% camino.signal_allcmpts_weighted = camino.signal_allcmpts./femesh.total_volume;
-% 
-% const.signal_weighted = const.signal./femesh.volumes;
-% const.signal_allcmpts_weighted = const.signal_allcmpts./femesh.total_volume;
-
-
-
 totaltime = totaltime_addition + toc(starttime);
 results = merge_results(camino,const,nsequence_camino,nsequence_const,totaltime,save_magnetization);
 

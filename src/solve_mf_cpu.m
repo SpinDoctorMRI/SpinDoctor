@@ -130,6 +130,7 @@ camino.signal = inf(ncompartment, nsequence_camino);
 camino.signal_allcmpts = zeros(nsequence_camino,1);
 sequences_camino=sequences(~const_sequences_ind);
 camino.itertimes = zeros(nsequence_camino, 1);
+
 % Load if results are already available
 totaltime_addition = 0;
 if ~rerun && do_save
@@ -355,11 +356,12 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                 end
                 const.signal(ilapeig, no_result_flag_const) = sum(M * mag_const);
             end
-            fprintf("Computing or loading MF magnetization for camino file sequences for compartment %d " ...
-                + "using %d eigenvalues.\n", ilapeig, neig);
+
             if any(no_result_flag_camino, 'all')
+                fprintf("Computing MF magnetization for camino file sequences for compartment %d " ...
+                + "using %d eigenvalues.\n", ilapeig, neig);
                 % save final laplace coefficient in nu_list
-                nu_list = zeros(neig, nsequence_camino, func2str(dtype));
+                nu_list_camino = zeros(neig, nsequence_camino, func2str(dtype));
                 for iseq = 1:nsequence_camino
                     % Experiment parameters
                     seq = sequences_camino{iseq};
@@ -386,19 +388,19 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                     % Compute final laplace coefficient
                     nu = evolve_laplace_coef_direction_varying(nu0,seq, q,moments, LT2,dtype);
                     % Save final laplace coefficient in nu_list
-                    nu_list(:, iseq) = nu;
+                    nu_list_camino(:, iseq) = nu;
 
                     % Save computational time
                     camino.itertimes(iseq) = toc(itertime);
                 end
 
                 % Compute final magnetization
-                nu_list = nu_list(:, no_result_flag_camino);
-                mag = funcs * double(nu_list);
+                nu_list_camino = nu_list_camino(:, no_result_flag_camino);
+                mag = funcs * double(nu_list_camino);
                 
                 % Final magnetization coefficients in finite element nodal basis
                 if save_magnetization
-                    camino.magnetization(ilapeig, no_result_flag) = ...
+                    camino.magnetization(ilapeig, no_result_flag_camino) = ...
                         mat2cell(mag, size(mag, 1), ones(1, size(mag, 2)));
                 end
                 camino.signal(ilapeig, no_result_flag) = sum(M * mag);
@@ -544,7 +546,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
         fprintf("Computing or loading MF magnetization for camino file sequences using %d eigenvalues.\n", neig);
         if any(no_result_flag_camino, 'all')
             % save final laplace coefficient in nu_list
-            nu_list = zeros(neig, nsequence, func2str(dtype));
+            nu_list_camino = zeros(neig, nsequence, func2str(dtype));
             for iseq = 1:nsequence_camino
                 % Experiment parameters
                 seq = sequences_camino{iseq};
@@ -568,15 +570,15 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                 % Compute final laplace coefficient
                 nu = evolve_laplace_coef_direction_varying(nu0,seq, q,moments, LQT2,dtype);
                 % Save final laplace coefficient in nu_list
-                nu_list(:, iseq) = nu;
+                nu_list_camino(:, iseq) = nu;
 
                 % Save computational time
                 camino.itertimes(iseq) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
             end
                 % end
             % Compute final magnetization
-            nu_list = nu_list(:, no_result_flag_camino);
-            mag = funcs * double(nu_list);
+            nu_list_camino = nu_list_camino(:, no_result_flag_camino);
+            mag = funcs * double(nu_list_camino);
             
             % Final magnetization coefficients in finite element nodal basis
             idx = 1;

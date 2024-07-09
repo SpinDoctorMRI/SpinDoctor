@@ -20,19 +20,34 @@ function results = solve_mf_gpus(femesh, setup, lap_eig, savepath, save_magnetiz
 %   savepath (optional): path string
 %   save_magnetization (optinal): logical. Defaults to true.
 %
-%   results: struct with fields
-%       magnetization: {ncompartment x namplitude x nsequence x
+%   results: struct with fields. Split into the experiments for constant
+%   direction vector sequences (const) and those with varying direction
+%   (camino) from camino files. 
+%   If only const or only camino sequences are present, then this
+%   additional struct layer is removed.
+%   
+%       camino.magnetization: {ncompartment x nsequeunce}[npoint x 1]
+%          Magnetization field at final timestep
+%       camino.signal: [ncompartment x nsequence]
+%           Compartmentwise total magnetization at final timestep
+%       camino.signal_allcmpts: [nsequence x 1]
+%           Total magnetization at final timestep
+%       camino.itertimes: [nsequence x 1]
+%           Computational time for each iteration
+%       const.magnetization: {ncompartment x namplitude x nsequence x
 %                       ndirection}[npoint x 1]
 %           Magnetization field at final timestep
-%       signal: [ncompartment x namplitude x nsequence x ndirection]
+%       const.signal: [ncompartment x namplitude x nsequence x ndirection]
 %           Compartmentwise total magnetization at final timestep
-%       signal_allcmpts: [namplitude x nsequence x ndirection]
+%       const.signal_allcmpts: [namplitude x nsequence x ndirection]
 %           Total magnetization at final timestep
-%       itertimes: [namplitude x nsequence x ndirection]
+%       const.itertimes: [namplitude x nsequence x ndirection]
 %           Computational time for each iteration
 %       totaltime: [1 x 1]
 %           Total computational time, including matrix assembly
 
+
+disp("SOLVE_MF_GPUS")
 % TEMPORARY. Camino file sequences not yet implemented for this solver.
 const_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),setup.gradient.sequences,'UniformOutput',true);
 if ~all(const_ind,'all')
@@ -105,50 +120,65 @@ else
 end
 
 % Initialize output arguments
-magnetization = cell(ncompartment, namplitude, nsequence, ndirection);
-signal = inf(ncompartment, namplitude, nsequence, ndirection);
-signal_allcmpts = zeros(namplitude, nsequence, ndirection);
-itertimes = zeros(ncompartment, namplitude, nsequence, ndirection);
+const_sequences_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),sequences,'UniformOutput',true);
+nsequence_const = sum(const_sequences_ind);
+sequences_const = sequences(const_sequences_ind);
+const = struct;
+const.magnetization = cell(ncompartment, namplitude, nsequence_const, ndirection);
+const.signal = inf(ncompartment, namplitude, nsequence_const, ndirection);
+const.signal_allcmpts = zeros(namplitude, nsequence_const, ndirection);
+const.itertimes = zeros(namplitude, nsequence_const, ndirection);
+
+nsequence_camino = sum(~const_sequences_ind);
+camino = struct;
+camino.magnetization = cell(ncompartment,nsequence_camino, 1);
+camino.signal = inf(ncompartment, nsequence_camino);
+camino.signal_allcmpts = zeros(nsequence_camino,1);
+sequences_camino=sequences(~const_sequences_ind);
+camino.itertimes = zeros(nsequence_camino, 1);
 
 % Load if results are already available
+totaltime_addition = 0;
 if ~rerun && do_save
-    % Iterate over gradient amplitudes, sequences and directions
-    for iseq = 1:nsequence
-        seq = sequences{iseq};
-        % Load results
+    fprintf("Load mf results from %s\n", savepath);
+    % Checking for const sequences
+    for iseq = 1:nsequence_const
+        % Extract iteration inputs
+        seq = sequences_const{iseq};
         filename = sprintf("%s/%s.mat", savepath, seq.string(true));
         mfile = matfile(filename, "Writable", false);
 
-        for ia = 1:prod([namplitude, ndirection])
+        for iall = 1:prod([namplitude, ndirection])   
             % Extract Cartesian indices
-            [iamp, idir] = ind2sub([namplitude, ndirection], ia);
-
+            [iamp, idir] = ind2sub([namplitude, ndirection], iall);
+        
             % Extract iteration inputs
             b = bvalues(iamp, iseq);
             ug = directions(:, idir);
-
+        
             % File name for saving or loading iteration results
             gradient_field = gradient_fieldstring(ug, b);
-
+        
             % Check if results are already available
             if hasfield(mfile, gradient_field)
                 % Load results
-                fprintf("Load mf for %s, %d/%d.\n", ...
-                    seq.string, ia, namplitude*ndirection);
-
+                fprintf("Load mf for %s, %d/%d.\n", seq.string, iall, namplitude*ndirection);
+                time_temp = totaltime_addition;
                 try
-                    data = mfile.(gradient_fieldstring(ug, b));
-                    signal(:, iamp, iseq, idir) = data.signal;
-                    itertimes(:, iamp, iseq, idir) = data.itertimes;
+                    savedata = mfile.(gradient_field);
+                    const.signal(:, iamp, iseq, idir) = savedata.signal;
+                    const.itertimes(iamp, iseq, idir) = savedata.itertimes;
+                    totaltime_addition = totaltime_addition + savedata.itertimes;
                     if save_magnetization
-                        magnetization(:, iamp, iseq, idir) = data.magnetization;
+                        const.magnetization(:, iamp, iseq, idir) = savedata.magnetization;
                     end
                 catch
-                    signal(:, iamp, iseq, idir) = inf;
-                    itertimes(:, iamp, iseq, idir) = 0;
+                    const.signal(:, iamp, iseq, idir) = inf;
+                    const.itertimes(iamp, iseq, idir) = 0;
+                    totaltime_addition = time_temp;
                     if save_magnetization
                         for icmpt = 1:ncompartment
-                            magnetization{icmpt, iamp, iseq, idir} = [];
+                            const.magnetization{icmpt, iamp, iseq, idir} = [];
                         end
                     end
                     warning("mf: the saved data of experiment %s %s doesn't exist or is broken."...
@@ -158,12 +188,47 @@ if ~rerun && do_save
             end
         end
     end
+    % Checking for camino sequences
+    for iseq = 1:nsequence_camino
+        seq = sequences_camino{iseq};
+        filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+        mfile = matfile(filename, "Writable", false);
+        if hasfield(mfile,seq.string(true))
+            % Load results
+            fprintf("Load mf for %s \n", seq.string);
+            time_temp = totaltime_addition;
+            try
+                savedata = mfile.(seq.string);
+                camino.signal(:,iseq) = savedata.signal;
+                camino.itertimes(iseq) = savedata.itertimes;
+                totaltime_addition = totaltime_addition + savedata.itertimes;
+                if save_magnetization
+                    camino.magnetization(:, iseq) = savedata.magnetization;
+                end
+            catch e
+                    disp(e)
+                    camino.signal(:, iseq) = inf;
+                    camino.itertimes( iseq) = 0;
+                    totaltime_addition = time_temp;
+                    if save_magnetization
+                        for icmpt = 1:ncompartment
+                            camino.magnetization{icmpt, iseq} = [];
+                        end
+                    end
+                    warning("mf: the saved data of experiment %s doesn't exist or is broken."...
+                     + " Rerun simulation.", ...
+                        seq.string);
+
+            end
+        end
+    end
 end
 
 % Record unsaved experiments
-no_result_flag = permute(any(isinf(signal), 1), [2 3 4 1]);
+no_result_flag_camino = permute(any(isinf(camino.signal), 1), [2 3 4 1]);
+no_result_flag_const = permute(any(isinf(const.signal), 1), [2 3 4 1]);
 
-if any(no_result_flag, 'all')
+if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
     % Assemble mass matrix in each compartment (for spatial integration)
     disp("Setting up FEM matrices");
     M_cmpts = cell(1, ncompartment);
@@ -197,6 +262,13 @@ if any(no_result_flag, 'all')
         Q = couple_flux_matrix(femesh, setup.pde, Q_blocks, false);
     end
 
+    % Select GPU device
+    if isnumeric(setup.mf.gpu)
+        gpuDevice(setup.mf.gpu);
+    else
+        gpuDevice(); 
+    end
+
     if multi_lap_eig && ~setup.mf.surf_relaxation
         for ilapeig = 1:length(lap_eig)
             % Extract eigenvalues, eigenfunctions
@@ -222,21 +294,20 @@ if any(no_result_flag, 'all')
             end
 
             % Coefficients of initial spin density in Laplace eigenfunction basis
-            nu0 = dtype(funcs' * (M * rho));
+            nu0 = gpuArray(dtype(funcs' * (M * rho)));
             % Prepare LT2
             if no_relaxation
-                LT2 = dtype(values');
+                LT2 = gpuArray(dtype(values'));
             else
-                LT2 = dtype(diag(values)+T2);
+                LT2 = gpuArray(dtype(diag(values)+T2));
             end
 
+            if any(no_result_flag_const, 'all')
             % save final laplace coefficient in nu_list
-            nu_list = zeros(neig, namplitude, nsequence, ndirection, func2str(dtype));
-
-            fprintf("Computing or loading MF magnetization for compartment %d " ...
+            nu_list_const = zeros(neig, namplitude, nsequence_const, ndirection, func2str(dtype));
+            fprintf("Computing or loading MF magnetization for constant direction sequences for compartment %d " ...
                 + "using %d eigenvalues.\n", ilapeig, neig);
-            
-            % Create parpool if no parallel pool exists
+             % Create parpool if no parallel pool exists
             if isempty(gcp('nocreate')) 
                 parpool('local', numel(setup.mf.gpu));
             elseif gcp().NumWorkers~=numel(setup.mf.gpu)
@@ -248,7 +319,7 @@ if any(no_result_flag, 'all')
             spmd 
                 gpuDevice(setup.mf.gpu(labindex));
             end
-
+            itertimes=zeros(neig,namplitude,nsequence_const,ndirection);
             parfor idir = 1:ndirection
                 % Experiment parameters
                 ug = directions(:, idir);
@@ -263,10 +334,10 @@ if any(no_result_flag, 'all')
 
                     for iamp = 1:namplitude
                         % skip, if signal is already there
-                        if all(~isinf(signal(:, iamp, iseq, idir)), 'all')
+                        if all(~isinf(const.signal(:, iamp, iseq, idir)), 'all')
                             continue
                         else
-                            no_result_flag(iamp, iseq, idir) = true;
+                            no_result_flag_const(iamp, iseq, idir) = true;
                         end
 
                         % Measure iteration time
@@ -289,31 +360,97 @@ if any(no_result_flag, 'all')
                         iamp, namplitude, g, q, b);
 
                         % Compute final laplace coefficient
-                        nu = evolve_laplace_coef(nu0, seq, 1i*q*A, gpuArray(LT2), ninterval);
+                        nu = evolve_laplace_coef(nu0, seq, 1i*q*A, LT2, ninterval);
 
                         % Save final laplace coefficient in nu_list
-                        nu_list(:, iamp, iseq, idir) = gather(nu);
+                        nu_list_const(:, iamp, iseq, idir) = gather(nu);
 
                         % Save computational time
                         itertimes(ilapeig, iamp, iseq, idir) = toc(itertime);
                     end
                 end
             end % iterations
-
-            % release all GPUs
-            gpuDevice([]);
+            
+            const.itertimes(no_result_flag_const) = itertimes(no_result_flag_const);
 
             % Compute final magnetization
-            nu_list = nu_list(:, no_result_flag);
-            mag = compute_mag_gpu(dtype(funcs), dtype(nu_list), setup.mf.gpu);
-
+            nu_list_const = nu_list_const(:, no_result_flag_const);
+            mag_const = compute_mag_gpu(dtype(funcs), dtype(nu_list_const), setup.mf.gpu);
+            
             % Final magnetization coefficients in finite element nodal basis
             if save_magnetization
-                magnetization(ilapeig, no_result_flag) = ...
-                    mat2cell(mag, size(mag, 1), ones(1, size(mag, 2)));
+                const.magnetization(ilapeig, no_result_flag_const) = ...
+                    mat2cell(mag_const, size(mag_const, 1), ones(1, size(mag_const, 2)));
             end
-            signal(ilapeig, no_result_flag) = sum(M * mag);
-        end % lapeig iterations
+            const.signal(ilapeig, no_result_flag_const) = sum(M * mag_const);
+        end 
+        if any(no_result_flag_camino, 'all')
+                fprintf("Computing MF magnetization for camino file sequences for compartment %d " ...
+                + "using %d eigenvalues.\n", ilapeig, neig);
+                % save final laplace coefficient in nu_list
+                nu_list_camino = zeros(neig, nsequence_camino, func2str(dtype));
+                % Create parpool if no parallel pool exists
+                if isempty(gcp('nocreate')) 
+                    parpool('local', numel(setup.mf.gpu));
+                elseif gcp().NumWorkers~=numel(setup.mf.gpu)
+                    delete(gcp);
+                    parpool('local', numel(setup.mf.gpu));
+                end
+            
+                % Select GPUs and transfer data
+                spmd 
+                    gpuDevice(setup.mf.gpu(labindex));
+                end
+                
+                signal = camino.signal;
+                parfor iseq = 1:nsequence_camino
+                    % Experiment parameters
+                    seq = sequences_camino{iseq};
+
+                    % skip, if signal is already there
+                    if all(~isinf(signal(:, iseq, 1)), 'all')
+                        continue
+                    else
+                        no_result_flag_camino( iseq, 1) = true;
+                    end
+
+                    % Measure iteration time
+                    itertime = tic;
+                    q = setup.gamma/1e6;
+                    % Experiment parameters
+
+                    % Run simulation if no result is saved or results are not available
+                    % Display state of iterations
+                    fprintf("Computing MF magnetization using %d eigenvalues\n" ...
+                    + "  Sequence  %d of %d: f = %s\n", ...
+                    neig,...
+                    iseq, nsequence_camino, seq);
+
+                    % Compute final laplace coefficient
+                    nu = evolve_laplace_coef_direction_varying(nu0,seq, q,moments, LT2,dtype);
+                    % Save final laplace coefficient in nu_list
+                    nu_list_camino(:, iseq) = nu;
+
+                    % Save computational time
+                    itertimes(iseq) = toc(itertime);
+                end
+                
+                camino.itertimes(no_result_flag_camino) =itertimes(no_result_flag_camino);
+                % Compute final magnetization
+                nu_list_camino = nu_list_camino(:, no_result_flag_camino);
+                mag = funcs * double(nu_list_camino);
+                
+                % Final magnetization coefficients in finite element nodal basis
+                if save_magnetization
+                    camino.magnetization(ilapeig, no_result_flag_camino) = ...
+                        mat2cell(mag, size(mag, 1), ones(1, size(mag, 2)));
+                end
+                camino.signal(ilapeig, no_result_flag_camino) = sum(M * mag);
+            end
+        end %lap_eig iterations
+        
+        % release GPU memory
+        gpuDevice([]);
     else
         % Prepare mass, density, moments and relaxation matrices
         M = blkdiag(M_cmpts{:});
@@ -360,94 +497,96 @@ if any(no_result_flag, 'all')
         end
 
         % Coefficients of initial spin density in Laplace eigenfunction basis
-        nu0 = dtype(funcs' * (M * rho));
+        nu0 = gpuArray(dtype(funcs' * (M * rho)));
         % Prepare LT2
         if no_relaxation
-            LQT2 = dtype(LQ);
+            LQT2 = gpuArray(dtype(LQ));
         else
             if size(LQ, 1) == 1
-                LQT2 = dtype(diag(LQ)+T2);
+                LQT2 = gpuArray(dtype(diag(LQ)+T2));
             else
-                LQT2 = dtype(LQ+T2);
+                LQT2 = gpuArray(dtype(LQ+T2));
             end
         end
 
         % save final laplace coefficient in nu_list
-        nu_list = zeros(neig, namplitude, nsequence, ndirection, func2str(dtype));
+        nu_list_const = zeros(neig, namplitude, nsequence_const, ndirection, func2str(dtype));
 
         fprintf("Computing or loading MF magnetization using %d eigenvalues.\n", neig);
+        if any(no_result_flag_const, 'all')
 
-        % Create parpool if no parallel pool exists
-        if isempty(gcp('nocreate')) 
-            parpool('local', numel(setup.mf.gpu));
-        elseif gcp().NumWorkers~=numel(setup.mf.gpu)
-            delete(gcp);
-            parpool('local', numel(setup.mf.gpu));
-        end
-        
-        % Select GPUs
-        spmd 
-            gpuDevice(setup.mf.gpu(labindex));
-        end
-
-        parfor idir = 1:ndirection
-            % Experiment parameters
-            ug = directions(:, idir);
-            
-            % Components of BT operator matrix
-            A = sum(moments .* shiftdim(ug, -2), 3);
-            A = gpuArray(dtype(A));
-
-            for iseq = 1:nsequence
-                % Experiment parameters
-                seq = sequences{iseq};
-
-                for iamp = 1:namplitude   
-                    % skip, if signal is already there
-                    if all(~isinf(signal(:, iamp, iseq, idir)), 'all')
-                        continue
-                    else
-                        no_result_flag(iamp, iseq, idir) = true;
-                    end
-
-                    % Measure iteration time
-                    itertime = tic;
-
-                    % Experiment parameters
-                    q = qvalues(iamp, iseq);
-                    b = bvalues(iamp, iseq);
-                    g = gvalues(iamp, iseq);
-
-                    % Run simulation if no result is saved or results are not available
-                    % Display state of iterations
-                    fprintf("Computing MF magnetization using %d eigenvalues\n" ...
-                    + "  Direction %d of %d: ug = [%.2f; %.2f; %.2f]\n" ...
-                    + "  Sequence  %d of %d: f = %s\n" ...
-                    + "  Amplitude %d of %d: g = %g, q = %g, b = %g\n", ...
-                    neig, ...
-                    idir, ndirection, ug, ...
-                    iseq, nsequence, seq, ...
-                    iamp, namplitude, g, q, b);
-
-                    % Compute final laplace coefficient
-                    nu = evolve_laplace_coef(nu0, seq, 1i*q*A, gpuArray(LQT2), ninterval);
-
-                    % Save final laplace coefficient in nu_list
-                    nu_list(:, iamp, iseq, idir) = gather(nu);
-
-                    % Save computational time
-                    itertimes(:, iamp, iseq, idir) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
-                end
+            % Create parpool if no parallel pool exists
+            if isempty(gcp('nocreate')) 
+                parpool('local', numel(setup.mf.gpu));
+            elseif gcp().NumWorkers~=numel(setup.mf.gpu)
+                delete(gcp);
+                parpool('local', numel(setup.mf.gpu));
             end
-        end % iterations
+        
+            % Select GPUs and transfer data
+            spmd 
+                gpuDevice(setup.mf.gpu(labindex));
+            end
 
-        % release GPU memory
-        gpuDevice([]);
+            signal = const.signal;
+            itertimes = zeros(neig,namplitude,nsequence,ndirection);
+            parfor idir = 1:ndirection
+                % Experiment parameters
+                ug = directions(:, idir);
+                
+                % Components of BT operator matrix
+                A = sum(moments .* shiftdim(ug, -2), 3);
+                A = dtype(A);
+    
+                for iseq = 1:nsequence_const
+                    % Experiment parameters
+                    seq = sequences_const{iseq};
+    
+                   for iamp = 1:namplitude
+                        % skip, if signal is already there
+                        if all(~isinf(signal(:, iamp, iseq, idir)), 'all')
+                            continue
+                        else
+                            no_result_flag_const(iamp, iseq, idir) = true;
+                        end
+    
+                        % Measure iteration time
+                        itertime = tic;
+    
+                        % Experiment parameters
+                        q = qvalues(iamp, iseq);
+                        b = bvalues(iamp, iseq);
+                        g = gvalues(iamp, iseq);
+    
+                        % Run simulation if no result is saved or results are not available
+                        % Display state of iterations
+                        fprintf("Computing MF magnetization using %d eigenvalues\n" ...
+                        + "  Direction %d of %d: ug = [%.2f; %.2f; %.2f]\n" ...
+                        + "  Sequence  %d of %d: f = %s\n" ...
+                        + "  Amplitude %d of %d: g = %g, q = %g, b = %g\n", ...
+                        neig, ...
+                        idir, ndirection, ug, ...
+                        iseq, nsequence_const, seq, ...
+                        iamp, namplitude, g, q, b);
+    
+                        % Compute final laplace coefficient
+                        nu = evolve_laplace_coef(nu0, seq, 1i*q*A, LQT2, ninterval);
+    
+                        % Save final laplace coefficient in nu_list
+                        nu_list_const(:, iamp, iseq, idir) = nu;
+    
+                        % Save computational time
+                        itertimes(:, iamp, iseq, idir) = toc(itertime);% * npoint_cmpts / sum(npoint_cmpts);
+                    end
+                end
+            end % iterations
+
+            const.itertimes(no_result_flag_const) = itertimes(no_result_flag_const);
 
         % Compute final magnetization
-        nu_list = nu_list(:, no_result_flag);
-        mag = compute_mag_gpu(dtype(funcs), dtype(nu_list), setup.mf.gpu);
-        
+        nu_list_const = nu_list_const(:, no_result_flag_const);
+        mag = compute_mag_gpu(dtype(funcs), dtype(nu_list_const), setup.mf.gpu);
+
         % Final magnetization coefficients in finite element nodal basis
         idx = 1;
         allinds = [namplitude nsequence ndirection];
@@ -455,50 +594,125 @@ if any(no_result_flag, 'all')
             % Extract indices
             [iamp, iseq, idir] = ind2sub(allinds, iall);
 
-            if no_result_flag(iamp, iseq, idir)
+            if no_result_flag_const(iamp, iseq, idir)
                 mag_temp = mat2cell(mag(:, idx), npoint_cmpts);
                 if save_magnetization
-                    magnetization(:, iamp, iseq, idir) = mag_temp;
+                    const.magnetization(:, iamp, iseq, idir) = mag_temp;
                 end
-                signal(:, iamp, iseq, idir) = cellfun(@(M, m) sum(M * m), M_cmpts', mag_temp);
+                const.signal(:, iamp, iseq, idir) = cellfun(@(M, m) sum(M * m), M_cmpts', mag_temp);
                 idx = idx + 1;
             end
         end
+        end
+
+         fprintf("Computing or loading MF magnetization for camino file sequences using %d eigenvalues.\n", neig);
+        if any(no_result_flag_camino, 'all')
+            % save final laplace coefficient in nu_list
+            nu_list_camino = zeros(neig, nsequence, func2str(dtype));
+
+            % Create parpool if no parallel pool exists
+            if isempty(gcp('nocreate')) 
+                parpool('local', numel(setup.mf.gpu));
+            elseif gcp().NumWorkers~=numel(setup.mf.gpu)
+                delete(gcp);
+                parpool('local', numel(setup.mf.gpu));
+            end
+        
+            % Select GPUs and transfer data
+            spmd 
+                gpuDevice(setup.mf.gpu(labindex));
+            end
+
+
+            signal =camino.signal;
+            itertimes=zeros(nsequence,1);
+            parfor iseq = 1:nsequence_camino
+                % Experiment parameters
+                seq = sequences_camino{iseq};
+
+                % skip, if signal is already there
+                if all(~isinf(signal(:, iseq, 1)), 'all')
+                    continue
+                else
+                    no_result_flag_camino( iseq, 1) = true;
+                end
+
+                % Measure iteration time
+                itertime = tic;
+                q = setup.gamma/1e6;
+                % Run simulation if no result is saved or results are not available
+                % Display state of iterations
+                fprintf("Computing MF magnetization using %d eigenvalues\n" ...
+                + "  Sequence  %d of %d: f = %s\n",...
+                neig, iseq, nsequence, seq);
+
+                % Compute final laplace coefficient
+                nu = evolve_laplace_coef_direction_varying(nu0,seq, q,moments, LQT2,dtype);
+                % Save final laplace coefficient in nu_list
+                nu_list_camino(:, iseq) = nu;
+
+                % Save computational time
+                itertimes(iseq) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
+            end
+                % end
+            % Compute final magnetization
+            camino.itertimes(no_result_flag_camino) =itertimes(no_result_flag_camino);
+            nu_list_camino = nu_list_camino(:, no_result_flag_camino);
+            mag = funcs * double(nu_list_camino);
+            
+            % Final magnetization coefficients in finite element nodal basis
+            idx = 1;
+            
+            for iseq = 1:nsequence_camino
+                % Extract indices
+                if no_result_flag_camino(iseq, 1)
+                    mag_temp = mat2cell(mag(:, idx), npoint_cmpts);
+                    if save_magnetization
+                        camino.magnetization(:,  iseq) = mag_temp;
+                    end
+                    camino.signal(:, iseq, 1) = cellfun(@(M, m) sum(M * m), M_cmpts', mag_temp);
+                    idx = idx + 1;
+                end
+            end
+        end
+
+        % release GPU memory
+        gpuDevice([]);
     end
+end
 
-    if do_save && any(no_result_flag, 'all')
-        for iseq = 1:nsequence
-            seq = sequences{iseq};
-            filename = sprintf("%s/%s.mat", savepath, seq.string(true));
-            fprintf("Save %s\n", filename);
-            mfile = matfile(filename, "Writable", true);
-            for iamp = 1:namplitude
-                for idir = 1:ndirection
-                    if no_result_flag(iamp, iseq, idir)
-                        % Extract iteration inputs
-                        data = struct;
-                        data.q = qvalues(iamp, iseq);
-                        data.b = bvalues(iamp, iseq);
-                        data.ug = directions(:, idir);
-                        data.g = gvalues(iamp, iseq);
-                        data.signal = signal(:, iamp, iseq, idir);
-                        data.itertimes = itertimes(:, iamp, iseq, idir);
-                        if save_magnetization
-                            data.magnetization = magnetization(:, iamp, iseq, idir);
-                        end
+if do_save && any(no_result_flag_const, 'all')
+    for iseq = 1:nsequence_const
+        seq = sequences_const{iseq};
+        filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+        fprintf("Save %s\n", filename);
+        mfile = matfile(filename, "Writable", true);
+        for iamp = 1:namplitude
+            for idir = 1:ndirection
+                if no_result_flag_const(iamp, iseq, idir)
+                    % Extract iteration inputs
+                    data = struct;
+                    data.q = qvalues(iamp,iseq);
+                    data.b = bvalues(iamp, iseq);
+                    data.ug = directions(:, idir);
+                    data.g = gvalues(iamp,iseq);
+                    data.signal = const.signal(:,iamp, iseq, idir);
+                    data.itertimes = const.itertimes(iamp,iseq,idir);
+                    if save_magnetization
+                        data.magnetization = const.magnetization(:,iamp,iseq,idir);
+                    end
 
-                        % Save results to MAT-file
-                        gradient_field = gradient_fieldstring(data.ug, data.b);
+                    % Save results to MAT-file
+                    gradient_field = gradient_fieldstring(data.ug, data.b);
+                    mfile.(gradient_field) = data;
+
+                    % dMRI signal is centrosymmetric
+                    data.ug = -data.ug;
+                    % convert negative zeros to positive zeros
+                    data.ug(data.ug == 0) = +0;
+                    gradient_field = gradient_fieldstring(data.ug, data.b);
+                    if ~hasfield(mfile, gradient_field)
                         mfile.(gradient_field) = data;
-
-                        % dMRI signal is centrosymmetric
-                        data.ug = -data.ug;
-                        % convert negative zeros to positive zeros
-                        data.ug(data.ug == 0) = +0;
-                        gradient_field = gradient_fieldstring(data.ug, data.b);
-                        if ~hasfield(mfile, gradient_field)
-                            mfile.(gradient_field) = data;
-                        end
                     end
                 end
             end
@@ -506,19 +720,36 @@ if any(no_result_flag, 'all')
     end
 end
 
-% Compute total signal (sum over compartments)
-signal_allcmpts(:) = sum(signal, 1);
+if do_save && any(no_result_flag_camino, 'all')
+    for iseq = 1:nsequence_camino
+        seq = sequences_camino{iseq};
+        filename = sprintf("%s/%s.mat", savepath, seq.string(true));
+        fprintf("Save %s\n", filename);
+        mfile = matfile(filename, "Writable", true);
+       
+        if no_result_flag_camino(iseq, 1)
+            % Extract iteration inputs
+            data = struct;
+            data.seq= seq;
+            data.signal = camino.signal(:,  iseq);
+            data.sequence = seq;
+            data.itertimes = camino.itertimes(iseq);
+            if save_magnetization
+                data.magnetization = camino.magnetization(:, iseq);
+            end
 
-% Create output structure
-results.signal = signal;
-results.signal_allcmpts = signal_allcmpts;
-results.itertimes = itertimes;
-results.totaltime = toc(starttime);
-if save_magnetization
-    results.magnetization = magnetization;
-    results.magnetization_avg = average_magnetization(magnetization);
+            % Save results to MAT-file
+            gradient_field = sprintf("%s",seq);
+            mfile.(gradient_field) = data;
+        end
+    end
 end
+% Total magnetization (sum over compartments)
+camino.signal_allcmpts(:) = sum(camino.signal, 1);
+const.signal_allcmpts(:) = sum(const.signal, 1);
+% Create output structure
+totaltime = totaltime_addition + toc(starttime);
+results = merge_results(camino,const,nsequence_camino,nsequence_const,totaltime,save_magnetization);
 
 % Display function evaluation time
 toc(starttime);
-end
