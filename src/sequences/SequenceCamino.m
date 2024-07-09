@@ -1,6 +1,6 @@
 classdef SequenceCamino  < AbsSequence
-    %UNTITLED2 Summary of this class goes here
-    %   Detailed explanation goes here
+    %SEQUENCECAMINO A direction varying sequence.
+    %   This is is obtained from a camino .scheme file.
 
     properties
         dt
@@ -13,17 +13,16 @@ classdef SequenceCamino  < AbsSequence
 
     methods
         function obj = SequenceCamino(K,dt,g,name)
-            %UNTITLED2 Construct an instance of this class
-            %   Detailed explanation goes here
+            %SequenceCamino Construct an instance of this class
             obj.K = K;
-            obj.dt =dt;  % Conversion from s to micro s
+            obj.dt =dt;  
             obj.g = g;
             obj.echotime = K*dt;
             obj.name = name;
         end
 
         function f = vec_call(obj, t)
-        %CALL Call the time profile at time `t`. Vectorised routine
+        %VEC_CALL Call the time profile at time `t`. Vectorised routine
             find_imin = @(s) min([max([0,floor(s./obj.dt)]), obj.K - 1 ]);
             imin = 1+arrayfun(find_imin,t);
             find_imax = @(s) max([min([1+floor(s./obj.dt),obj.K - 1]), 0]);
@@ -36,16 +35,17 @@ classdef SequenceCamino  < AbsSequence
         end
 
         function f = call(obj, t)
-        %CALL Call the time profile at time `t`. Vectorised routine to
-        %compute magnitude of sequence.
+        %CALL compute the magnitude of the sequence at time `t`. Vectorised routine to
             f = vecnorm(obj.vec_call(t),2,1);
         end
 
         function t = diffusion_time(obj)
-            % Should be specified by the user.
+            %DIFFUSION_TIME note not necessarily well-defined for a general
+            %sequence
             t = obj.K*obj.dt/2;
         end
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
+            %INTERVALS Extract time intervals for sequence
             timelist = obj.dt*(0:(obj.K-1));
             t_1 = string(timelist(1:end-1)); t_2 = string(timelist(2:end));
             interval_str = sprintf("[%s,%s]!",[t_1;t_2]);
@@ -95,7 +95,7 @@ classdef SequenceCamino  < AbsSequence
         end
 
         function plot(obj)
-            % figure;
+            %PLOT plot the sequence.
             hold on;
             t = obj.dt*(0:obj.K -1);
             g_x = obj.g(1,:); g_y = obj.g(2,:); g_z = obj.g(3,:);

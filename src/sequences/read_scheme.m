@@ -1,5 +1,6 @@
 function sequences = read_scheme(filename)
-
+%READ_SCHEME reads direction varying gradient sequences from a camino
+%.scheme file
 [~,name,~] = fileparts(filename);
 fid = fopen(filename,'r');
 tline = fgetl(fid);

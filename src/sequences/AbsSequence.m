@@ -1,6 +1,7 @@
 classdef (Abstract) AbsSequence
     %SEQUENCE Gradient sequence (time profile)
-    %   This represents an abstract gradient sequence.
+    %   This represents an abstract gradient sequence. Such a sequence is
+    %   not assumed to have a fixed driection vector.
     
      methods (Abstract)
         f = call(obj, t)
