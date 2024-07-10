@@ -2,6 +2,7 @@
 
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
 
+This is an extended version for simulating direction varying sequences for human microglia.
 
 ## Software requirements
 
@@ -13,38 +14,13 @@ the simulations can be run in parallel.
 
 ## Getting started
 
-1) The base folder contains a commented general purpose driver called `driver_spindoctor.m`. The other driver, `driver_save_load.m`, can save and load simulations.
-2) The input files for the drivers are found in the folder `setups`, and define the structures needed for the simulations.
-3) Multiple neuron meshes are found in the folder `mesh_files`. These can be loaded in the `setups/setup_neuron.m` script.
-4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
-
-## Updates July 2024
-
-New features:
-
-* Simulation of general gradient sequences is now supported. These sequences can be read directly from a Camino .scheme file. Simulations can be run for solve_btpde, solve_btpde_midpoint, and solve_mf.
-* Segmenting a finite element mesh into soma and processes/dendrites when the mesh comes from a swc file.
-* Code refactoring, to incorporate the new features.
-
-
-
-## Updates March 2021
-
-All modules (master, T2, NeuronModule, MatrixFormalismModule) are now merged and found in the `master` branch. The previous versions of the modules are still found in their branches.
-
-New features:
-
-* Code refactoring, change of data structures
-* New input file system, controlled by a structure `setup`
-* Some speed and memory improvements (extensive vectorization, reduced memory usage in ODE solvers)
-* Support for parallel outer loops (solve for multiple directions, amplitudes and sequences in parallel)
-* Diffusion tensors as an alternative to scalar diffusion coefficients
-* Matrix formalism with built in Matlab functions instead of PDE Toolbox
-* Add convex hull ECS + tight wrap ECS for neurons (experimental feature)
-* Simple interface for pulse sequences, the user can add custom sequences
-	* by passing a function handle, for which the integral quantities are computed numerically,
-	* or by manually defining a subclass of the `Sequence` class
-
+1) The setup scripts in the setups folder can be used to modify the solver and types of gradient sequences.
+2) To accommodate batch processing, an individual cell can be run using the driver_cell.m or driver_btpde.m functions.
+    Here the user can specify the tetgen options used and length scales of the matrix formalism.
+    An example of how to call these functions is given in example.m
+3) driver_output_signals.m will save the signals into.mat files and also to plain text files.
+4) driver_get_morez_errors.m and driver_get_pgse_errors.m compares the matrix formalism signals against the finite element ode15 solution.
+5) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
 
 ## Authors
 
