@@ -52,7 +52,7 @@ setup.geometry.ecs_shape = "no_ecs";                    % Shape of ECS: "no_ecs"
 setup.geometry.ecs_ratio = 0.2;                         % ECS gap; percentage in side length
 
 % setup.geometry.refinement = 10;                       % Tetgen refinement parameter (comment for automatic)
-setup.geometry.tetgen_options = "-pq1.2aVCn";              % Tetgen options (priority is inferior to refinement)
+setup.geometry.tetgen_options = "-pq1.2a0.5VCn";              % Tetgen options (priority is inferior to refinement)
 
 %% PDE parameters
 setup.pde.diffusivity_in = 0.002;                       % Diffusion coefficient IN (scalar or 3x3-tensor)

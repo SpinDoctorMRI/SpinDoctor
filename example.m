@@ -3,8 +3,9 @@ addpath(genpath('setups'));
 addpath(genpath('src'));
 
 % Get paths of cells to be considered
-fid = fopen("cells_human.txt",'r');
-% fid = fopen("cells_human_separated.txt",'r');
+fid = fopen("cells_human.txt",'r');                  % Run only on the full cells
+% fid = fopen("cells_human_separated.txt",'r');      % Run only on individual somas and processes
+                                                     
 
 tline = fgetl(fid);
 i=1;
@@ -20,7 +21,7 @@ ncells = length(names);
 %% Matrix formalism experiments
 % Parameters for experiments
 tetgen_options = "-pq1.2a0.5VCn";
-ls = '3.0';
+ls = '1.0';
 
 % Setup file
 setup_file='setup_morez';
