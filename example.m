@@ -4,6 +4,8 @@ addpath(genpath('src'));
 
 % Get paths of cells to be considered
 fid = fopen("cells_human.txt",'r');
+% fid = fopen("cells_human_separated.txt",'r');
+
 tline = fgetl(fid);
 i=1;
 clear names;
@@ -44,12 +46,12 @@ end
 
 %% Output error plots
 % Parameters of tetgen and solve_mf to be tested.
-lsval = [1.0];
+lsval = [1.0,3.0];
 hval = [0.5];
 
 for i =1:ncells
     tic
-    driver_get_morez_errors(names(i),'0','figures_errors_morez_Q3');   
+    driver_get_morez_errors(names(i),lsval,hval,'0','figures_errors_morez_Q3');   
     close all;
     toc
 end
