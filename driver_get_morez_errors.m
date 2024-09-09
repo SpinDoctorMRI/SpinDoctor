@@ -1,8 +1,8 @@
-function driver_get_morez_errors(meshname, lsval,hval ,segment_cell,direc)    
+function driver_get_morez_errors(meshname,lsval,hval,only_cell,direc)    
 
 nh = length(hval);
 nls = length(lsval);
-segment_cell = str2num(segment_cell);
+only_cell = str2num(only_cell);
 
 if ~isdir(direc)
     mkdir(direc)
@@ -22,7 +22,7 @@ setup_r.geometry.tetgen_options = sprintf("-pq1.2a%.1fVCn",0.1);
 savepath_r=fullfile('saved_simul',sprintf('%s_tet%s',cellname,setup_r.geometry.tetgen_options),'cell');
 btpde_cell = load_btpde(setup_r,savepath_r,false);
 
-if segment_cell ==1
+if only_cell ~=1
     savepath_soma_r=fullfile('saved_simul',sprintf('%s_tet%s',cellname,setup_r.geometry.tetgen_options),'soma');
     btpde_soma = load_btpde(setup_r,savepath_soma_r,false);
 
@@ -58,9 +58,9 @@ for i = 1:nh
 
         fig_cell = figure(1); hold on;
         name = sprintf("h= %.1f, ls =%.4f",h,ls);
-        plot(rel_error,'Color',colors(j),'LineStyle',styles(i),'DisplayName',name);
+        plot(rel_error,'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
 
-        if segment_cell == 1
+        if only_cell ~=1
             tetgen_path=sprintf('%s/%s_ply_dir/%s_%s_tet%s_mesh.1',mesh_path,cellname,cellname,setup.geometry.ecs_shape,setup.geometry.tetgen_options);
             [~,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_path);
             permutation = align_dendrites(femesh_dendrites_btpde,femesh_dendrites);
@@ -75,11 +75,11 @@ for i = 1:nh
             rel_error_soma = abs(real(mf_soma.signal - btpde_soma.signal))./abs(real(btpde_soma.signal))
             
             fig_soma = figure(2); hold on;
-            plot(rel_error_soma,'Color',colors(j),'LineStyle',styles(i),'DisplayName',name);
+            plot(rel_error_soma,'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
             
             for k = 1:ndendrites
                 fig_dend = figure(2+k);hold on;
-                plot(rel_error_dendrites{k},'Color',colors(j),'LineStyle',styles(i),'DisplayName',name);
+                plot(rel_error_dendrites{k},'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
             end
         end
         
@@ -91,7 +91,7 @@ end
 fig_cell = figure(1);grid on;xlabel('Sequence');ylabel('Relative error');legend('Location','eastoutside');
 saveas(fig_cell,sprintf('%s/%s_test_morez_cell.fig',direc,cellname))
 
-if segment_cell==1
+if only_cell ~=1
     fig_soma = figure(2);grid on;xlabel('Sequence');ylabel('Relative error');legend('Location','eastoutside');
     saveas(fig_soma,sprintf('%s/%s_test_morez_soma.fig',direc,cellname))
 

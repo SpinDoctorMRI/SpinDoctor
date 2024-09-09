@@ -1,4 +1,4 @@
-function results= driver_cell(mesh,setup_file,tetgen_options,ls)
+function results= driver_mf(mesh,setup_file,tetgen_options,ls)
 % driver_cell  runs experiments for only the full cell.
 % mesh_path : (str) path to mesh
 % exp_str: (str) descriptor for experiments. Copy of results will be saved to signals/cell_name_tetgen_options_exp_str
@@ -35,7 +35,9 @@ if isfield(setup,'mf')
     save_path_cell = sprintf("%s/cell",save_path_root);
     lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);         
     % Compute MF magnetization
-    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
+    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,true);
+else
+    error('mf not a field in setup file %s',setup_file);
 end
 results.setup = setup; results.mf = mf;
 toc

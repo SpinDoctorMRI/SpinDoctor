@@ -1,5 +1,5 @@
-function results = driver_segmented(mesh_path,setup_file,tetgen_options,ls)
-% driver_segmented  runs experiments for all components of cell.
+function results = driver_mf_segmented(mesh_path,setup_file,tetgen_options,ls)
+% driver_segmented  runs mf experiments for all components of cell.
 % mesh_path : (str) path to mesh
 % exp_str: (str) descriptor for experiments. Copy of results will be saved to signals/cell_name_tetgen_options_exp_str
 % tetgen_options : (str) tetgen_options for mesh. Defaults to '-pq1.2aVCn'
@@ -33,6 +33,10 @@ end
 setup.name=string(mesh_path);
 [mesh_path,cellname,~] = fileparts(setup.name);
 swc_file=sprintf("swc_files/%s.swc",cellname);
+if ~isfile(swc_file)
+    error('Error: %s does not exists. \n Either move file here or run driver_mf instead.',swc_file);
+end
+
 [setup, femesh, ~, ~]  = prepare_simulation(setup);
 tetgen_path=sprintf('%s/%s_ply_dir/%s_%s_tet%s_mesh.1',mesh_path,cellname,cellname,setup.geometry.ecs_shape,setup.geometry.tetgen_options);
 [femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_path);
@@ -44,16 +48,16 @@ save_path_root=sprintf('saved_simul/%s_tet%s',cellname,setup.geometry.tetgen_opt
 if isfield(setup,'mf')
     % Simulations on full cell
     save_path_cell = sprintf("%s/cell",save_path_root);
-    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);         
+    % lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);         
     % Compute MF magnetization
-    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
-    
+    % mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
+    disp("Computing Soma")
     % Simulations on soma
     save_path_soma = sprintf("%s/soma",save_path_root);
     lap_eig = compute_laplace_eig(femesh_soma, setup.pde, setup.mf,save_path_soma);         
     % Compute MF magnetization
     mf_soma = solve_mf(femesh_soma, setup, lap_eig,save_path_soma,false);
-
+    disp("Computing Dendrites")
     %Simulations on dendrites
     ndendrites=length(femesh_dendrites);
     mf_dendrites = cell(ndendrites,1);
@@ -64,11 +68,15 @@ if isfield(setup,'mf')
         mf_dendrites{i} = solve_mf(femesh_dendrites{i}, setup, lap_eig,save_path_dendrite,false);
     end
     % Store results
-    results.cell = mf;
+    % results.cell = mf;
     results.soma = mf_soma;
     results.dendrites=mf_dendrites;
     results.total_volume = femesh.total_volume;
     results.soma_volume = femesh_soma.total_volume;
-    results.dendrite_volume = [femesh_dendrites{:}.total_volume];
+    results.dendrite_volume  = zeros(ndendrites,1);
+    for i =1:ndendrites
+        results.dendrite_volume(i) = femesh_dendrites{i}.total_volume;
+    end
+    
 end
 results.setup=setup;
