@@ -1,42 +1,48 @@
-To download data from Margaret.
-
-$list = Get-Content .\neuron_meshing_paper\cells.txt -Raw;
-
-$list=$list -Split "\n";
-
-foreach ($cell in $list){
-
-$sourceDirec = -join('amcsween@margaret.saclay.inria.fr:/scratch/amcsween/SpinDoctor/',$cell);
-scp -r $sourceDirec  $cell;
+The neuron meshing paper present simulations from the following three cells
 
 
-$name = Split-Path -Path $cell -Leaf -Resolve;
+```bash
+mesh_files/ultraliser/1-2-2-watertight.ply
+mesh_files/ultraliser_modified/1-2-2.CNG_um.ply
+mesh_files/selected/1-2-2.CNG.ply
+```
 
-$parts = $name.Split("."); $L = $parts.Length - 2;
+which were meshed from the Ultraliser tool, modified Ultraliser and our method respectively. 
 
-$cellname = $parts[0..$L] -Join ".";
+For each mesh individual simulations were run by running:
 
-echo $cellname;
-$Direc = Split-Path -Path $cell;
-$sourceDirec = -join('amcsween@margaret.saclay.inria.fr:/scratch/amcsween/SpinDoctor/',$Direc,'/',$cellname,'_ply_dir');
-$targetDirec = -join($Direc,'/',$cellname,'_ply_dir');
+```matlab
+driver_mf(mesh,"setup_comparison","-pq1.2a0.5O9VCn","3");
+driver_btpde(mesh,"setup_comparison","-pq1.2a0.1O9VCn","1");
+```
 
-scp -r $sourceDirec $targetDirec
+Convergence of solutions were established by saving the errors to  a .mat file with:
 
+```
+results = driver_get_PGSE_errors(mesh,"1","setup_comparison","neuron_meshing_paper/figures","3","0.5") ;
+save("neuron_meshing_paper/"+cellname+".mat","results");
+```
 
-}
+Directly compare volume weighted signals with the script 
+```
+cd neuron_meshing_paper; compare_ultraliser_signals;
+```
 
-foreach ($cell in $list){
-$name = Split-Path -Path $cell -Leaf -Resolve;
-$parts = $name.Split("."); $L = $parts.Length - 2;
-$cellname = $parts[0..$L] -Join ".";
-echo $cellname;
-
-$sourceDirec = -join('amcsween@margaret.saclay.inria.fr:/scratch/amcsween/SpinDoctor/saved_simul/',$cellname,'_tet*');
-
-echo $sourceDirec;
-scp -r $sourceDirec ./saved_simul;
-}
+Meshing and comparing convergence of individual compartments of the cell can be done by running:
 
 
+```matlab
+driver_mf_segmented(mesh,"setup_comparison","-pq1.2a0.5O9VCn","3");
+driver_btpde(mesh,"setup_comparison","-pq1.2a0.1O9VCn","0");
+results = driver_get_PGSE_errors(mesh,"1","setup_comparison","neuron_meshing_paper/figures","3","0.5");
+```
 
+Once convergence has been established, individual expermeints can be run by running:
+```matlab
+[results,femesh]= load_mf_segmented(mesh,"setup_comparison","-pq1.2a0.1O9VCn",'3');
+```
+or 
+
+```matlab
+[results,femesh]= load_mf(mesh,"setup_comparison","-pq1.2a0.1O9VCn",'3');
+```

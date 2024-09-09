@@ -44,8 +44,8 @@ title(title_str);%, sprintf("All %d compartments", ncompartment));
 % title(title_str, sprintf("All %d compartments", ncompartment));
 
 %% Axis
-axis equal;
-axis(axis_vec);
+    axis equal;
+    axis(axis_vec);
 
 %% Colorbar
 colorbar("eastoutside");

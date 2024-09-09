@@ -1,8 +1,0 @@
-mesh_files/selected/1-2-1.CNG.ply,-pq1.2a1.0VCn,0.8706867792514584
-mesh_files/selected/02a_pyramidal2aFI.CNG.ply,-pq1.2a1.0VCn,0.9241090254119482
-mesh_files/selected/541549258_transformed.CNG.ply,-pq1.2a1.0VCn,0.8725029210869016
-mesh_files/selected/Homo-sapiens_-4203_BA46_1-3_a.CNG.ply,-pq1.2a1.0VCn,0.7530189488234579
-mesh_files/selected/1-2-1.CNG.ply,-pq1.2a0.5VCn,0.8769520749637846
-mesh_files/selected/02a_pyramidal2aFI.CNG.ply,-pq1.2a0.5VCn,0.9237807569585451
-mesh_files/selected/541549258_transformed.CNG.ply,-pq1.2a0.5VCn,0.8726503161608906
-mesh_files/selected/Homo-sapiens_-4203_BA46_1-3_a.CNG.ply,-pq1.2a0.5VCn,0.7722545060013747

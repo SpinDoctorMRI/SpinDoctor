@@ -1,6 +1,8 @@
-function driver_get_PGSE_errors(meshname,only_cell,setup_file,direc,lsval,hval) 
+function results = driver_get_PGSE_errors(meshname,only_cell,setup_file,direc,lsval,hval) 
 % DRIVER_GET_PGSE_ERRORS Records 
 
+hval = str2num(hval)
+lsval = str2num(lsval)
 
 set(groot,'defaultLineLineWidth',3.0)
 nh = length(hval);
@@ -20,7 +22,7 @@ run(sprintf("%s.m",setup_file));
 setup_r = setup;
 setup_r.name = string(meshname);
 
-setup_r.geometry.tetgen_options = sprintf("-pq1.2a%.1fVCn",0.1);
+setup_r.geometry.tetgen_options = "-pq1.2a0.1VCn";
 [setup_r,femesh_btpde,~,~] = prepare_simulation(setup_r);
 savepath_r=fullfile('saved_simul',sprintf('%s_tet%s',cellname,setup_r.geometry.tetgen_options),'cell');
 btpde_cell = load_btpde(setup_r,savepath_r,false);
@@ -45,22 +47,27 @@ end
 % end
 styles = ["-";"--";":"];
 colors = ['k';'r'];
-cm = colormap(parula(ndendrites));
+if only_cell ~= 1
+    cm = colormap(parula(ndendrites));  
+end
 max_errors = zeros(nh,nls);
+results = cell(nh,nls);
 for i = 1:nh
     for j = 1:nls
         try
         clear setup;
         run(sprintf("%s.m",setup_file));
+        output = struct;
         h = hval(i); ls = lsval(j);
+        output.h = h; output.ls = ls;
         setup.name = string(meshname);
-        setup.geometry.tetgen_options = sprintf("-pq1.2a%.1fVCn",h);
+        setup.geometry.tetgen_options = sprintf("-pq1.2a%.1fVCn",h);%sprintf("-pq1.2a%.1fVCn",h);
         setup.mf.length_scale = ls;
         [setup,femesh,~,~] = prepare_simulation(setup);
         savepath=fullfile('saved_simul',sprintf('%s_tet%s',cellname,setup.geometry.tetgen_options),'cell');
         mf_cell = load_mf(setup,savepath,false);
         rel_error = abs(real(mf_cell.signal - btpde_cell.signal))./abs(real(btpde_cell.signal));
-
+        output.cell = rel_error;
         fig_cell = figure(i); hold on;
         name = sprintf("h= %.1f, ls =%.4f, cell",h,ls);
         % plot(setup.gradient.bvalues,rel_error,'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
@@ -79,10 +86,12 @@ for i = 1:nh
                 rel_error_dendrites{k} = abs(real(mf_dendrite.signal - btpde_dendrite{k}.signal))./abs(real(btpde_dendrite{k}.signal));
             end
             rel_error_soma = abs(real(mf_soma.signal - btpde_soma.signal))./abs(real(btpde_soma.signal));
+            output.soma = rel_error_soma;
+            output.dendrites = rel_error_dendrites;
             hold on;
             % fig_soma = figure(2); hold on;
             name = sprintf("h= %.1f, ls =%.4f, soma",h,ls);
-
+                
             % plot(setup.gradient.bvalues,rel_error_soma,'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
             plot(setup.gradient.bvalues,rel_error_soma,'LineStyle',styles(j),'DisplayName',name,'Color',colors(2),'Marker','x');
 
@@ -97,9 +106,12 @@ for i = 1:nh
         else
             max_errors(i,j) = max(rel_error);
         end
+        results{i,j} = output;
         catch
             warning('Data not loading for h=%f,ls=%f',h,ls);
             max_errors(i,j) = NaN;
+        end
+
     end
     end
 for i =1:nh

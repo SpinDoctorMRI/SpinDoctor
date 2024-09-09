@@ -111,6 +111,7 @@ else
                 surfaces = create_surfaces_neuron(filename, setup);
             end
     end
+    disp(fname_tetgen)
     save_surfaces(fname_tetgen, surfaces);
 end
 

@@ -1,4 +1,4 @@
-function results= load_mf_cell(mesh,setup_file,tetgen_options,ls)
+function [results,femesh]= load_mf_cell(mesh,setup_file,tetgen_options,ls)
     % driver_cell  runs experiments for only the full cell.
     % mesh_path : (str) path to mesh
     % exp_str: (str) descriptor for experiments. Copy of results will be saved to signals/cell_name_tetgen_options_exp_str

@@ -58,7 +58,10 @@ if isfield(setup,'btpde')
         results.soma = btpde_soma;
         results.dendrites=btpde_dendrites;
         results.soma_volume = femesh_soma.total_volume;
-        results.dendrite_volume = [femesh_dendrites{:}.total_volume];
+        results.dendrite_volumes = cell(ndendrites,1);
+        for i = 1:ndendrites
+            results.dendrite_volumes{i} =femesh_dendrites{i}.total_volume;
+        end    
     end
 
 

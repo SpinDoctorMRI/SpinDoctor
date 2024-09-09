@@ -1,34 +1,59 @@
 cd ..
 addpath(genpath('src'))
 addpath(genpath('setups'))
-setup_file='setup_bvalues_experiments'
-tet="-pq1.1a1.0VCn";
-
-
-mesh='mesh_files/ultraliser/1-2-1-watertight.ply'
-results_neuron_ultraliser= load_mf_cell(mesh,setup_file,tet,'1.0')
-
-% mesh='mesh_files/ultraliser/20-sn-1-watertight.ply'
-% results_microglia_ultraliser= load_mf_cell(mesh,setup_file,tet,'1.0')
-
-tet="-pq1.2a0.1VCn";
-mesh='mesh_files/selected/1-2-1.CNG.ply'
-results_neuron= load_mf_cell(mesh,setup_file,tet,'1.0')
-
-% mesh='mesh_files/ultraliser/20-sn-1.CNG.ply'
-% results_microglia= load_mf_cell(mesh,setup_file,tet,'1.0')
-
-relative_errors = abs(real(results_neuron.mf.signal/results_neuron.total_volume- results_neuron_ultraliser.mf.signal/results_neuron_ultraliser.total_volume))./abs(real(results_neuron_ultraliser.mf.signal/results_neuron_ultraliser.total_volume));
-bvals = results_neuron.setup.gradient.bvalues;
-
-relative_errors = squeeze(relative_errors);
+setup_file='setup_comparison';
+tet="-pq1.2a0.5O9VCn";
 set(groot,'defaultLineLineWidth',3.0)
 
-fig = figure(1)
-plot(bvals,mean(relative_errors,2),'DisplayName','Direction-averaged error','Marker','x')
-hold on;
-plot(bvals,max(relative_errors'),'DisplayName','Direction-maximised error','Marker','o')
-grid on;xlabel('b-values');ylabel('Relative error');legend('Location','eastoutside','Interpreter','None');
-saveas(fig,'neuron_meshing_paper/ultraliser_comparison_1.png')
+%%
+mesh='mesh_files/ultraliser_modified/1-2-2.CNG_um.ply';
+[mf_ultraliser,femesh_u]= load_mf_cell(mesh,setup_file,tet,'3.0');
 
-% save('neuron_meshing_paper/ultraliser_comparison_data.mat','relative_errors','bvals')
+
+%%
+mesh='mesh_files/selected/1-2-2.CNG.ply';
+[mf_neuron,femesh]= load_mf_cell(mesh,setup_file,tet,'3.0');
+% [btpde_neuron,femesh_b]= load_btpde_cell(mesh,setup_file,tet_btpde);
+%%
+relative_errors = abs(real(mf_neuron.mf.signal/mf_neuron.total_volume- mf_ultraliser.mf.signal/mf_ultraliser.total_volume))./abs(real(mf_ultraliser.mf.signal/mf_ultraliser.total_volume));
+
+bvals = mf_neuron.setup.gradient.bvalues;
+relative_errors = squeeze(relative_errors);
+%%
+
+fig = figure(1);
+plot(bvals,relative_errors,'DisplayName','Matrix formalism relative signal differences','Marker','x')
+grid on;xlabel('b-values');ylabel('Relative error');legend('Location','eastoutside','Interpreter','None');
+
+
+fig = figure(2);
+plot(bvals,mf_neuron.mf.signal/mf_neuron.total_volume,'DisplayName','Our method','Marker','x')
+hold on;
+plot(bvals,mf_ultraliser.mf.signal/mf_ultraliser.total_volume,'DisplayName','Modified Ultraliser','Marker','x')
+
+grid on;xlabel('b-values');ylabel('Volume weighted signal');legend('Location','eastoutside','Interpreter','None');
+
+
+
+%%
+set(0,'defaulttextinterpreter','latex')
+
+ifield = 5;
+plot_field_everywhere(femesh, mf_neuron.mf.magnetization(ifield), sprintf('Our method MF b=%f',bvals(ifield)))
+set(gca,'fontsize',24)
+
+plot_field_everywhere(femesh_u, mf_ultraliser.mf.magnetization(ifield), sprintf('Modified Ultraliser MF b=%f',bvals(ifield)))
+set(gca,'fontsize',24)
+
+
+
+
+
+
+
+
+
+
+
+
+

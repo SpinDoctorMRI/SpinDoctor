@@ -35,7 +35,7 @@ if isfield(setup,'mf')
     save_path_cell = sprintf("%s/cell",save_path_root);
     lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);         
     % Compute MF magnetization
-    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
+    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,true);
 else
     error('mf not a field in setup file %s',setup_file);
 end

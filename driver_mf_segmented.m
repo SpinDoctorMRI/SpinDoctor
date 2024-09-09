@@ -48,9 +48,9 @@ save_path_root=sprintf('saved_simul/%s_tet%s',cellname,setup.geometry.tetgen_opt
 if isfield(setup,'mf')
     % Simulations on full cell
     save_path_cell = sprintf("%s/cell",save_path_root);
-    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);         
+    % lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);         
     % Compute MF magnetization
-    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
+    % mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
     disp("Computing Soma")
     % Simulations on soma
     save_path_soma = sprintf("%s/soma",save_path_root);
@@ -68,7 +68,7 @@ if isfield(setup,'mf')
         mf_dendrites{i} = solve_mf(femesh_dendrites{i}, setup, lap_eig,save_path_dendrite,false);
     end
     % Store results
-    results.cell = mf;
+    % results.cell = mf;
     results.soma = mf_soma;
     results.dendrites=mf_dendrites;
     results.total_volume = femesh.total_volume;

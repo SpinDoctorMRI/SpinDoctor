@@ -1,2 +1,0 @@
-mesh_files/selected/1-2-1.CNG.ply
-mesh_files/ultraliser/1-2-1-watertight.ply

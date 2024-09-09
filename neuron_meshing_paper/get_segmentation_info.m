@@ -35,11 +35,11 @@ function get_segmentation_info(mesh_path,tetgen_options)
     savefig(fig,sprintf('neuron_meshing_paper/%s_tet%s.fig',cellname,setup.geometry.tetgen_options));
     total_volume = femesh.total_volume;
     soma_volume = femesh_soma.total_volume;
-    dendrite_volume = 0
-    for iden = 1:length(femesh_dendrites);
-        dendrite_volume = dendrite_volume + femesh_dendrites{iden}.total_volume
+    dendrite_volume = 0;
+    for iden = 1:length(femesh_dendrites)
+        dendrite_volume = dendrite_volume + femesh_dendrites{iden}.total_volume;
     end
-    fid = fopen('neuron_meshing_paper/segmentation_info.txt','a');
+    fid = fopen('neuron_meshing_paper/output_data/segmentation_info.txt','a');
     fprintf(fid,'\\verb|%s| & %.1f & %.1f & %.1f \\\\ \n',cellname,total_volume,100*soma_volume/total_volume,100*dendrite_volume/total_volume);
     fclose(fid);
     quit
