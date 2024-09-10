@@ -1,8 +1,8 @@
 function results = driver_get_PGSE_errors(meshname,only_cell,setup_file,direc,lsval,hval) 
 % DRIVER_GET_PGSE_ERRORS Records 
 
-hval = str2num(hval)
-lsval = str2num(lsval)
+hval = str2num(hval);
+lsval = str2num(lsval);
 
 set(groot,'defaultLineLineWidth',3.0)
 nh = length(hval);

@@ -1,8 +1,14 @@
-function driver_get_morez_errors(meshname,lsval,hval,only_cell,direc)    
+function results = driver_get_morez_errors(meshname,lsval,hval,only_cell,direc)    
+
+
+hval = str2num(hval);
+lsval = str2num(lsval);
 
 nh = length(hval);
 nls = length(lsval);
 only_cell = str2num(only_cell);
+
+
 
 if ~isdir(direc)
     mkdir(direc)
@@ -36,12 +42,13 @@ if only_cell ~=1
 end
 
 rel_error = cell(nh,nls);
-if segment_cell ==1
+if only_cell ~=1
     rel_error_soma =  cell(nh,nls);
     rel_error_dendrites = cell(ndendrites,nh,nlss);
 end
 styles = ["-";"--";":"];
 colors = ['g';'b';'r'];
+results = cell(nh,nls);
 
 for i = 1:nh
     for j = 1:nls
@@ -49,13 +56,15 @@ for i = 1:nh
         setup_morez_ref_sol;
         h = hval(i); ls = lsval(j);
         setup.name = string(meshname);
+        output = struct;
+
         setup.geometry.tetgen_options = sprintf("-pq1.2a%.1fVCn",h);
         setup.mf.length_scale = ls;
         [setup,femesh,~,~] = prepare_simulation(setup);
         savepath=fullfile('saved_simul',sprintf('%s_tet%s',cellname,setup.geometry.tetgen_options),'cell');
         mf_cell = load_mf(setup,savepath,false);
-        rel_error = abs(real(mf_cell.signal - btpde_cell.signal))./abs(real(btpde_cell.signal))
-
+        rel_error = abs(real(mf_cell.signal - btpde_cell.signal))./abs(real(btpde_cell.signal));
+        output.cell = rel_error;
         fig_cell = figure(1); hold on;
         name = sprintf("h= %.1f, ls =%.4f",h,ls);
         plot(rel_error,'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
@@ -70,18 +79,22 @@ for i = 1:nh
             for k =1:ndendrites
                 savepath_dendrite =fullfile('saved_simul',sprintf('%s_tet%s/dendrite_%d',cellname,setup.geometry.tetgen_options,permutation(k)));
                 mf_dendrite = load_mf(setup,savepath_dendrite,false);
-                rel_error_dendrites{k} = abs(real(mf_dendrite.signal - btpde_dendrite{k}.signal))./abs(real(btpde_dendrite{k}.signal))
+                rel_error_dendrites{k} = abs(real(mf_dendrite.signal - btpde_dendrite{k}.signal))./abs(real(btpde_dendrite{k}.signal));
             end
-            rel_error_soma = abs(real(mf_soma.signal - btpde_soma.signal))./abs(real(btpde_soma.signal))
-            
+            rel_error_soma = abs(real(mf_soma.signal - btpde_soma.signal))./abs(real(btpde_soma.signal));
+            output.soma = rel_error_soma;
+            output.dendrites = rel_error_dendrites;
             fig_soma = figure(2); hold on;
             plot(rel_error_soma,'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
-            
             for k = 1:ndendrites
                 fig_dend = figure(2+k);hold on;
                 plot(rel_error_dendrites{k},'Color',colors(i),'LineStyle',styles(j),'DisplayName',name);
             end
         end
+        output.h = h; output.ls= ls;
+        results{i,j} = output;
+        
+
         
         
 
