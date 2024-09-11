@@ -42,7 +42,7 @@
 
 addpath(genpath('src'));
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
-setup.name = "mesh_files/spindle/whole_neurons/04b_spindle3aFI_cell.ply";
+setup.name = "mesh_files/spindle/whole_neurons/16o_spindle13aFI.stl";
 
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
