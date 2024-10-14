@@ -1,4 +1,4 @@
-function [femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_path)
+function [femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_path,soma_mesh_path)
 %%SEGMENT_FEMESH creates finite element meshes corresponding to the soma
 %%and dendrite branches.
 %   
@@ -38,30 +38,33 @@ function [femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_
         femesh_dendrites = initialise_dendrites(p,e,bins,dendrite_elements);
 
     else
-    disp('Segmenting finite element mesh')
-    % Extract swc information and tetrahedra adjacency
-    swc = Swc(swc_file);neighbours =read_tetgen_neigh(string(tetgen_path));
-    % Create soma mesh
-    femesh_soma = separate_soma(femesh,swc,neighbours);
+        disp('Segmenting finite element mesh')
+        % Extract swc information and tetrahedra adjacency
+        swc = Swc(swc_file);neighbours =read_tetgen_neigh(string(tetgen_path));
+        % Create soma mesh
+        if nargin ==3
+            femesh_soma = separate_soma_swc(femesh,swc,neighbours);
+        else
+            femesh_soma = separate_soma_swc(femesh,swc,neighbours,soma_mesh_path);
+        end
     
-
-    % Create dendrites
-    femesh_dendrites = find_dendrites_femesh(femesh,femesh_soma,neighbours);
-    ndendrites = length(femesh_dendrites);
+        % Create dendrites
+        femesh_dendrites = find_dendrites_femesh(femesh,femesh_soma,neighbours);
+        ndendrites = length(femesh_dendrites);
+        
     
-
-
-    % Save soma mesh
-    fid = fopen(sprintf('%s_soma_elements',tetgen_path),'w');
-    fprintf(fid,'%d\n',femesh_soma.element_map);
-    fclose(fid);
-
-    % Save dendrites
-    for i =1:ndendrites
-        fid = fopen(sprintf('%s_dendrite_%d_elements',tetgen_path,i),'w');
-        fprintf(fid,'%d\n',femesh_dendrites{i}.element_map);
+    
+        % Save soma mesh
+        fid = fopen(sprintf('%s_soma_elements',tetgen_path),'w');
+        fprintf(fid,'%d\n',femesh_soma.element_map);
         fclose(fid);
-    end
+    
+        % Save dendrites
+        for i =1:ndendrites
+            fid = fopen(sprintf('%s_dendrite_%d_elements',tetgen_path,i),'w');
+            fprintf(fid,'%d\n',femesh_dendrites{i}.element_map);
+            fclose(fid);
+        end
 
 
     end

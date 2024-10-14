@@ -36,7 +36,7 @@ dist =  vecnorm(dist,2,2);
 fprintf('Minimum distance is %f at permutation %d\n',M,I);
 next_min = min(dist(1:size(P,1) ~= I));
 fprintf('Next smallest = %f\n',next_min);
-if next_min < 5*M
+if next_min < 2*M
     error('Centroid method inconclusive to align dendrites')
 end
 p = P(I,:);
