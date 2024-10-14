@@ -1,4 +1,4 @@
-# SpinDoctor Toolbox (developmental code, not documented)
+# SpinDoctor Toolbox
 
 SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
 
