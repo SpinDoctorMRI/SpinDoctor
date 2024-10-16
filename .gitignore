@@ -1,12 +1,3 @@
 .DS_Store
-output
-saved_simul
-mesh_files
-*.mex*
-*.fig
-*.ps1
-*.txt
-*.scheme
-analyse_morez.asv
-analyse_morez.m
-*.ipynb
+saved_simul/*/*/lap_eig*
+saved_simul/*/*/*/FEM*
