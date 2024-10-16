@@ -1,4 +1,4 @@
-function [femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_path,soma_mesh_path)
+function [femesh,femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_path,soma_mesh_path)
 %%SEGMENT_FEMESH creates finite element meshes corresponding to the soma
 %%and dendrite branches.
 %   
@@ -20,7 +20,7 @@ function [femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_
         soma_element_map=fscanf(fid,'%d',[1,Inf]);
         fclose(fid);
         
-        femesh_soma = initialise_soma(p,e,soma_element_map);
+        femesh_soma= initialise_soma(p,e,soma_element_map);
 
         i = 1;
         bins = zeros([nelement,1]);
@@ -35,25 +35,36 @@ function [femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,tetgen_
         mask(femesh_soma.element_map) = false;
         dendrite_elements = find(mask);
         bins = bins(bins>0);
-        femesh_dendrites = initialise_dendrites(p,e,bins,dendrite_elements);
-
+        [femesh_dendrites,elementmarkers] = initialise_dendrites(p,e,bins,dendrite_elements);
+        
+        % Previous method, using comparts in one finite element mesh to
+        % handle segmentation.
+        % elementmarkers(soma_element_map) = 1;
+        % femesh.elementmarkers = elementmarkers;
+        % femesh.points = [femesh.points{:}]; femesh.facets = [femesh.facets{:}]; femesh.elements = [femesh.elements{:}];
+        % femesh.facetmarkers = ones(1,size(femesh.facets,2));
+        % femesh = split_mesh(femesh);
     else
         disp('Segmenting finite element mesh')
         % Extract swc information and tetrahedra adjacency
         swc = Swc(swc_file);neighbours =read_tetgen_neigh(string(tetgen_path));
         % Create soma mesh
-        if nargin ==3
-            femesh_soma = separate_soma_swc(femesh,swc,neighbours);
+        if nargin ==4
+             [femesh_soma,soma_element_map] = separate_soma(femesh,swc,neighbours,soma_mesh_path);
         else
-            femesh_soma = separate_soma_swc(femesh,swc,neighbours,soma_mesh_path);
+             [femesh_soma,soma_element_map] = separate_soma(femesh,swc,neighbours);
         end
     
         % Create dendrites
-        femesh_dendrites = find_dendrites_femesh(femesh,femesh_soma,neighbours);
+        [femesh_dendrites,elementmarkers] = find_dendrites_femesh(femesh,femesh_soma,neighbours);
         ndendrites = length(femesh_dendrites);
         
-    
-    
+        % Previous method, using comparts in one finite element mesh to
+        % handle segmentation.
+        % elementmarkers(soma_element_map) = 1;
+        % femesh.elementmarkers = elementmarkers;
+        % femesh.facetmarkers = ones(1,size(femesh.facets,2));
+        % femesh = split_mesh(femesh);
         % Save soma mesh
         fid = fopen(sprintf('%s_soma_elements',tetgen_path),'w');
         fprintf(fid,'%d\n',femesh_soma.element_map);

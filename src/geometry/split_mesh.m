@@ -66,7 +66,6 @@ for icmpt = 1:ncompartment
         boundary_on_compartment = all(ismember(boundary_facets{iboundary}, point_map{icmpt}), "all");
         if boundary_on_compartment
             % Associate boundary to compartment in new local numbering system
-
             % Create list of facets in boundary in new local numbering system
             facets{icmpt, iboundary} = boundary_facets{iboundary};
             oldcode = point_map{icmpt};
@@ -74,6 +73,17 @@ for icmpt = 1:ncompartment
             assert(numel(newcode) == numel(oldcode), ...
                 "newcode and oldecode must have the same number of elements");
             [toreplace, bywhat] = ismember(facets{icmpt, iboundary}, oldcode);
+            facets{icmpt, iboundary}(toreplace) = newcode(bywhat(toreplace));
+        elseif any(all(ismember(boundary_facets{iboundary}, point_map{icmpt}),1))
+            %14/10 testing for moving all code to compartments.
+            disp('Reached')
+            facets{icmpt, iboundary} = boundary_facets{iboundary}(:,all(ismember(boundary_facets{iboundary}, point_map{icmpt}),1));
+            oldcode = point_map{icmpt};
+            newcode = 1:length(point_map{icmpt});
+            size(facets{icmpt, iboundary})
+            [toreplace, bywhat] = ismember(facets{icmpt, iboundary}, oldcode);
+            size(toreplace)
+            size(bywhat)
             facets{icmpt, iboundary}(toreplace) = newcode(bywhat(toreplace));
         end
     end

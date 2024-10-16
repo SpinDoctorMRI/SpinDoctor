@@ -83,7 +83,7 @@ setup.mf.length_scale =1;                               % Minimum length scale o
 setup.mf.neig_max = 2000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 400;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;
-setup.mf.rerun=true;
+setup.mf.rerun=false;
 setup.mf.rerun_eigen = false;
 %% BTPDE experiment parameters (comment block to skip experiment)
 % setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE

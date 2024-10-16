@@ -1,4 +1,4 @@
-function femesh_dendrites = initialise_dendrites(p,e,bins,dendrite_elements)
+function [femesh_dendrites,element_markers]= initialise_dendrites(p,e,bins,dendrite_elements)
 %%INITIALISE_DENDRITES creates femesh structures for the dendrites, after they have been sorted into branches
 % 
 %   p: (3,N) array of points from full cell finite element mesh
@@ -9,11 +9,13 @@ function femesh_dendrites = initialise_dendrites(p,e,bins,dendrite_elements)
 %       sorted into dendrite branches
     dendrite_ids = unique(bins);
     femesh_dendrites = cell(length(dendrite_ids),1);
+    element_markers = zeros(1,size(e,2));
     for i = 1:length(dendrite_ids)
         femesh_dendrite = struct;
         femesh_dendrite.ncompartment =1;
         femesh_dendrite.nboundary =1;
-        element_map = dendrite_elements(bins == dendrite_ids(i));
+        element_map = dendrite_elements(bins == dendrite_ids(i));   
+        element_markers(element_map) = i + 1;
         elements = e(:,element_map);
         point_map = unique(elements);
         points = p(:,point_map);

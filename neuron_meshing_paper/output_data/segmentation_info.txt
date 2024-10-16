@@ -1,4 +1,0 @@
-\verb|1-2-1.CNG| & 14256.6 & 0.735 & 0.265 \\ 
-\verb|02a_pyramidal2aFI.CNG| & 25629.0 & 0.808 & 0.192 \\ 
-\verb|541549258_transformed.CNG| & 3809.5 & 0.810 & 0.190 \\ 
-\verb|Homo-sapiens_-4203_BA46_1-3_a.CNG| & 1304.5 & 0.995 & 0.005 \\ 

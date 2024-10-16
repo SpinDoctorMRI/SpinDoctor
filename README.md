@@ -1,7 +1,29 @@
+# Neuron Meshing paper
+
+This code was used in a forthcoming publication by us to simulate diffusion magnetic resonance imaging (dMRI) experiments on realistic neuron and microlgia geometries. The primary purpose of the code is to test our meshes against the meshes produced by the Ultraliser tool (available here https://github.com/BlueBrain/Ultraliser).
+
+To test for an individual cell, run 
+```
+driver_demo;
+```
+The sequences, cell geometry and experimental parameters can be adjusted in the setup file.
+
+The simulations for the neuron 1-2-2.CNG can be done by running:
+```
+driver_run_neuron_simulations;
+```
+
+The simulations for the human microglia cells can be done by running:
+```
+driver_run_microglia_simulations; 
+```
+
+
+
+
 # SpinDoctor Toolbox
 
-SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes.
-
+SpinDoctor is a software package that performs numerical simulations of diffusion magnetic resonance imaging (dMRI) for prototyping purposes. This branch contains the code and data used in a forthcoming publication describing our surface meshing algorithm https://github.com/AlexMcSD/mesh_swc.
 
 ## Software requirements
 
@@ -10,13 +32,6 @@ The SpinDoctor Toolbox has been developed in the MATLAB R2020b and tested with M
 SpinDoctor requires no additional MATLAB Toolboxes. However, if the MATLAB Parallel Computing Toolbox is available,
 the simulations can be run in parallel.
 
-
-## Getting started
-
-1) The base folder contains a commented general purpose driver called `driver_spindoctor.m`. The other driver, `driver_save_load.m`, can save and load simulations.
-2) The input files for the drivers are found in the folder `setups`, and define the structures needed for the simulations.
-3) Multiple neuron meshes are found in the folder `mesh_files`. These can be loaded in the `setups/setup_neuron.m` script.
-4) The user guide is found [here](https://github.com/jingrebeccali/SpinDoctor/blob/master/user_guide.pdf).
 
 ## Updates July 2024
 
