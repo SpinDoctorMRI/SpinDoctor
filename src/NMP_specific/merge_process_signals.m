@@ -1,11 +1,19 @@
-function [process_signals,process_signals_um] = merge_process_signals(results,results_um,femesh_neurites,femesh_neurites_um,inds,inds_um)
-process_signals_copy = results.mf_neurites;
+function [process_signals,process_signals_um,volumes,volumes_um] = merge_process_signals(results,results_um,femesh_neurites,femesh_neurites_um,inds,inds_um)
+% This function is used specifically from the Neuron Meshing paper to solve the problem of 
+% different meshing algorithms being segmented in different ways.
+
+
+
+    process_signals_copy = results.mf_neurites;
 process_signals_copy_um = results_um.mf_neurites;
 ngroups = length(inds);
 
 sz = size(process_signals_copy{1}.signal);
 process_signals = zeros([ngroups,sz]);
 process_signals_um = zeros([ngroups,sz]);
+
+volumes = zeros([ngroups,1]);
+volumes_um = zeros([ngroups,1]);
 
 
 for ii = 1:ngroups
@@ -17,7 +25,7 @@ for ii = 1:ngroups
         V = V + femesh_neurites{group1(j)}.total_volume;
     end
     process_signals(ii,:) = real(sum(signals1,1)/V);
-    
+    volumes(ii) = V;
     signals2 = zeros([length(inds_um{ii}),sz]);
     group2 = inds_um{ii};
     V = 0;
@@ -26,6 +34,6 @@ for ii = 1:ngroups
         V = V + femesh_neurites_um{group2(j)}.total_volume;
     end
     process_signals_um(ii,:)= real(sum(signals2,1))/V;
-
+    volumes_um(ii) = V;
 end
 process_signals = squeeze(process_signals); process_signals_um = squeeze(process_signals_um);

@@ -37,6 +37,7 @@ end
 setup.name=string(mesh);
 [~,cellname,~] = fileparts(setup.name);
 
+segment_cell = nargin == 4;
 
 if segment_cell
     setup.cell.swc = swc_file;
@@ -44,7 +45,7 @@ end
 
 
 [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
-savepath_root=sprintf('saved_simul/%s_tet%s',cellname,setup.geometry.tetgen_options);
+savepath_root=sprintf("saved_simul\\%s_tet%s",cellname,setup.geometry.tetgen_options);
 
 
 

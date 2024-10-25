@@ -1,3 +1,3 @@
 .DS_Store
-saved_simul/*/*/lap_eig*
-saved_simul/*/*/*/FEM*
+mesh_files/*/*/*
+

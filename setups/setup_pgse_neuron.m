@@ -75,7 +75,7 @@ setup.pde.permeability_ecs = 0;                         % Permeability ECS bound
 %% Gradient sequences
 setup.gradient.sequences = {PGSE(10000,43000)};
 setup.gradient.directions = [1;0;0];
-setup.gradient.values = [500,1000,2500,4000,6000];
+setup.gradient.values = [500 1000 2500 4000 6000 7000 8000 10000 12000 20000];
 setup.gradient.values_type  = "b";
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.

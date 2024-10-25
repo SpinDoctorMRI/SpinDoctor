@@ -80,6 +80,7 @@ ncompartment = setup.ncompartment;
 namplitude = setup.namplitude;
 nsequence = setup.nsequence;
 ndirection = setup.ndirection;
+FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,multi_lap_eig,savepath);
 
 if do_save
     % Folder for saving
@@ -102,7 +103,6 @@ if do_save
 else
     savepath = "";
 end
-FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,multi_lap_eig,savepath);
 
 % Initialize output arguments
 const_sequences_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),sequences,'UniformOutput',true);

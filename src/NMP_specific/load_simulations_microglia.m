@@ -49,19 +49,27 @@ savepath_root=sprintf('saved_simul/%s_tet%s',cellname,setup.geometry.tetgen_opti
 
 
 
-load_magnetization = false; 
-
 if segment_cell
+    max_volume = 1;
     disp("Loading simulations for soma and neurites/processes only");
-    savepath_soma = sprintf("%s/soma",savepath_root);
     nneurites = length(femesh_neurites);
+    volumes = zeros(nneurites,1);
+    for i =1:nneurites
+    volumes(i)= femesh_neurites{i}.total_volume;
+    end
+    [sorted_volumes,idx_neurites] =sort(volumes);
+    idx_neurites = idx_neurites(sorted_volumes > max_volume);
+    femesh_neurites = femesh_neurites(idx_neurites);
+    
+    load_magnetization = false; 
+    savepath_soma = sprintf("%s/soma",savepath_root);
     if isfield(setup,'mf')
         mf_soma = load_mf(setup,savepath_soma,load_magnetization);
         mf_neurites = cell(nneurites,1);
         for ib = 1:nneurites
             mf_neurites{ib} =  load_mf(setup,sprintf("%s/neurite_%d",savepath_root,ib),load_magnetization);
         end
-
+        mf_neurites = mf_neurites(idx_neurites);
         results.mf_soma = mf_soma; results.mf_neurites = mf_neurites;
     end
 
@@ -71,6 +79,7 @@ if segment_cell
         for ib = 1:nneurites
             btpde_neurites{ib} =  load_btpde(setup,sprintf("%s/neurite_%d",savepath_root,ib),load_magnetization);
         end
+        btpde_neurites = btpde_neurites(idx_neurites);
 
         results.btpde_soma = btpde_soma; results.btpde_neurites = btpde_neurites;
     end
@@ -79,6 +88,7 @@ if segment_cell
 else
     disp("Loading simulations for cell only");
     savepath_cell = sprintf("%s/cell",savepath_root);
+    load_magnetization=false;
     if isfield(setup,'mf')
         mf_cell= load_mf(setup,savepath_cell,load_magnetization);
        

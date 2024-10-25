@@ -79,13 +79,13 @@ setup.gradient.values = [500 1000];
 setup.gradient.values_type  = "b";
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
-setup.mf.length_scale =2;                               % Minimum length scale of eigenfunctions
-setup.mf.neig_max = 4000;                               % Requested number of eigenvalues
+setup.mf.length_scale =1;                               % Minimum length scale of eigenfunctions
+setup.mf.neig_max = 2000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 400;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;
-setup.mf.rerun=true;
+setup.mf.rerun=false;
 setup.mf.rerun_eigen = false;
-setup.mf.save_eig = false;
+setup.mf.save_eig = true;
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver

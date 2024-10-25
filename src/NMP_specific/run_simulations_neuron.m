@@ -1,9 +1,23 @@
 function [results,femesh_cell,femesh_soma,femesh_neurites]= run_simulations_neuron(mesh,setup_file,tetgen_options,swc_file)
-% driver_mf  runs experiments for only the full cell.
-% mesh : (str) path to mesh
-% setup_file: (str) name of setup file.
-% tetgen_options : (str) tetgen_options for mesh. Defaults to '-pq1.2aVCn'
-% fig_path :  (str) save path for a plot of the mesh
+%RUN_SIMULATIONS_NEURON computes experiments from a neuron.
+%   
+%   RUN_SIMULATIONS_NEURON(MESH,SETUP_FILE) computes the signal from the
+%   setup file for the mesh file only, with tetgen options specified in the
+%   setup file.
+% 
+%   RUN_SIMULATIONS_NEURON(MESH,SETUP_FILE,TETGEN_OPTIONS) computes the signal from the
+%   setup file for the mesh file only, with tetgen options specified in the
+%   setup file.
+% 
+%   RUN_SIMULATIONS_NEURON(MESH,SETUP_FILE,TETGEN_OPTIONS,SWC_FILE) computes the signal from the
+%   setup file for the soma and process of the microglia cell only, with tetgen options specified in the
+%   setup file.
+% 
+%   mesh : (str) path to mesh
+%   setup_file: (str) name of setup file.
+%   tetgen_options : (str) (optional) tetgen_options for mesh. Defaults to value from
+%                   setup_file.
+%   swc_file : (str)(optional) path to swc file.
 tic
 addpath(genpath('setups'));
 addpath(genpath('src'));

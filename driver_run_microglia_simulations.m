@@ -4,7 +4,7 @@ addpath(genpath('setups'))
 
 setup_file='setup_pgse_microglia';
 %% Get list of meshes
-fid = fopen("cells_human_well_meshed.txt",'r');
+fid = fopen("cells_human.txt",'r');
 meshes = textscan(fid,"%s");
 fclose(fid);
 meshes = meshes{1}; meshes = string(meshes);
@@ -17,34 +17,33 @@ meshes_um = replace(meshes,"Alzheimer_study","ultraliser_modified");
 meshes_um = replace(meshes_um,".ply","_um.ply");
 %% Run simulations for mesh_swc meshes
 % tetgen_options = "-pq1.2a0.5O9VCn";
-tetgen_options = "-pq1.2a0.05O9VCn";
-for i = 1:ncells
-    mesh = meshes(i);
-    run_simulations_microglia(mesh,setup_file,tetgen_options);
-end
-%%
-tetgen_options = "-pq1.2a0.05O9VCn";
-for i = 1:ncells
-    mesh = meshes(i);
-    [~,cellname,~] = fileparts(mesh);
-    swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
-    run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
-end
-%% Run simulations for modified ultraliser meshes
+% for i = 1:ncells
+%     mesh = meshes(i);
+%     run_simulations_microglia(mesh,setup_file,tetgen_options);
+% end
+% %%
+% tetgen_options = "-pq1.2a0.05O9VCn";
+% for i = 1:ncells
+%     mesh = meshes(i);
+%     [~,cellname,~] = fileparts(mesh);
+%     swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
+%     run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
+% end
+% %% Run simulations for modified ultraliser meshes
 % tetgen_options = "-pq1.2a0.5O9VCn";
-tetgen_options = "-pq1.2a0.05O9VCn";
-for i = 1:ncells
-    mesh = meshes_um(i); 
-    run_simulations_microglia(mesh,setup_file,tetgen_options);
-end
-tetgen_options = "-pq1.2a0.05O9VCn";
-for i = 1:ncells
-    mesh = meshes_um(i);
-    [~,cellname_um,~] = fileparts(mesh);
-    cellname = replace(cellname_um,"_um","");
-    swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
-    run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
-end
+% % tetgen_options = "-pq1.2a0.05O9VCn";
+% for i = 1:ncells
+%     mesh = meshes_um(i); 
+%     run_simulations_microglia(mesh,setup_file,tetgen_options);
+% end
+% tetgen_options = "-pq1.2a0.05O9VCn";
+% for i = 1:ncells
+%     mesh = meshes_um(i);
+%     [~,cellname_um,~] = fileparts(mesh);
+%     cellname = replace(cellname_um,"_um","");
+%     swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
+%     run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
+% end
 %% Compare cell signals
 warning("All but 6 of the meshes were problematic. We only expect close results for those in cells_human_compare.txt");
 tetgen_options = "-pq1.2a0.5O9VCn";
@@ -65,7 +64,6 @@ for i =1:ncells
         signal = real(results.mf_cell.signal./femesh_cell.total_volume);
         signal_um = real(results_um.mf_cell.signal./femesh_cell_um.total_volume);
 
-        save(sprintf('neuron_meshing_paper/microglia_output/%s.mat',cell),'signal','signal_um','bvals');
         signal = real(results.mf_cell.signal/femesh_cell.total_volume);
         signal_ultraliser = real(results_um.mf_cell.signal/femesh_cell_um.total_volume);
         namplitude = length(bvals);
@@ -75,6 +73,9 @@ for i =1:ncells
         rel_errors(icell,:) = rel_error; abs_errors(icell,:) = abs_error;
         meshes_tested(icell) = cell;
         volumes(icell) = femesh_cell.total_volume; volumes_ult(icell) = femesh_cell_um.total_volume;
+        volume=femesh_cell.total_volume
+        save(sprintf('neuron_meshing_paper/microglia_output/%s.mat',cell),'signal','signal_um','bvals','volume');
+
     end
 end
 
