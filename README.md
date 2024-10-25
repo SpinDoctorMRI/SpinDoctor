@@ -19,10 +19,8 @@ driver_run_microglia_simulations;
 ```
 and comparing the signals of individual compartments is done in:
 ```
-compare_microlgia_segmented;
+driver_compare_microlgia_simulations_segmented;
 ```
-
-We note that if the tetgen parameters are changed then the correspondance between branches may be altered. If branches are split/merged then it is necessary to manually assign the correspondance between branches. This is done in the switch statements in compare_microglia_segmented and also in the last section of driver_run_neuron_simulations.
 
 The figures for the paper were plotted using plot_data.ipynb.
 
