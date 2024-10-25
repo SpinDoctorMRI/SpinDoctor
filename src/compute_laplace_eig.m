@@ -1,4 +1,4 @@
-function lap_eig = compute_laplace_eig(femesh, pde, mf, savepath)
+function lap_eig = compute_laplace_eig(femesh, pde, mf, savepath,save_laplace_eig)
 %COMPUTE_LAPLACE_EIG Compute Laplace eigenvalues and eigenfunctions.
 %
 %   femesh: struct
@@ -16,8 +16,9 @@ function lap_eig = compute_laplace_eig(femesh, pde, mf, savepath)
 % Measure computational time of eigendecomposition
 starttime = tic;
 
-% Check if a save path has been provided (this toggers saving)
-do_save = nargin == nargin(@compute_laplace_eig);
+% Check if a save path has been provided (this triggers saving unless an
+% additional do not save flag is provided).
+do_save = (nargin == (nargin(@compute_laplace_eig) -1)) || (nargin == (nargin(@compute_laplace_eig)) && save_laplace_eig);
 
 % Extract mf parameters
 rerun = mf.rerun_eigen;
