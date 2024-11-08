@@ -43,6 +43,9 @@
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
 
+%% Saved simulation location
+% setup.saved_simul_loc= "path/to/saved_simul";
+
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells

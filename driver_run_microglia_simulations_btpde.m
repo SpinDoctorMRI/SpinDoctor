@@ -7,7 +7,7 @@ setup_file_btpde='setup_pgse_microglia_btpde';
 setup_file_mf='setup_pgse_microglia';
 
 % Get list of meshes
-fid = fopen("cells_human_well_meshed.txt",'r');
+fid = fopen("cells_human.txt",'r');
 meshes = textscan(fid,"%s");
 fclose(fid);
 meshes = meshes{1}; meshes = string(meshes);
@@ -18,25 +18,24 @@ ncells = length(meshes);
 
 meshes_um = replace(meshes,"Alzheimer_study","ultraliser_modified");
 meshes_um = replace(meshes_um,".ply","_um.ply");
-%% Run simulations for mesh_swc meshes
+%% Run simulations for Alpha_Mesh_Swc meshes
 tetgen_options="-pq1.1a0.01O9VCn";
-for i = 1%:ncells
+for i = 1:ncells
     mesh = meshes(i);
-    % run_simulations_microglia(mesh,setup_file_btpde,tetgen_options);
+    run_simulations_microglia(mesh,setup_file_btpde,tetgen_options);
     [~,cellname,~] = fileparts(mesh);
     swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
-    % run_simulations_microglia(mesh,setup_file_btpde,tetgen_options,swc_file,soma_file);
+    run_simulations_microglia(mesh,setup_file_btpde,tetgen_options,swc_file,soma_file);
 end
 %% Run simulations for modified ultraliser meshes
 tetgen_options = "-pq1.10.05O9VCn";
-% tetgen_options = "-pq1.2a0.05O9VCn";
 for i = 1:ncells
     mesh = meshes_um(i); 
-    % run_simulations_microglia(mesh,setup_file_btpde,tetgen_options);
+    run_simulations_microglia(mesh,setup_file_btpde,tetgen_options);
     [~,cellname_um,~] = fileparts(mesh);
     cellname = replace(cellname_um,"_um","");
     swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
-    % run_simulations_microglia(mesh,setup_file_btpde,tetgen_options,swc_file,soma_file);
+    run_simulations_microglia(mesh,setup_file_btpde,tetgen_options,swc_file,soma_file);
 end
 %% Compare cell signals
 tetgen_options_mf = "-pq1.2a0.5O9VCn";
@@ -45,43 +44,43 @@ clear rel_errors abs_errors; icell = 0;
 clear volumes; clear volumes_ult;
 clear meshes_tested;
 clear cellnames ;
-% for i =1:ncells
-    % mesh = meshes(i); type = types(i);
-    % [~,cellname,~] = fileparts(mesh); 
-    % mesh = sprintf("mesh_files/ultraliser_modified/%s/%s_um.ply",type,cellname);
-    % [results_btpde,femesh_cell_btpde,~,~]= load_simulations_microglia(mesh,setup_file_btpde,tetgen_options_btpde);
-    % [results_mf,femesh_cell_mf,~,~]= load_simulations_microglia(mesh,setup_file_mf,tetgen_options_mf);
-    % bvals = results_mf.setup.gradient.bvalues;
-    % % Save direct comparison here for plots in
-    % % plotting_microglia.ipynb.
-    % signal_btpde = real(results_btpde.btpde_cell.signal./femesh_cell_btpde.total_volume);
-    % signal_mf = real(results_mf.mf_cell.signal./femesh_cell_mf.total_volume);
-    % % signal_btpde = real(results_btpde.btpde_cell.signal);
-    % % signal_mf = real(results_mf.mf_cell.signal); 
-    % namplitude = length(bvals);
-    % rel_error = abs((signal_btpde- signal_mf)./signal_btpde);
-    % abs_error  = abs(signal_btpde- signal_mf);
-    % save(sprintf('neuron_meshing_paper/microglia_output/%s_convergence.mat',cellname),'rel_error','abs_error','bvals');
+for i =1:ncells
+    mesh = meshes(i); type = types(i);
+    [~,cellname,~] = fileparts(mesh); 
+    mesh = sprintf("mesh_files/ultraliser_modified/%s/%s_um.ply",type,cellname);
+    [results_btpde,femesh_cell_btpde,~,~]= load_simulations_microglia(mesh,setup_file_btpde,tetgen_options_btpde);
+    [results_mf,femesh_cell_mf,~,~]= load_simulations_microglia(mesh,setup_file_mf,tetgen_options_mf);
+    bvals = results_mf.setup.gradient.bvalues;
+    % Save direct comparison here for plots in
+    % plotting_microglia.ipynb.
+    signal_btpde = real(results_btpde.btpde_cell.signal./femesh_cell_btpde.total_volume);
+    signal_mf = real(results_mf.mf_cell.signal./femesh_cell_mf.total_volume);
+    % signal_btpde = real(results_btpde.btpde_cell.signal);
+    % signal_mf = real(results_mf.mf_cell.signal); 
+    namplitude = length(bvals);
+    rel_error = abs((signal_btpde- signal_mf)./signal_btpde);
+    abs_error  = abs(signal_btpde- signal_mf);
+    save(sprintf('neuron_meshing_paper/microglia_output/%s_convergence.mat',cellname),'rel_error','abs_error','bvals');
 
-    % icell = icell + 1; 
-    % rel_errors(icell,:) = rel_error; abs_errors(icell,:) = abs_error;
-    % cellnames(i) = cellname;
-% end
+    icell = icell + 1; 
+    rel_errors(icell,:) = rel_error; abs_errors(icell,:) = abs_error;
+    cellnames(i) = cellname;
+end
 
-% fig = figure(1);
-% plot(bvals,rel_errors);
-% legend(cellnames,'Interpreter','none');
-% title("Relative errors");
-% grid on;
-% xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
+fig = figure(1);
+plot(bvals,rel_errors);
+legend(cellnames,'Interpreter','none');
+title("Relative errors");
+grid on;
+xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
 
-% fig = figure(2);
-% plot(bvals,abs_errors);
-% legend(cellnames,'Interpreter','none');
-% title("Absolute errors");
-% grid on;
-% xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
-
+fig = figure(2);
+plot(bvals,abs_errors);
+legend(cellnames,'Interpreter','none');
+title("Absolute errors");
+grid on;
+xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
+stop
 
 %% Compare segmented cell signals
 close all;
@@ -127,7 +126,7 @@ for i =1%:ncells
             mf_neurites_data = [results_mf.mf_neurites{:}];
             for ii = 1:nneurites
                 S = zeros(1,namplitude);
-                V = 0
+                V = 0;
                 for jj = 1: length(inds_mf{ii})
                     j = inds_mf{ii}(jj);
                     V = V + femesh_neurites_mf{j}.total_volume;

@@ -16,36 +16,34 @@ ncells = length(meshes);
 meshes_um = replace(meshes,"Alzheimer_study","ultraliser_modified");
 meshes_um = replace(meshes_um,".ply","_um.ply");
 %% Run simulations for mesh_swc meshes
-% tetgen_options = "-pq1.2a0.5O9VCn";
-% for i = 1:ncells
-%     mesh = meshes(i);
-%     run_simulations_microglia(mesh,setup_file,tetgen_options);
-% end
-% %%
-% tetgen_options = "-pq1.2a0.05O9VCn";
-% for i = 1:ncells
-%     mesh = meshes(i);
-%     [~,cellname,~] = fileparts(mesh);
-%     swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
-%     run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
-% end
-% %% Run simulations for modified ultraliser meshes
-% tetgen_options = "-pq1.2a0.5O9VCn";
-% % tetgen_options = "-pq1.2a0.05O9VCn";
-% for i = 1:ncells
-%     mesh = meshes_um(i); 
-%     run_simulations_microglia(mesh,setup_file,tetgen_options);
-% end
-% tetgen_options = "-pq1.2a0.05O9VCn";
-% for i = 1:ncells
-%     mesh = meshes_um(i);
-%     [~,cellname_um,~] = fileparts(mesh);
-%     cellname = replace(cellname_um,"_um","");
-%     swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
-%     run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
-% end
+tetgen_options = "-pq1.2a0.5O9VCn";
+for i = 1:ncells
+    mesh = meshes(i);
+    run_simulations_microglia(mesh,setup_file,tetgen_options);
+end
+%%
+tetgen_options = "-pq1.2a0.05O9VCn";
+for i = 1:ncells
+    mesh = meshes(i);
+    [~,cellname,~] = fileparts(mesh);
+    swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
+    run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
+end
+%% Run simulations for modified ultraliser meshes
+tetgen_options = "-pq1.2a0.5O9VCn";
+for i = 1:ncells
+    mesh = meshes_um(i); 
+    run_simulations_microglia(mesh,setup_file,tetgen_options);
+end
+tetgen_options = "-pq1.2a0.05O9VCn";
+for i = 1:ncells
+    mesh = meshes_um(i);
+    [~,cellname_um,~] = fileparts(mesh);
+    cellname = replace(cellname_um,"_um","");
+    swc_file = sprintf("swc_files/%s.swc",cellname); soma_file = sprintf("mesh_files/Alzheimer_study/Soma/%s.ply",cellname);
+    run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
+end
 %% Compare cell signals
-warning("All but 6 of the meshes were problematic. We only expect close results for those in cells_human_compare.txt");
 tetgen_options = "-pq1.2a0.5O9VCn";
 
 clear rel_errors abs_errors; icell = 0;
@@ -95,6 +93,6 @@ xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
 
 
 %% Compare segmented cell signals
-warning("Running compare_microglia_segmented.m");
-% compare_microglia_segmented;
+disp("Running compare_microglia_segmented.m");
+driver_compare_microglia_simulations_segmented;
 

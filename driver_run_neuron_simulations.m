@@ -36,20 +36,20 @@ signal_um = real(results_um.mf_cell.signal./femesh_cell_um.total_volume);
 
 volume=femesh_cell.total_volume;
 save(sprintf('neuron_meshing_paper/neuron_output/%s.mat',cellname),'signal','signal_um','bvals','volume');namplitude = length(bvals);
-rel_error = abs((signal- signal_um)./signal);
-abs_error  = abs(signal- signal_um);
+rel_diff = abs((signal- signal_um)./signal);
+abs_diff= abs(signal- signal_um);
 
 fig = figure(1);
-plot(bvals,rel_error);
+plot(bvals,rel_diff);
 % legend(meshes_tested,'Interpreter','none');
-title("Relative errors");
+title("Relative absolute difference");
 grid on;
 xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
 
 fig = figure(2);
-plot(bvals,abs_error);
+plot(bvals,abs_diff);
 % legend(meshes_tested,'Interpreter','none');
-title("Absolute errors");
+title("Absolute difference");
 grid on;
 xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
 
@@ -74,21 +74,21 @@ inds_um = {4,2,1,5,6,3};
 % p = align_dendrites(femesh_neurites,femesh_neurites_um);
 % inds = num2cell([1:length(femesh_neurites)]); inds_um = num2cell(p);
 
-% fig = figure;
-% subplot(2,1,1); hold on;
-% plot_neurites_soma(femesh_soma,femesh_neurites);hold on;
-% title('Our method');
-% subplot(2,1,2); hold on;
-% plot_neurites_soma(femesh_soma_um,femesh_neurites_um)
-% title('Modified Ultraliser');
-% sgtitle(sprintf("%s",cellname),'Interpreter','none');
-% savefig(fig,"neuron.fig");
+fig = figure;
+subplot(2,1,1); hold on;
+plot_neurites_soma(femesh_soma,femesh_neurites);hold on;
+title('Our method');
+subplot(2,1,2); hold on;
+plot_neurites_soma(femesh_soma_um,femesh_neurites_um)
+title('Modified Ultraliser');
+sgtitle(sprintf("%s",cellname),'Interpreter','none');
+savefig(fig,"neuron.fig");
 
 
 % plot_neurite_alignment(femesh_soma,femesh_neurites,inds,femesh_soma_um,femesh_neurites_um,inds_um,cellname);
 [process_signals,process_signals_um,volumes,volumes_um] = merge_process_signals(results,results_um,femesh_neurites,femesh_neurites_um,inds,inds_um);
 soma_volume = femesh_soma.total_volume;soma_volume_um = femesh_soma_um.total_volume;
-signal_differnce = abs(process_signals-process_signals_um) 
+signal_differnce = abs(process_signals-process_signals_um) ;
 save(sprintf('neuron_meshing_paper/neuron_output/%s_seg.mat',cellname),'signal_soma','signal_soma_um','process_signals','process_signals_um','bvals','soma_volume','soma_volume_um','volumes','volumes_um');   
 
 

@@ -43,6 +43,9 @@
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
 
+%% Saved simulation location
+setup.saved_simul_loc= "C:\\Users\\amcsween\\SpinDoctor_saved_simul";
+
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells
@@ -79,7 +82,7 @@ setup.gradient.values = [500 1000 2500 4000 6000 7000 8000 10000 12000 20000];
 setup.gradient.values_type  = "b";
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
-setup.mf.length_scale =0.6;                               % Minimum length scale of eigenfunctions
+setup.mf.length_scale =0.5;                               % Minimum length scale of eigenfunctions
 setup.mf.neig_max = 2000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 400;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;

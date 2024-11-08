@@ -43,6 +43,7 @@
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
 
+
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells

@@ -43,6 +43,10 @@
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
 setup.name = "mesh_files/spindle/04b_spindle3aFI.ply";  % Path to surface mesh of cell.
+
+%% Saved simulation location
+% setup.saved_simul_loc= "path/to/saved_simul";
+
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells

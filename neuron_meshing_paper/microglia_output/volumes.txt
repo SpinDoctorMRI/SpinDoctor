@@ -1,60 +1,10 @@
-826_6_3
-
- Our method
- Total volume 800.94
- Soma volume fraction 0.45
- Processes volume fraction 0.55
-Modified Ultraliser
- Total volume 1121.38
- Soma volume fraction 0.35
- Processes volume fraction 0.65
-ctrl_010319_13_826-2_1
-
- Our method
- Total volume 823.73
- Soma volume fraction 0.32
- Processes volume fraction 0.68
-Modified Ultraliser
- Total volume 1090.30
- Soma volume fraction 0.26
- Processes volume fraction 0.74
-714_3_2
-
- Our method
- Total volume 404.07
- Soma volume fraction 0.39
- Processes volume fraction 0.61
-Modified Ultraliser
- Total volume 544.95
- Soma volume fraction 0.31
- Processes volume fraction 0.69
-714_3_3
-
- Our method
- Total volume 221.80
- Soma volume fraction 0.86
- Processes volume fraction 0.14
-Modified Ultraliser
- Total volume 275.45
- Soma volume fraction 0.76
- Processes volume fraction 0.24
-766_4_3
-
- Our method
- Total volume 438.68
- Soma volume fraction 0.42
- Processes volume fraction 0.57
-Modified Ultraliser
- Total volume 614.96
- Soma volume fraction 0.33
- Processes volume fraction 0.67
-818_1_3
-
- Our method
- Total volume 302.14
- Soma volume fraction 0.96
- Processes volume fraction 0.04
-Modified Ultraliser
- Total volume 321.96
- Soma volume fraction 0.95
- Processes volume fraction 0.05
+\hline \\ \multirow{2}{*}{Cell} & \multicolumn{2}{c|}{Alpha\_ Mesh\_ Swc} & \multicolumn{2}{c|}{Modified Ultraliser} \\ 
+ & Soma fraction & Processes fraction & Soma fraction & Processes fraction \\ 
+\hline
+826_6_3 & 0.45 & 0.55 & 0.35 & 0.65 \\ 
+ctrl_010319_13_826-2_1 & 0.32 & 0.68 & 0.26 & 0.74 \\ 
+714_3_2 & 0.39 & 0.61 & 0.31 & 0.69 \\ 
+714_3_3 & 0.86 & 0.14 & 0.76 & 0.24 \\ 
+766_4_3 & 0.42 & 0.57 & 0.33 & 0.67 \\ 
+818_1_3 & 0.96 & 0.04 & 0.95 & 0.05 \\ 
+\hline

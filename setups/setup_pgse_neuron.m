@@ -43,6 +43,9 @@
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
 
+%% Saved simulation location
+% setup.saved_simul_loc= "path/to/saved_simul";
+
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells
@@ -51,6 +54,7 @@ setup.geometry.include_in = false;                      % Ratio Rin/R, within ra
 setup.geometry.in_ratio = 0.7;                          % Ratio Rin/R, within range [0,0.99]
 setup.geometry.ecs_shape = "no_ecs";                    % Shape of ECS: "no_ecs", "box", "convex_hull", or "tight_wrap".
 setup.geometry.ecs_ratio = 0.2;                         % ECS gap; percentage in side length
+
 h = .5;                                                  % Tetgen refinement parameter (comment for automatic)
                     
 % setup.geometry.tetgen_options = sprintf("-pqa%fVCn",h^3/(6*sqrt(2)));              % Tetgen options (priority is inferior to refinement)

@@ -52,7 +52,7 @@ if include_cell
         lap_eig_cell = compute_laplace_eig(femesh_cell, setup.pde, setup.mf,savepath_cell,save_eig);  
         mf_cell = solve_mf(femesh_cell, setup, lap_eig_cell,savepath_cell,save_magnetization);
     else
-        mf_cell  = solve_mf_cpu_no_lap(femesh_cell, setup, savepath_cell);
+        mf_cell  = solve_mf_cpu_no_lap(setup, savepath_cell);
         lap_eig_cell = "Not assigned";
     end
 else
@@ -71,7 +71,7 @@ if include_soma
         lap_eig_soma = compute_laplace_eig(femesh_soma, setup.pde, setup.mf,savepath_soma,save_eig);  
         mf_soma = solve_mf(femesh_soma, setup, lap_eig_soma,savepath_soma,save_magnetization);
     else
-        mf_soma = solve_mf_cpu_no_lap(femesh_soma, setup, savepath_soma);
+        mf_soma = solve_mf_cpu_no_lap(setup, savepath_soma);
         lap_eig_soma = "Not assigned";
     end
 else
@@ -93,7 +93,7 @@ if include_neurites
              lap_eig_neurites{ib}= compute_laplace_eig(femesh_neurites{ib}, setup.pde, setup.mf,savepath_neurite,save_eig);  
             mf_neurites{ib} = solve_mf(femesh_neurites{ib}, setup,  lap_eig_neurites{ib},savepath_neurite,save_magnetization);
         else
-            mf_neurites{ib} = solve_mf_cpu_no_lap(femesh_neurites{ib}, setup, savepath_neurite);
+            mf_neurites{ib} = solve_mf_cpu_no_lap( setup, savepath_neurite);
             lap_eig_neurites = "Not assigned";
         end
     end
