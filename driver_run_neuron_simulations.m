@@ -67,7 +67,7 @@ namplitude = length(bvals);
 % femesh_neurites_merged = [femesh_neurites{:}];
 % femesh_neurites_merged_um = [femesh_neurites_um{:}];
 
-% volumes_neurites = [femesh_neurites_merged.total_volume];
+% volumes_neurites = [femesh_neurites_merged.total_volume];`
 % volumes_neurites_um = [femesh_neurites_merged_um.total_volume];
 inds = {1,[2,4],[3,5,7],9,8,6};
 inds_um = {4,2,1,5,6,3};

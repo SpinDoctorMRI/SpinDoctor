@@ -66,7 +66,6 @@ if include_soma
     savepath_soma= sprintf("%s/soma",savepath_root);
     FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_soma);
     compute_eig = ~isfile(FEM_save_path);
-    if compute_eig
     if compute_eig || save_magnetization
         disp("Computing eigenfunctions but not saving.")
         lap_eig_soma = compute_laplace_eig(femesh_soma, setup.pde, setup.mf,savepath_soma,save_eig);  
