@@ -1,4 +1,7 @@
 .DS_Store
-mesh_files/*/*/*
 
+output
+saved_simul
+mesh_files
+*.mex*
 get_saved_simul.ps1

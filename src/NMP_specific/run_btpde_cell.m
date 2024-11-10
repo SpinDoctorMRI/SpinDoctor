@@ -35,6 +35,12 @@ function [btpde_cell,btpde_soma,btpde_neurites] = run_btpde_cell(femesh_cell, se
 %   femesh_neurites (optional): struct
 %   include_cell (optional): logical. Defaults to true.
 
+include_cell = nargin < 7 || include_cell;
+include_soma = nargin >= 5 && isstruct(femesh_soma);
+include_neurites = nargin >= 6 && isstruct(femesh_neurites);
+
+
+
 if nargin == 2
     btpde_cell = solve_btpde(femesh_cell, setup);
 elseif nargin == 3
@@ -50,14 +56,14 @@ else
     btpde_cell = "Not assigned";
 end
 
-if nargin >= 5
+if include_soma
     save_path_soma = sprintf("%s/soma",savepath_root);
     btpde_soma = solve_btpde(femesh_soma, setup,save_path_soma,save_magnetization);
 else
     btpde_soma = "Not assigned";
 end
 
-if nargin >= 6
+if include_neurites
     ndendrites=length(femesh_neurites);
     btpde_neurites = cell(ndendrites,1);
     for i=1:ndendrites 

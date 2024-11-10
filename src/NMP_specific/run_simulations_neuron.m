@@ -42,13 +42,11 @@ if segment_cell
 end
 
 [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
-
 if isfield(setup,'saved_simul_loc')
-    savepath_root = sprintf('%s/%s_tet%s',setup.saved_simul_loc,cellname,setup.geometry.tetgen_options);
+savepath_root=create_savepath(setup,"mf",setup.saved_simul_loc);
 else
-    savepath_root=sprintf('saved_simul/%s_tet%s',cellname,setup.geometry.tetgen_options);
+savepath_root=create_savepath(setup,"mf");
 end
-
 
 save_magnetization = false; 
 

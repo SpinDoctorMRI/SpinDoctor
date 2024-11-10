@@ -76,7 +76,6 @@ for icmpt = 1:ncompartment
             facets{icmpt, iboundary}(toreplace) = newcode(bywhat(toreplace));
         elseif any(all(ismember(boundary_facets{iboundary}, point_map{icmpt}),1))
             %14/10 testing for moving all code to compartments.
-            disp('Reached')
             facets{icmpt, iboundary} = boundary_facets{iboundary}(:,all(ismember(boundary_facets{iboundary}, point_map{icmpt}),1));
             oldcode = point_map{icmpt};
             newcode = 1:length(point_map{icmpt});
