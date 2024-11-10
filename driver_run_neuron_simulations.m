@@ -54,7 +54,7 @@ grid on;
 xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
 
 
-% %% Compare segmented cell signals
+%% Compare segmented cell signals
 
 [results,femesh_cell,femesh_soma,femesh_neurites]= load_simulations_neuron(mesh,setup_file,tetgen_options,swc_file);
 [results_um,femesh_cell_um,femesh_soma_um,femesh_neurites_um]= load_simulations_neuron(mesh_um,setup_file,tetgen_options,swc_file);
