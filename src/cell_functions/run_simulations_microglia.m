@@ -45,9 +45,11 @@ end
 
 
 [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
-savepath_root=sprintf("C:\\Users\\amcsween\\SpinDoctor_saved_simul\\%s_tet%s",cellname,setup.geometry.tetgen_options);
-
-
+if isfield(setup,'saved_simul_loc')
+savepath_root=create_savepath(setup,"mf",setup.saved_simul_loc);
+else
+savepath_root=create_savepath(setup,"mf");
+end
 
 save_magnetization = false; 
 
