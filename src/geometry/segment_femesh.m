@@ -76,8 +76,4 @@ function [femesh,femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,
             fprintf(fid,'%d\n',femesh_dendrites{i}.element_map);
             fclose(fid);
         end
-
-
     end
-
-
