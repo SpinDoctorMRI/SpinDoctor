@@ -16,13 +16,9 @@ addpath(genpath("src"));
 addpath(genpath("setups"));
 setup_camino;
 
-[~,cellname,~] = fileparts(setup.name);
-save_path = sprintf("saved_simul/%s",cellname);
-fprintf('Saving to %s\n',save_path);
+% [~,cellname,~] = fileparts(setup.name);
 
-if ~isdir(save_path)
-    mkdir(save_path)
-end
+% fprintf('Saving to %s\n',save_path);
 
 %% Prepare simulation
 [setup, femesh, surfaces, cells]  = prepare_simulation(setup);
@@ -37,17 +33,33 @@ tic
 % Perform BTPDE experiments
 if isfield(setup, "btpde")
     % Solve BTPDE
+    save_path = create_savepath(setup,"btpde");
     btpde = solve_btpde(femesh, setup,save_path,true);
 end
 toc
+<<<<<<< Updated upstream
+=======
+
+tic
+% Perform BTPDE midpoint experiments
+if isfield(setup, "btpde_midpoint")
+    % Solve BTPDE
+    save_path = create_savepath(setup,"btpde_midpoint");
+    btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path,true);
+end
+toc
+
+>>>>>>> Stashed changes
 % Perform MF experiments
 % Perform Laplace eigendecomposition
 tic
 if isfield(setup,"mf")
-lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
-    
-% Compute MF magnetization
-mf = solve_mf(femesh, setup, lap_eig,save_path,false);
+    save_path = create_savepath(setup,"mf");
+
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
+        
+    % Compute MF magnetization
+    mf = solve_mf(femesh, setup, lap_eig,save_path,false);
 end
 toc
 

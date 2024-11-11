@@ -42,24 +42,24 @@
 
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
-setup.name = "mesh_files/spindle/whole_neurons/1-2-1.CNG.ply";
+setup.name = "mesh_files/spindle/04b_spindle3aFI.ply";  % Path to surface mesh of cell.
 
+%% Saved simulation location
+% setup.saved_simul_loc= "path/to/saved_simul";
+setup.saved_simul_loc = "C:\Users\amcsween\SpinDoctor_saved_simul"
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells
-% setup.geometry.rmin = 1;                              % Minimum radius
-% setup.geometry.rmax = 4;                              % Maximum radius
-% setup.geometry.dmin = 0.2;                            % Minimum distance between cells (times mean(rmin,rmax))
-% setup.geometry.dmax = 0.3;                            % Maximum distance between cells (times mean(rmin,rmax))
-% setup.geometry.height = 100;                          % Cylinder height (ignored if not cylinder)
 setup.geometry.deformation = [0; 0];                    % Domain deformation; [a_bend,a_twist]
 setup.geometry.include_in = false;                      % Ratio Rin/R, within range [0,0.99]
 setup.geometry.in_ratio = 0.7;                          % Ratio Rin/R, within range [0,0.99]
 setup.geometry.ecs_shape = "no_ecs";                    % Shape of ECS: "no_ecs", "box", "convex_hull", or "tight_wrap".
 setup.geometry.ecs_ratio = 0.2;                         % ECS gap; percentage in side length
-% setup.geometry.refinement = 10;                       % Tetgen refinement parameter (comment for automatic)
-setup.geometry.tetgen_options = "-pqa1.0AVCn";              % Tetgen options (priority is inferior to refinement)
-
+% h = .5;                                                 % Tetgen refinement parameter (comment for automatic)
+setup.geometry.tetgen_options = "-pq1.2a1.0O9VCn";        % Tetgen options (priority is inferior to refinement)
+%% Cell parameters
+setup.cell.swc = "swc_files/04b_spindle3aFI.swc";       % Path to swc file of cell
+% setup.cell.soma = "mesh_files/Soma/04b_spindle3aFI_soma.ply" % Path to surface mesh of soma
 %% PDE parameters
 setup.pde.diffusivity_in = 0.002;                       % Diffusion coefficient IN (scalar or 3x3-tensor)
 setup.pde.diffusivity_out = 0.002;                      % Diffusion coefficient OUT (scalar or 3x3-tensor)
@@ -77,40 +77,22 @@ setup.pde.permeability_out = 0;                         % Permeability OUT bound
 setup.pde.permeability_ecs = 0;                         % Permeability ECS boundary
 
 %% Gradient sequences
-setup.gradient.values = [50 100 500 1000 4000 10000];   % g-, q-, or b-values [1 x namplitude]
-setup.gradient.values_type = "b";                       % Type of values: "g", "q", or "b"
-setup.gradient.sequences = {                            % Gradient sequences {1 x nsequence}
-    % PGSE(2500, 4000)
-    PGSE(5000, 15000)
-    % CosOGSE(2500, 4000, 4)
-}';
-% setup.gradient.directions = [1.0; 0.0; 0.0];            % Gradient directions [3 x ndirection]
-setup.gradient.directions=unitcircle(12);
+setup.gradient.sequences = {PGSE(10000,43000)};
+setup.gradient.directions = [1;0;0];
+setup.gradient.values = [500 1000];
+setup.gradient.values_type  = "b";
+%% MF experiment parameters (comment block to skip experiment)
+% Length scale hard-coded for these experiments from the diffusivity values and sequence length.
+setup.mf.length_scale =1;                               % Minimum length scale of eigenfunctions
+setup.mf.neig_max = 2000;                               % Requested number of eigenvalues
+setup.mf.ninterval = 400;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
+setup.mf.eigs.sigma = 1e-8;
+setup.mf.rerun=false;
+setup.mf.rerun_eigen = false;
+setup.mf.save_eig = true;
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
-setup.btpde.rerun = false;
-%% BTPDE midpoint experiment parameters (comment block to skip experiment)
-% setup.btpde_midpoint.implicitness = 0.5;                % Theta-parameter: 0.5 for Crank-Nicolson
-% setup.btpde_midpoint.timestep = 5;                      % Time step dt
+setup.btpde.rerun = false;                               % Rerun simulation with or without saved results
 
-%% HADC experiment parameters (comment block to skip experiment)
-setup.hadc.ode_solver = @ode15s;                        % ODE solver for HADC
-setup.hadc.reltol = 1e-4;                               % Relative tolerance for ODE solver
-setup.hadc.abstol = 1e-6;                               % Absolute tolerance for ODE solver
-
-%% MF experiment parameters (comment block to skip experiment)
-setup.mf.length_scale = 3;                              % Minimum length scale of eigenfunctions
-setup.mf.neig_max = 250;                                % Requested number of eigenvalues
-setup.mf.ninterval = 100;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
-
-%% Analytical experiment parameters (comment block to skip experiment)
-% setup.analytical.length_scale = 1;                    % Minimum length scale of eigenfunctions
-% setup.analytical.eigstep = 1e-8;                      % Minimum distance between eigenvalues
-
-%% Karger model parameters (comment block to skip experiment)
-% setup.karger.ndirection = 50;                         % Number of directions to compute diffusion tensor
-% setup.karger.ode_solver = @ode45;                     % ODE solver for BTPDE
-% setup.karger.reltol = 1e-4;                           % Relative tolerance for ODE solver
-% setup.karger.abstol = 1e-6;                           % Absolute tolerance for ODE solver

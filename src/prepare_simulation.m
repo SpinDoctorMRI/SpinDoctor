@@ -1,4 +1,4 @@
-function [setup, femesh, surfaces, cells] = prepare_simulation(setup)
+    function [setup, femesh, surfaces, cells,femesh_soma,femesh_neurites] = prepare_simulation(setup)
 %PREPARE_SETUP Prepare setup.
 %   The parameters are added to or removed from the input structure.
 %
@@ -42,3 +42,26 @@ end
 setup.pde.initial_signal = setup.pde.initial_density * femesh.volumes';
 % Compute mean diffusivity
 setup.pde.mean_diffusivity = compute_mean_diffusivity(setup.pde.diffusivity, femesh);
+
+% Segment the cell, if options are enabled.
+if isfield(setup,'cell') && isfield(setup.cell,'swc')
+    [mesh_path,cellname,~] = fileparts(setup.name);
+    tetgen_path=sprintf('%s/%s_ply_dir/%s_%s_tet%s_mesh.1',mesh_path,cellname,cellname,setup.geometry.ecs_shape,setup.geometry.tetgen_options);
+    if isfile(setup.cell.swc)
+        swc_file = setup.cell.swc;
+        if isfield(setup.cell,'soma')
+            soma_file = setup.cell.soma;
+            if not(isfile(soma_file))
+                error("File %s was used to segment the mesh but no such file exists.\n",soma_file);
+            end
+           [femesh,femesh_soma,femesh_neurites] = segment_femesh(femesh,swc_file,tetgen_path,soma_file); 
+        else
+           [femesh,femesh_soma,femesh_neurites] = segment_femesh(femesh,swc_file,tetgen_path); 
+        end
+    else
+        disp('error')
+        error("File %s was used to segment the mesh but no such file exists.\n",setup.cell.swc);
+    end
+else
+    femesh_soma = "Not assigned"; femesh_neurites = "Not assigned";
+end
