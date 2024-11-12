@@ -1,4 +1,4 @@
-function femesh_dendrites = find_dendrites_femesh(femesh,femesh_soma,neighbours)
+function [femesh_dendrites,element_markers] = find_dendrites_femesh(femesh,femesh_soma,neighbours)
 %%FIND_DENDRITES_FEMESH extracts the finite element meshes for the
 %%dendrites.
 % 
@@ -19,4 +19,4 @@ dendrite_elements = find(mask);
 p = [femesh.points{:}];
 e = [femesh.elements{:}];
 
-femesh_dendrites = initialise_dendrites(p,e,bins,dendrite_elements);
+[femesh_dendrites,element_markers] = initialise_dendrites(p,e,bins,dendrite_elements);

@@ -30,36 +30,38 @@ free = compute_free_diffusion(setup.gradient.bvalues, setup.pde.diffusivity, ...
     femesh.volumes, setup.pde.initial_density);
 
 tic
-% Perform BTPDE experiments
+
+savepath_root = "saved_simul/"
+Perform BTPDE experiments
 if isfield(setup, "btpde")
     % Solve BTPDE
-    save_path = create_savepath(setup,"btpde");
-    btpde = solve_btpde(femesh, setup,save_path,true);
+    save_path = create_savepath(setup,"btpde",savepath_root);
+    save_path_cell = sprintf("%s/cell",save_path);
+    btpde = solve_btpde(femesh, setup,save_path_cell,true);
 end
 toc
-<<<<<<< Updated upstream
-=======
 
 tic
 % Perform BTPDE midpoint experiments
 if isfield(setup, "btpde_midpoint")
     % Solve BTPDE
-    save_path = create_savepath(setup,"btpde_midpoint");
-    btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path,true);
+    save_path = create_savepath(setup,"btpde_midpoint",savepath_root);
+    save_path_cell = sprintf("%s/cell",save_path);
+
+    btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path_cell,true);
 end
 toc
 
->>>>>>> Stashed changes
 % Perform MF experiments
 % Perform Laplace eigendecomposition
 tic
 if isfield(setup,"mf")
-    save_path = create_savepath(setup,"mf");
-
-    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
+    save_path = create_savepath(setup,"mf",savepath_root);
+    save_path_cell = sprintf("%s/cell",save_path);
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);
         
     % Compute MF magnetization
-    mf = solve_mf(femesh, setup, lap_eig,save_path,false);
+    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
 end
 toc
 

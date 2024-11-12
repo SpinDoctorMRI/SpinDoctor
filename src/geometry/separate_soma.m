@@ -63,3 +63,4 @@ soma_element_map = initial_soma_elements(bins == bins(source_soma));
 
 % Once the mask is found, the mesh is extracted and information stored.
 femesh_soma = initialise_soma(p,e,soma_element_map);
+

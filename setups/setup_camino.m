@@ -42,7 +42,7 @@
 
 addpath(genpath('src'));
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
-setup.name = "mesh_files/spindle/whole_neurons/04b_spindle3aFI_cell.ply";
+setup.name = "mesh_files/spindle/04b_spindle3aFI.ply";
 
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
@@ -54,7 +54,7 @@ setup.geometry.ecs_shape = "no_ecs";                    % Shape of ECS: "no_ecs"
 setup.geometry.ecs_ratio = 0.2;                         % ECS gap; percentage in side length
 
 % setup.geometry.refinement = 10;                       % Tetgen refinement parameter (comment for automatic)
-setup.geometry.tetgen_options = "-pqaVC";              % Tetgen options (priority is inferior to refinement)
+setup.geometry.tetgen_options = "-pq1.2a1.0O9VCn";              % Tetgen options (priority is inferior to refinement)
 
 %% PDE parameters
 setup.pde.diffusivity_in = 0.002;                       % Diffusion coefficient IN (scalar or 3x3-tensor)

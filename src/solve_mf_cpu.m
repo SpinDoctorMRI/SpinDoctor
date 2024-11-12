@@ -92,6 +92,9 @@ nsequence = setup.nsequence;
 ndirection = setup.ndirection;
 
 if do_save
+    % Save path for finite element matrices
+    FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,multi_lap_eig,savepath);
+
     % Folder for saving
     mf_str = sprintf("neig%g_ls%.4f", ...
         setup.mf.neig_max, setup.mf.length_scale);
@@ -109,6 +112,8 @@ if do_save
     if ~isfolder(savepath)
         mkdir(savepath);
     end
+
+
 else
     savepath = "";
 end
@@ -524,7 +529,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
             % Compute final magnetization
             nu_list_const = nu_list_const(:, no_result_flag_const);
             mag_const= funcs * double(nu_list_const);
-            
+            nu2signal = sum(M_cmpts{1}'*funcs,1);
             % Final magnetization coefficients in finite element nodal basis
             idx = 1;
             allinds = [namplitude nsequence_const ndirection];
@@ -579,10 +584,10 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
             % Compute final magnetization
             nu_list_camino = nu_list_camino(:, no_result_flag_camino);
             mag = funcs * double(nu_list_camino);
-            
+            nu2signal = sum(M_cmpts{1}'*funcs,1);
             % Final magnetization coefficients in finite element nodal basis
             idx = 1;
-            
+
             for iseq = 1:nsequence_camino
                 % Extract indices
                 if no_result_flag_camino(iseq, 1)
@@ -661,6 +666,15 @@ if do_save && any(no_result_flag_camino, 'all')
         end
     end
 end
+
+if do_save && ~multi_lap_eig && exist("moments") && ~isfile(FEM_save_path)
+    % Save mass, density, moments and relaxation matrices
+    save(FEM_save_path,"moments","LQT2","nu2signal","nu0");
+elseif ~exist("moments") && ~isfile(FEM_save_path)
+    warning("Finite element matrices not saved. Set setup.mf.rerun = true to save matrices.")
+end
+
+
 % Total magnetization (sum over compartments)
 camino.signal_allcmpts(:) = sum(camino.signal, 1);
 const.signal_allcmpts(:) = sum(const.signal, 1);

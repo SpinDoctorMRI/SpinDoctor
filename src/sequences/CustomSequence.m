@@ -8,11 +8,11 @@ classdef CustomSequence < Sequence
     end
     
     methods
-        function obj = CustomSequence(delta, Delta, timeprofile)
+        function obj = CustomSequence(delta, Delta, timeprofile,TE)
             %SEQUENCE Construct an instance of this class
             %   Here it is assumed that the sequence is parametrized by the two
             %   parameters delta and Delta only.
-            obj@Sequence(delta, Delta);
+            obj@Sequence(delta, Delta,TE);
             obj.timeprofile = timeprofile;
         end
         
@@ -34,8 +34,8 @@ classdef CustomSequence < Sequence
             %   between these time steps and a list of strings representing the
             %   behavior of the sequence on each of these intervals.
             %   There is only one interval for the custom sequence.
-            timelist = [0 obj.echotime];
-            interval_str = "[0, Delta+delta]";
+            timelist = [0 obj.TE];
+            interval_str = "[0, TE]";
             timeprofile_str = "custom time profile";
         end
         

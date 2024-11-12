@@ -40,7 +40,7 @@ setup.saved_simul_loc = 'C:\Users\amcsween\SpinDoctor_saved_simul';
 % [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
 
 %% Run simulations
-% 
+% % 
 % if isfield(setup,'saved_simul_loc')
 %     savepath_root=sprintf("%s/%s_tet%s",setup.saved_simul_loc,cellname,setup.geometry.tetgen_options);
 %     else

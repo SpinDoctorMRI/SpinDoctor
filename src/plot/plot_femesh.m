@@ -1,4 +1,4 @@
-function plot_femesh(femesh, compartments)
+function plot_femesh(femesh, compartments,make_new_figure)
 %PLOT_FEMESH Plot the finite element meshes of inner, outer, and ECS compartments.
 %
 %   femesh: struct
@@ -14,7 +14,9 @@ pmax = max([femesh.points{:}], [], 2);
 axis_vec = [pmin(1) pmax(1) pmin(2) pmax(2) pmin(3) pmax(3)];
 
 for label = labels
+    if nargin == 2 || make_new_figure
     figure;
+    end
     hold on
     for icmpt = find(compartments == label)
         facets = [femesh.facets{icmpt, :}];

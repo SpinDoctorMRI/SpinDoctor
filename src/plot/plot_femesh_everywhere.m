@@ -19,7 +19,7 @@ for icmpt = [ncompartment 1:ncompartment-1] % Plot ECS first
     points = femesh.points{icmpt};
     h = trisurf(facets', points(1, :), points(2, :), points(3, :));
     if icmpt < ncompartment
-        %set(h, "facealpha", 0.7);
+        set(h, "facealpha", 0.7);
         set(h, "LineWidth", 1);
     else
         set(h, "LineWidth", 0.03);

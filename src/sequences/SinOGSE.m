@@ -1,17 +1,19 @@
 classdef SinOGSE < Sequence
     %SINOGSE Oscillating Gradient Spin Echo.
     %   This sequence consists of two sin-pulses of duration delta, separated by
-    %   a pause of duration Delta - delta, with nperiod periods per pulse.
+    %   a pause of duration Delta - delta, with nperiod periods per pulse. 
+    %   An initial pause and a fixed echo time can be set through optional
+    %   Sequence parameters.
     
     properties
         nperiod
     end
     
     methods
-        function obj = SinOGSE(delta, Delta, nperiod)
+        function obj = SinOGSE(delta, Delta, nperiod,varargin)
             %SINOGSE Construct an instance of this class.
             %   The constructor stores the parameters.
-            obj@Sequence(delta, Delta)
+            obj@Sequence(delta, Delta,varargin{:})
             if (nperiod == round(nperiod)) && nperiod>0
                 obj.nperiod = nperiod;
             else
@@ -25,6 +27,7 @@ classdef SinOGSE < Sequence
             d = obj.delta;
             D = obj.Delta;
             n = obj.nperiod;
+            t = t-obj.t1;
             f = (0 <= t & t < d) .* sin(2 * pi * n / d * t) ...
                 - (D <= t & t <= obj.echotime) .* sin(2 * pi * n / d * (t - D));
         end
@@ -35,6 +38,7 @@ classdef SinOGSE < Sequence
             d = obj.delta;
             D = obj.Delta;
             n = obj.nperiod;
+            t = t-obj.t1;
             F = ((0 <= t & t < d) .* (1 - cos(2 * pi * n / d * t)) ...
                 + (d <= t & t <= obj.echotime) .* (1 - cos(2 * pi * n / d * d)) ...
                 - (D <= t & t <= obj.echotime) .* (1 - cos(2 * pi * n / d * (t - D)))) ...
@@ -104,7 +108,6 @@ classdef SinOGSE < Sequence
             d = obj.delta;
             D = obj.Delta;
             n = obj.nperiod;
-            
             if lambda < 1e-7
                 % Use Taylor expansion when lambda is close to 0 
                 % to improve numerical stability
@@ -131,6 +134,7 @@ classdef SinOGSE < Sequence
                         + 2) ) ...
                     / (3 * d * (4*n^2*pi^2 + lambda^2*d^2)^2);
             end
+        
         end
 
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
@@ -139,8 +143,8 @@ classdef SinOGSE < Sequence
             %   start and stop), a list of strings representing the intervals
             %   between these time steps and a list of strings representing the
             %   behavior of the sequence on each of these intervals.
-            timelist = [0, obj.delta, obj.Delta, obj.Delta+obj.delta];
-            interval_str = ["[0, delta]", "[delta, Delta]", "[Delta, Delta+delta]"];
+            timelist = [obj.t1 ,obj.t1 + obj.delta, obj.t1 + obj.Delta, obj.t1 + obj.Delta+obj.delta];
+            interval_str = ["[t1,t1 + delta]", "[t1 + delta,t1 + Delta]", "[t1+Delta, t1+Delta+delta]"];
             funcname = sprintf("sin(2*pi*%d/delta*t)", obj.nperiod);
             timeprofile_str = ["f(t) = " + funcname, "f(t) = 0 (constant)", ...
                 "f(t) = -" + funcname];
@@ -149,6 +153,16 @@ classdef SinOGSE < Sequence
                 timelist(3) = [];
                 interval_str(2) = [];
                 timeprofile_str(2) = [];
+            end
+            if obj.TE > obj.t1 + obj.Delta+obj.delta
+                timelist = [timelist, obj.TE];
+                interval_str = [interval_str,"[t1+Delta+delta,TE]"];
+                timeprofile_str = [timeprofile_str,"f(t) = 0 (constant)"];
+            end
+            if obj.t1 > 0
+                timelist = [0,timelist];
+                interval_str = ["[0,t1]",interval_str];
+                timeprofile_str = ["f(t) = 0 (constant)",timeprofile_str];
             end
         end
         

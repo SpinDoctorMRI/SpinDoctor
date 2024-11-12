@@ -2,20 +2,27 @@ classdef PGSE < Sequence
     %PGSE Pulsed Gradient Spin Echo sequence.
     %   This sequence consists of two opposite pulses of duration `delta`
     %   separated by a pause of duration `Delta - delta`.
-    
+    %   An initial pause and a fixed echo time can be set through optional
+    %   Sequence parameters.
     methods
         function f = call(obj, t)
             %CALL Call the PGSE time profile at time t.
             %   The function is vectorized.
-            f = (0 <= t & t < obj.delta) - (obj.Delta <= t & t <= obj.echotime);
+            % f = (obj.t1 <= t & t < obj.t1  + obj.delta) - (obj.t1 + obj.Delta <= t & t <= obj.t1 + obj.Delta + obj.delta);
+            t = t- obj.t1;
+            f = (0<= t & t <obj.delta) - (obj.Delta <= t & t <= obj.Delta + obj.delta);
         end
         
         function F = integral(obj, t)
             %INTEGRAL Compute the integral of the PGSE sequence from 0 to t.
             %   An analytical expression is available.
-            F = (0 <= t & t < obj.delta) .* t ...
-                + (obj.delta <= t & t <= obj.echotime) .* obj.delta ...
-                - (obj.Delta <= t & t <= obj.echotime) .* (t - obj.Delta);
+            % F = (obj.t1 <= t & t <obj.t1+ obj.delta) .* (t -obj.t1) ...
+            %     + (obj.t1+obj.delta <= t & t <= obj.t1+obj.Delta + obj.delta) .* obj.delta ...
+            %     - (obj.t1+obj.Delta <= t & t <= obj.t1+obj.Delta + obj.delta) .* (t - obj.t1 - obj.Delta);
+            t = t- obj.t1;
+            F = (0<= t & t < obj.delta) .* t  ...
+                + (obj.delta <= t & t <=obj.Delta + obj.delta) .* obj.delta ...
+                - (obj.Delta <= t & t <= obj.Delta + obj.delta) .* (t- obj.Delta);
         end
         
         function int = integral_F2(obj)
@@ -47,7 +54,6 @@ classdef PGSE < Sequence
             %   An analytical expression is available for the PGSE sequence
             d = obj.delta;
             D = obj.Delta;
-            
             if lambda < 1e-7
                 % Use Taylor expansion when lambda is close to 0 
                 % to improve numerical stability
@@ -65,6 +71,7 @@ classdef PGSE < Sequence
                     + 2 * (1 - lambda * d)) / ...
                     (lambda^2 * d^2 * (D - d/3));
             end
+
         end
 
         function [timelist, interval_str, timeprofile_str] = intervals(obj)
@@ -73,14 +80,24 @@ classdef PGSE < Sequence
             %   start and stop), a list of strings representing the intervals
             %   between these time steps and a list of strings representing the
             %   behavior of the sequence on each of these intervals.
-            timelist = [0, obj.delta, obj.Delta, obj.Delta+obj.delta];
-            interval_str = ["[0, delta]", "[delta, Delta]", "[Delta, Delta+delta]"];
+            timelist = [obj.t1 ,obj.t1 + obj.delta, obj.t1 + obj.Delta, obj.t1 + obj.Delta+obj.delta];
+            interval_str = ["[t1,t1 + delta]", "[t1 + delta,t1 + Delta]", "[t1+Delta, t1+Delta+delta]"];
             timeprofile_str = ["f(t) = 1 (constant)", "f(t) = 0 (constant)", "f(t) = -1 (constant)"];
             if obj.delta == obj.Delta
                 % Remove unused interval
                 timelist(3) = [];
                 interval_str(2) = [];
                 timeprofile_str(2) = [];
+            end
+            if obj.TE > obj.t1 + obj.Delta+obj.delta
+                timelist = [timelist, obj.TE];
+                interval_str = [interval_str,"[t1+Delta+delta,TE]"];
+                timeprofile_str = [timeprofile_str,"f(t) = 0 (constant)"];
+            end
+            if obj.t1 > 0
+                timelist = [0,timelist];
+                interval_str = ["[0,t1]",interval_str];
+                timeprofile_str = ["f(t) = 0 (constant)",timeprofile_str];
             end
         end
     end

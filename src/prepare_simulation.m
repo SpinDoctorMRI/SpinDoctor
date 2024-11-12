@@ -1,4 +1,4 @@
-    function [setup, femesh, surfaces, cells,femesh_soma,femesh_neurites] = prepare_simulation(setup)
+function [setup, femesh, surfaces, cells,femesh_soma,femesh_neurites] = prepare_simulation(setup)
 %PREPARE_SETUP Prepare setup.
 %   The parameters are added to or removed from the input structure.
 %

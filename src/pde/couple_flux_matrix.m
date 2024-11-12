@@ -106,6 +106,7 @@ for iboundary = 1:nboundary
         
         % fprintf("Interface boundary: %d, connecting compartments %d and %d\n", iboundary, cmpt1, cmpt2);
     elseif ntouch > 2
+        disp("Need to extend this case");
         error("Each interface touch only 1 or 2 compartments");
     end
 end
