@@ -19,12 +19,38 @@ fprintf("Running %s.m\n",setup_file)
 [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
 
 %% Run simulations
-savepath_root=sprintf("saved_simul\\%s_tet%s",cellname,setup.geometry.tetgen_options);
+
+if isfield(setup,'saved_simul_loc')
+savepath_root= create_savepath(setup, "mf",setup.saved_simul_loc);
+else
+savepath_root= create_savepath(setup, "mf");
+end
+
 
 save_magnetization = true; include_cell = true;
 
 [btpde_cell,btpde_soma,btpde_neurites] = run_btpde_cell(femesh_cell, setup, savepath_root,save_magnetization,femesh_soma,femesh_neurites,include_cell);
 [mf_cell,mf_soma,mf_neurites,lap_eig_cell,lap_eig_soma,lap_eig_neurites] = run_mf_cell(femesh_cell, setup, savepath_root,save_magnetization,femesh_soma,femesh_neurites,include_cell);
+
+setup.saved_simul_loc = 'C:\Users\amcsween\SpinDoctor_saved_simul';
+%% Obtain finite element meshes
+% 
+% [~,cellname,~] = fileparts(setup.name);
+% setup=rmfield(setup,'cell');
+% [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
+
+%% Run simulations
+% % 
+% if isfield(setup,'saved_simul_loc')
+%     savepath_root=sprintf("%s/%s_tet%s",setup.saved_simul_loc,cellname,setup.geometry.tetgen_options);
+%     else
+%     savepath_root=sprintf("saved_simul/%s_tet%s",cellname,setup.geometry.tetgen_options);
+% end
+% savepath_root = create_savepath(setup,'mf',setup.saved_simul_loc);
+% save_magnetization = true; include_cell = true;
+% 
+% [btpde_cell,btpde_soma,btpde_neurites] = run_btpde_cell(femesh_cell, setup, savepath_root,save_magnetization,femesh_soma,femesh_neurites,include_cell);
+% [mf_cell,mf_soma,mf_neurites,lap_eig_cell,lap_eig_soma,lap_eig_neurites] = run_mf_cell(femesh_cell, setup, savepath_root,save_magnetization,femesh_soma,femesh_neurites,include_cell);
 
 %% Visualize results
 

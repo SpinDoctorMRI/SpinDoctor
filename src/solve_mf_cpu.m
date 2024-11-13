@@ -584,7 +584,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
             % Compute final magnetization
             nu_list_camino = nu_list_camino(:, no_result_flag_camino);
             mag = funcs * double(nu_list_camino);
-            
+            nu2signal = sum(M_cmpts{1}'*funcs,1);
             % Final magnetization coefficients in finite element nodal basis
             idx = 1;
 
