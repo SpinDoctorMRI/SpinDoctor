@@ -35,7 +35,7 @@ function [mf_cell,mf_soma,mf_neurites,lap_eig_cell,lap_eig_soma,lap_eig_neurites
 
 include_cell = nargin < 7 || include_cell;
 include_soma = nargin >= 5 && isstruct(femesh_soma);
-include_neurites = nargin >= 6 && isstruct(femesh_neurites);
+include_neurites = nargin >= 6 && (isstruct(femesh_neurites) || iscell(femesh_neurites));
 
 save_eig = setup.mf.save_eig;
 

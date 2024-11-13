@@ -42,7 +42,7 @@ if nargin == 2
     
         center = mean(points, 2);
         center(3) = max(points(3, :)) + 1;
-        % text(center(1), center(2), center(3), sprintf("Neurite %d",ib), "color", colors(ib,:), "fontsize", 24);
+        text(center(1), center(2), center(3), sprintf("Neurite %d",ib), "color", colors(ib,:), "fontsize", 24);
     end
 else
     for ib = 1:nneurites
@@ -56,7 +56,7 @@ else
             alpha = 0.5; color = 'g';           
             center = mean(points, 2);
             center(3) = max(points(3, :)) + 1;
-            % text(center(1), center(2), center(3), sprintf("Neurite %d",ib), "color", 'k', "fontsize", 24);
+            text(center(1), center(2), center(3), sprintf("Neurite %d",ib), "color", 'k', "fontsize", 24);
         else
             alpha = 0.25; color = 'b';
         end

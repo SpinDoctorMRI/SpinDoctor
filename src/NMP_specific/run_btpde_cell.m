@@ -37,7 +37,7 @@ function [btpde_cell,btpde_soma,btpde_neurites] = run_btpde_cell(femesh_cell, se
 
 include_cell = nargin < 7 || include_cell;
 include_soma = nargin >= 5 && isstruct(femesh_soma);
-include_neurites = nargin >= 6 && isstruct(femesh_neurites);
+include_neurites = nargin >= 6 && (isstruct(femesh_neurites)|| iscell(femesh_neurites));
 
 
 
