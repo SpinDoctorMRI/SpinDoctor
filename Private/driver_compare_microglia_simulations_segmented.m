@@ -24,8 +24,8 @@ clear dendrite_errors; clear meshes_tested;
 clear meshes_need_adjustment;
 
 fid = fopen('neuron_meshing_paper/microglia_output/volumes.txt','w');
-fprintf(fid,"\\hline \\\\ \\multirow{2}{*}{Cell} & \\multicolumn{2}{c|}{Alpha\\_ Mesh\\_ Swc} & \\multicolumn{2}{c|}{Modified Ultraliser} \\\\ \n")
-fprintf(fid," & Soma fraction & Processes fraction & Soma fraction & Processes fraction \\\\ \n\\hline\n");
+% fprintf(fid,"\\hline \\\\ \\multirow{2}{*}{Cell} & \\multicolumn{2}{c|}{Alpha\\_ Mesh\\_ Swc} & \\multicolumn{2}{c|}{Modified Ultraliser} \\\\ \n")
+% fprintf(fid," & Soma fraction & Processes fraction & Soma fraction & Processes fraction \\\\ \n\\hline\n");
 
 for i =1:ncells
     mesh = meshes(i); type = types(i);

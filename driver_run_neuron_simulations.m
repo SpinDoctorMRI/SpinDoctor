@@ -9,61 +9,6 @@ mesh='mesh_files/selected/1-2-2.CNG.ply';
 [~,cellname,~] = fileparts(mesh);
 
 mesh_um = sprintf("mesh_files/ultraliser_modified/%s_um.ply",cellname);
-%% Run simulations 
-
-% Alpha_Mesh_Swc mesh
-[results,femesh_cell,~,~]=run_simulations_neuron(mesh,setup_file,tetgen_options);
-
-% Modified Ultraliser mesh
-[results_um,femesh_cell_um,~,~]= run_simulations_neuron(mesh_um,setup_file,tetgen_options);
-
-%% Load simulations
-
-% Alpha_Mesh_Swc mesh
-[results,femesh_cell,~,~]= load_simulations_neuron(mesh,setup_file,tetgen_options);
-
-% Modified Ultraliser mesh
-[results_um,femesh_cell_um,~,~]= load_simulations_neuron(mesh_um,setup_file,tetgen_options);
-
-%% Visualise and compare signals
-
-% Extract bvalues and signals
-bvals = results.setup.gradient.bvalues;
-signal = real(results.mf_cell.signal./femesh_cell.total_volume);
-signal_um = real(results_um.mf_cell.signal./femesh_cell_um.total_volume);
-
-
-volume=femesh_cell.total_volume;
-volume_um = femesh_cell_um.total_volume;
-
-filename=sprintf('neuron_meshing_paper/neuron_output/%s.mat',cellname);
-fprintf('Saving signals and volume to %s\n',filename);
-save(filename,'signal','signal_um','bvals','volume','volume_um');
-namplitude = length(bvals);
-
-rel_diff = abs((signal- signal_um)./signal);
-abs_diff= abs(signal- signal_um);
-
-figure;
-
-figure;plot(bvals,signal);hold on;plot(bvals,signal_um);
-title("Comparing volume weighted signals");
-ylabel("Volume weighted signals");
-legend(["Alpha_Mesh_Swc","Modified Ultraliser"],'Interpreter','none');
-grid on;
-xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
-
-
-figure;plot(bvals,rel_diff);title("Absolute relative difference");grid on;
-xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
-
-figure;plot(bvals,abs_diff);title("Absolute difference");grid on;
-xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
-
-fprintf("Alpha_Mesh_Swc volume = %f,\n Modified Ultraliser volume = %f.\n",volume,volume_um);
-fprintf("Here we only plot and consider the volume-weighted signals:\n")
-fprintf("Maximum relative signal difference = %f,\n Maximum absolute signal difference =%f.\n",max(rel_diff),max(abs_diff));
-
 
 %% Run segmented cell simulations
 % Alpha_Mesh_Swc segmented mesh
@@ -106,7 +51,7 @@ grid on;xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
 
 
 
-%% Access neurite signals and volumes
+% %% Access neurite signals and volumes
 
 bvals = results.setup.gradient.bvalues;namplitude = length(bvals);
 
@@ -125,7 +70,7 @@ signals_neurites_um = real([mf_neurites_um.signal]);
 signals_neurites_um = reshape(signals_neurites_um,[namplitude,nneurites_um])';
 signal_neurite_compartment_um = sum(signals_neurites_um,1);
 
-% Volumes
+% Volumes neurites
 volume = femesh_cell.total_volume;
 volume_um = femesh_cell_um.total_volume;
 femesh_n = [femesh_neurites{:}];
@@ -193,6 +138,9 @@ xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
 
 
 %% Save signals and volumes
+% fprintf("Alpha_Mesh_Swc \n Modified Ultraliser volume = %f.\n",volume,volume_um);
+fprintf("Alpha_Mesh_Swc:\nCell volume = %f, Soma volume = %f, Neurites volume = %f.\n",volume,volume_soma,volume_neurite_cmpt);
+fprintf("Modified Ultraliser:\nCell volume = %f, Soma volume = %f, Neurites volume = %f.\n",volume_um,volume_soma_um,volume_neurite_cmpt_um);
 
 
 save(sprintf('neuron_meshing_paper/neuron_output/%s_seg.mat',cellname), ...
@@ -200,5 +148,62 @@ save(sprintf('neuron_meshing_paper/neuron_output/%s_seg.mat',cellname), ...
     'bvals','volume_soma','volume_soma_um','volumes_neurites', ...
     'volumes_neurites_um',"signal_cell","signal_cell_um");   
 
+
+
+%% Run simulations for full cell
+
+% % Alpha_Mesh_Swc mesh
+% [results,femesh_cell,~,~]=run_simulations_neuron(mesh,setup_file,tetgen_options);
+% 
+% % Modified Ultraliser mesh
+% [results_um,femesh_cell_um,~,~]= run_simulations_neuron(mesh_um,setup_file,tetgen_options);
+% 
+% %% Load simulations
+% 
+% % Alpha_Mesh_Swc mesh
+% [results,femesh_cell,~,~]= load_simulations_neuron(mesh,setup_file,tetgen_options);
+% 
+% % Modified Ultraliser mesh
+% [results_um,femesh_cell_um,~,~]= load_simulations_neuron(mesh_um,setup_file,tetgen_options);
+% 
+% %% Visualise and compare signals
+% 
+% % Extract bvalues and signals
+% bvals = results.setup.gradient.bvalues;
+% signal = real(results.mf_cell.signal./femesh_cell.total_volume);
+% signal_um = real(results_um.mf_cell.signal./femesh_cell_um.total_volume);
+% 
+% 
+% volume=femesh_cell.total_volume;
+% volume_um = femesh_cell_um.total_volume;
+% 
+% filename=sprintf('neuron_meshing_paper/neuron_output/%s.mat',cellname);
+% fprintf('Saving signals and volume to %s\n',filename);
+% save(filename,'signal','signal_um','bvals','volume','volume_um');
+% namplitude = length(bvals);
+% 
+% rel_diff = abs((signal- signal_um)./signal);
+% abs_diff= abs(signal- signal_um);
+% 
+% figure;
+% 
+% figure;plot(bvals,signal);hold on;plot(bvals,signal_um);
+% title("Comparing volume weighted signals");
+% ylabel("Volume weighted signals");
+% legend(["Alpha_Mesh_Swc","Modified Ultraliser"],'Interpreter','none');
+% grid on;
+% xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
+% 
+% 
+% figure;plot(bvals,rel_diff);title("Absolute relative difference");grid on;
+% xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
+% 
+% figure;plot(bvals,abs_diff);title("Absolute difference");grid on;
+% xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
+% 
+% fprintf("Alpha_Mesh_Swc volume = %f,\n Modified Ultraliser volume = %f.\n",volume,volume_um);
+% fprintf("Here we only plot and consider the volume-weighted signals:\n")
+% fprintf("Maximum relative signal difference = %f,\n Maximum absolute signal difference =%f.\n",max(rel_diff),max(abs_diff));
+% 
 
 

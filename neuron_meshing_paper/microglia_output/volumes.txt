@@ -1,10 +1,16 @@
-\hline \\ \multirow{2}{*}{Cell} & \multicolumn{2}{c|}{Alpha\_ Mesh\_ Swc} & \multicolumn{2}{c|}{Modified Ultraliser} \\ 
- & Soma fraction & Processes fraction & Soma fraction & Processes fraction \\ 
-\hline
-826_6_3 & 0.45 & 0.55 & 0.35 & 0.65 \\ 
-ctrl_010319_13_826-2_1 & 0.32 & 0.68 & 0.26 & 0.74 \\ 
-714_3_2 & 0.39 & 0.61 & 0.31 & 0.69 \\ 
-714_3_3 & 0.86 & 0.14 & 0.76 & 0.24 \\ 
-766_4_3 & 0.42 & 0.57 & 0.33 & 0.67 \\ 
-818_1_3 & 0.96 & 0.04 & 0.95 & 0.05 \\ 
-\hline
+\hline 
+ \multirow{2}{*}{\textbf{Cell}} & \multirow{2}{*}{\textbf{Method}} &\multicolumn{2}{c|}{\textbf{Volume}} &\multirowcell{2}{\textbf{Soma volume}\\ \textbf{fraction}} \\ 
+  & & \textbf{Soma} &\multicolumn{1}{c|}{\textbf{Processes}} & \\ \hline 
+\multirow{2}{*}{\verb|826_6_3|} & {\it AMS} & 3.6e+02 & 4.4e+02 & 0.45 \\ 
+& {\it MU} & 3.9e+02 & 7.3e+02 & 0.35 \\ 
+ \hline\multirow{2}{*}{\verb|ctrl_010319_13_826-2_1|} & {\it AMS} & 2.6e+02 & 5.6e+02 & 0.32 \\ 
+& {\it MU} & 2.9e+02 & 8e+02 & 0.26 \\ 
+ \hline\multirow{2}{*}{\verb|714_3_2|} & {\it AMS} & 1.6e+02 & 2.5e+02 & 0.39 \\ 
+& {\it MU} & 1.7e+02 & 3.8e+02 & 0.31 \\ 
+ \hline\multirow{2}{*}{\verb|714_3_3|} & {\it AMS} & 1.9e+02 & 32 & 0.86 \\ 
+& {\it MU} & 2.1e+02 & 67 & 0.76 \\ 
+ \hline\multirow{2}{*}{\verb|766_4_3|} & {\it AMS} & 1.9e+02 & 2.5e+02 & 0.42 \\ 
+& {\it MU} & 2e+02 & 4.1e+02 & 0.33 \\ 
+ \hline\multirow{2}{*}{\verb|818_1_3|} & {\it AMS} & 2.9e+02 & 11 & 0.96 \\ 
+& {\it MU} & 3.1e+02 & 15 & 0.95 \\ 
+ \hline
