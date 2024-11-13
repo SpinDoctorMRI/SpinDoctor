@@ -7,8 +7,8 @@ setup_file_mf='setup_pgse_neuron';
 
 %% Set mesh to examine
 
-% mesh='mesh_files/selected/1-2-2.CNG.ply';
-mesh='mesh_files/ultraliser_modified/1-2-2.CNG_um.ply';
+mesh='mesh_files/selected/1-2-2.CNG.ply';
+% mesh='mesh_files/ultraliser_modified/1-2-2.CNG_um.ply';
 
 
 
