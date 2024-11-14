@@ -45,7 +45,6 @@
 
 %% Saved simulation location
 % setup.saved_simul_loc= "path/to/saved_simul";
-setup.saved_simul_loc ="C:\Users\amcsween\SpinDoctor_saved_simul"
 
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
