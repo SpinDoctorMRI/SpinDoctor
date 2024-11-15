@@ -1,47 +1,59 @@
-function [mf_cell,mf_soma,mf_neurites,lap_eig_cell,lap_eig_soma,lap_eig_neurites] = run_mf_cell(femesh_cell, setup, savepath_root,save_magnetization,femesh_soma,femesh_neurites,include_cell)
+function [mf_cell,mf_soma,mf_neurites,lap_eig_cell,lap_eig_soma,lap_eig_neurites] = run_mf_cell(femesh_cell, setup,save_magnetization,femesh_soma,femesh_neurites,include_cell)
 %RUN_MF_CELL Compute the solution to the BTPDE using Matrix Formalism.
 %
 %
-%   RUN_MF_CELL(FEMESH, SETUP, SAVEPATH_ROOT) saves the results of each iteration at
-%   "<SAVEPATH_ROOT>/cell/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT".
+%   RUN_MF_CELL(FEMESH, SETUP) saves the results of each iteration at
+%   "saved_simul/cell/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT".
 %   If a result is already present in the iteration file, the solver loads
-%   the results instead of solving for that iteration.
+%   the results instead of solving for that iteration. The directory
+%   saved_simul can be changed with setup.saved_simul_loc;
 %
-%   RUN_MF_CELL(FEMESH, SETUP, SAVEPATH, SAVE_MAGNETIZATION) also omits saving
+%   RUN_MF_CELL(FEMESH, SETUP, SAVE_MAGNETIZATION) also omits saving
 %   or loading the magnetization field if SAVE_MAGNETIZATION is set to FALSE.
 %
-%   RUN_MF_CELL(FEMESH, SETUP, SAVEPATH_ROOT, SAVE_MAGNETIZATION,FEMESH_SOMA) solves, saves and returns the results for the full cell 
+%   RUN_MF_CELL(FEMESH, SETUP, SAVE_MAGNETIZATION,FEMESH_SOMA) solves, saves and returns the results for the full cell 
 %   and for the simulation with only the soma. The soma signal is saved in
-%  "<SAVEPATH_ROOT>/soma/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT",
-%  and magnetization is saved if SAVE_MAGNETIZATION is set to TRUE.
+%  "saved_simul/soma/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT",
+%  and magnetization is saved if SAVE_MAGNETIZATION is set to TRUE.The directory
+%   saved_simul can be changed with setup.saved_simul_loc;
 %
-%   RUN_MF_CELL(FEMESH, SETUP, SAVEPATH_ROOT, SAVE_MAGNETIZATION,FEMESH_SOMA,FEMESH_NEURITES) solves, saves and returns the results for the full cell 
+%   RUN_MF_CELL(FEMESH, SETUP, SAVE_MAGNETIZATION,FEMESH_SOMA,FEMESH_NEURITES) solves, saves and returns the results for the full cell 
 %   and for the simulation with only the soma and for the simulation with only each neurite branch. The ith neurite signal is saved in
-%  "<SAVEPATH_ROOT>/neurite_%i/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT",
-%  and magnetization is saved if SAVE_MAGNETIZATION is set to TRUE.
+%  "saved_simul/neurite_%i/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT",
+%  and magnetization is saved if SAVE_MAGNETIZATION is set to TRUE. The directory
+%   saved_simul can be changed with setup.saved_simul_loc;
 %
-%   RUN_MF_CELL(FEMESH, SETUP, SAVEPATH_ROOT,
+%   RUN_MF_CELL(FEMESH, SETUP,
 %   SAVE_MAGNETIZATION,FEMESH_SOMA,FEMESH_NEURITES,INCLUDE_CELL) if
 %   INCLUDE_CELL is set to FALSE then only the soma and neurite signals are
 %   computed and saved.
 % 
 %   femesh_cell: struct
 %   setup: struct
-%   savepath (optional): string
 %   save_magnetization (optional): logical. Defaults to true.
 %   femesh_soma (optional): struct 
 %   femesh_neurites (optional): struct
 %   include_cell (optional): logical. Defaults to true.
 
-include_cell = nargin < 7 || include_cell;
-include_soma = nargin >= 5 && isstruct(femesh_soma);
-include_neurites = nargin >= 6 && (isstruct(femesh_neurites) || iscell(femesh_neurites));
+include_cell = nargin < 6 || include_cell;
+include_soma = nargin >= 4 && isstruct(femesh_soma);
+include_neurites = nargin >= 5 && (isstruct(femesh_neurites) || iscell(femesh_neurites));
 
 save_eig = setup.mf.save_eig;
 
 if not(save_eig) && save_magnetization
     error("Cannot have setup.mf.save_eig = false and save magentization.");
 end
+
+if isfield(setup,'saved_simul_loc')
+savepath_root= create_savepath(setup, "mf",setup.saved_simul_loc);
+else
+savepath_root= create_savepath(setup, "mf");
+end
+
+fprintf("Simulations to be stored in:\n%s\n",savepath_root);
+
+
 
 % Cell
 if include_cell

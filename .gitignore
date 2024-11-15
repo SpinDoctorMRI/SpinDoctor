@@ -3,3 +3,5 @@ output
 saved_simul
 *.mex*
 *.ps1
+/Private
+/mesh_files
