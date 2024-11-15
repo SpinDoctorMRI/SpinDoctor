@@ -8,6 +8,11 @@ elseif nargin == 2
     saveroot = 'saved_simul';
 end
 
+if isfield(setup,'saved_simul_loc')
+    saveroot = setup.saved_simul_loc;
+end
+
+
 % Prepare simulation
 [setup, femesh, ~]  = prepare_simulation(setup);
 
