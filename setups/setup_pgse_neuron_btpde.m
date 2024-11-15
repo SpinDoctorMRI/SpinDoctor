@@ -42,24 +42,9 @@
 
 
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
 
 %% Saved simulation location
 % setup.saved_simul_loc= "path/to/saved_simul";
-========
-setup.name = "mesh_files/spindle/04b_spindle3aFI.ply";  % Path to surface mesh of cell.
->>>>>>>> develop:setups/setup_segmentation.m
-
-%% Saved simulation location
-% setup.saved_simul_loc= "path/to/saved_simul";
-========
-setup.name = "mesh_files/spindle/04b_spindle3aFI.ply";  % Path to surface mesh of cell.
-
-%% Saved simulation location
-% setup.saved_simul_loc= "path/to/saved_simul";
->>>>>>>> develop:setups/setup_segmentation.m
-setup.saved_simul_loc = "C:\Users\amcsween\SpinDoctor_saved_simul"
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells
@@ -68,25 +53,11 @@ setup.geometry.include_in = false;                      % Ratio Rin/R, within ra
 setup.geometry.in_ratio = 0.7;                          % Ratio Rin/R, within range [0,0.99]
 setup.geometry.ecs_shape = "no_ecs";                    % Shape of ECS: "no_ecs", "box", "convex_hull", or "tight_wrap".
 setup.geometry.ecs_ratio = 0.2;                         % ECS gap; percentage in side length
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
-h = .5;                                                  % Tetgen refinement parameter (comment for automatic)
-                    
-% setup.geometry.tetgen_options = sprintf("-pqa%fVCn",h^3/(6*sqrt(2)));              % Tetgen options (priority is inferior to refinement)
-setup.geometry.tetgen_options = "-pq1.2a1.0VCn";    
-
-========
-========
->>>>>>>> develop:setups/setup_segmentation.m
-% h = .5;                                                 % Tetgen refinement parameter (comment for automatic)
 setup.geometry.tetgen_options = "-pq1.2a1.0O9VCn";        % Tetgen options (priority is inferior to refinement)
 %% Cell parameters
 setup.cell.swc = "swc_files/04b_spindle3aFI.swc";       % Path to swc file of cell
 % setup.cell.soma = "mesh_files/Soma/04b_spindle3aFI_soma.ply" % Path to surface mesh of soma
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
->>>>>>>> develop:setups/setup_segmentation.m
-========
->>>>>>>> develop:setups/setup_segmentation.m
+
 %% PDE parameters
 setup.pde.diffusivity_in = 0.002;                       % Diffusion coefficient IN (scalar or 3x3-tensor)
 setup.pde.diffusivity_out = 0.002;                      % Diffusion coefficient OUT (scalar or 3x3-tensor)
@@ -106,10 +77,9 @@ setup.pde.permeability_ecs = 0;                         % Permeability ECS bound
 %% Gradient sequences
 setup.gradient.sequences = {PGSE(10000,43000)};
 setup.gradient.directions = [1;0;0];
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
-setup.gradient.values = [500 1000 2500 4000 6000 7000 8000 10000 12000 20000];
+setup.gradient.values = [500 1000];
 setup.gradient.values_type  = "b";
+
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
 % char_length_scale = sqrt(2*3*setup.pde.diffusivity_in*1000*101);
@@ -118,12 +88,6 @@ setup.gradient.values_type  = "b";
 % setup.mf.ninterval = 400;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 % setup.mf.eigs.sigma = 1e-8;
 % setup.mf.rerun=false;
-
-========
-========
->>>>>>>> develop:setups/setup_segmentation.m
-setup.gradient.values = [500 1000];
-setup.gradient.values_type  = "b";
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
 setup.mf.length_scale =1;                               % Minimum length scale of eigenfunctions
@@ -133,20 +97,8 @@ setup.mf.eigs.sigma = 1e-8;
 setup.mf.rerun=false;
 setup.mf.rerun_eigen = false;
 setup.mf.save_eig = true;
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
->>>>>>>> develop:setups/setup_segmentation.m
-========
->>>>>>>> develop:setups/setup_segmentation.m
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
 setup.btpde.rerun = false;                               % Rerun simulation with or without saved results
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
-<<<<<<<< HEAD:setups/setup_pgse_neuron_btpde.m
-========
-
->>>>>>>> develop:setups/setup_segmentation.m
-========
-
->>>>>>>> develop:setups/setup_segmentation.m
