@@ -39,7 +39,7 @@ include_cell = nargin < 6 || include_cell;
 include_soma = nargin >= 4 && isstruct(femesh_soma);
 include_neurites = nargin >= 5 && (isstruct(femesh_neurites) || iscell(femesh_neurites));
 
-save_eig = setup.mf.save_eig;
+save_eig = setup.mf.save_eig
 
 if not(save_eig) && save_magnetization
     error("Cannot have setup.mf.save_eig = false and save magentization.");
@@ -79,7 +79,7 @@ if include_soma
     FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_soma);
     compute_eig = ~isfile(FEM_save_path);
     if compute_eig || save_magnetization
-        disp("Computing eigenfunctions but not saving.")
+        disp("Computing eigenfunctions.")
         lap_eig_soma = compute_laplace_eig(femesh_soma, setup.pde, setup.mf,savepath_soma,save_eig);  
         mf_soma = solve_mf(femesh_soma, setup, lap_eig_soma,savepath_soma,save_magnetization);
     else

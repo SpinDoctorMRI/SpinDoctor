@@ -42,11 +42,7 @@ segment_cell = nargin == 5;
 if segment_cell
     setup.cell.swc = swc_file; setup.cell.soma = soma_file;
     max_volume=1;
-    volumes = zeros(nneurites,1);
-    for i =1:nneurites
-        volumes(i)= femesh_neurites{i}.total_volume;
-    end
-    ind_neurites_keep = volumes > max_volume;
+    
 end
 
 
@@ -57,7 +53,11 @@ if segment_cell
     disp("Loading simulations for soma and neurites/processes only");
     nneurites = length(femesh_neurites); 
     include_soma = true; include_cell = false;
-
+    volumes = zeros(nneurites,1);
+    for i =1:nneurites
+        volumes(i)= femesh_neurites{i}.total_volume;
+    end
+    ind_neurites_keep = volumes > max_volume;
 else    
     disp("Loading simulations for cell only");
     nneurites = 0; include_soma = false; include_cell = true;

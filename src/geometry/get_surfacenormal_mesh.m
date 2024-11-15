@@ -19,8 +19,6 @@ element_centers = squeeze(mean(x, 2));
 
 
 % Create outward directed vectors (from cell center to outer facet)
-size(facet_centers)
-size(element_centers)
 outwards_vectors = facet_centers - element_centers;
 
 % Determine orientation of normals (+ for out, - for in)

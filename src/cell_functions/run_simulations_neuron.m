@@ -52,6 +52,7 @@ else
     nneurites = 0; include_soma = false; include_cell = true;
 end
 
+save_magnetization = false;
 if isfield(setup,'mf')
     [mf_cell,mf_soma,mf_neurites,~,~,~] = run_mf_cell(femesh_cell, setup,save_magnetization,femesh_soma,femesh_neurites,include_cell);
     results.mf_cell = mf_cell; results.mf_soma = mf_soma;results.mf_neurites = mf_neurites;

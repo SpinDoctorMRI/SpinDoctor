@@ -15,7 +15,8 @@ ncells = length(meshes);
 meshes_um = replace(meshes,"Alzheimer_study","ultraliser_modified");
 meshes_um = replace(meshes_um,".ply","_um.ply");
 %% Run simulations for Alpha_Mesh_Swc meshes
-tetgen_options = "-pq1.2a0.05O9VCn";
+tetgen_options = "-pq1.2a0.002O9VCn";
+setup_file ='setup_pgse_microglia';
 for i = 1:ncells
     mesh = meshes(i);
     [~,cellname,~] = fileparts(mesh);
@@ -23,7 +24,7 @@ for i = 1:ncells
     run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
 end
 %% Run simulations for Modified Ultraliser meshes
-tetgen_options = "-pq1.2a0.05O9VCn";
+tetgen_options = "-pq1.2a0.01O9VCn";
 for i = 1:ncells
     mesh = meshes_um(i);
     [~,cellname_um,~] = fileparts(mesh);
