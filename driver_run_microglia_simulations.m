@@ -24,7 +24,7 @@ for i = 1:ncells
     run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
 end
 %% Run simulations for Modified Ultraliser meshes
-tetgen_options = "-pq1.2a0.01O9VCn";
+tetgen_options = "-pq1.2a0.002O9VCn";
 for i = 1:ncells
     mesh = meshes_um(i);
     [~,cellname_um,~] = fileparts(mesh);
@@ -36,7 +36,7 @@ end
 
 %% Compare segmented cell signals
 
-tet="-pq1.2a0.05O9VCn";
+tet="-pq1.2a0.002O9VCn";
 
 % Control y axis of plots
 ymax = 0.08;
@@ -111,6 +111,19 @@ for i =1:ncells
     xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
     ylim([0,ymax]);
 
+
+    figure;
+    plot(bvals,abs(signal_cell-signal_cell_um)./signal_cell,'LineStyle','-','Color','b','LineWidth',2); hold on;
+    plot(bvals,abs(signal_neurite_compartment/volume_neurite_cmpt-signal_neurite_compartment_um/volume_neurite_cmpt_um)./(signal_neurite_compartment/volume_neurite_cmpt), ...
+        'LineStyle','-','Color','magenta','LineWidth',2);
+    plot(bvals,abs(signal_soma/volume_soma-signal_soma_um/volume_soma_um)./(signal_soma/volume_soma),'LineStyle','-','Color','g','LineWidth',2);
+    title(sprintf("Relative difference of volume weighted signals: %s",cellname),'Interpreter','none');
+    ylabel("Volume weighted signals");
+    legend(["Cell","Soma","Neurites"], ...
+        'Interpreter','none');
+    grid on;
+    xlabel("$b$ $\mathrm{s}/\mathrm{mm}^2$",'Interpreter','latex');
+    yscale('log');
     save(sprintf('neuron_meshing_paper/microglia_output/%s_seg.mat',cellname),'signal_cell','signal_cell_um','signal_soma','signal_soma_um', ...
         'signal_neurite_compartment','signal_neurite_compartment_um','bvals','volume_soma','volume_soma_um', ...
         'volume_neurite_cmpt','volume_neurite_cmpt_um','volume','volume_um');   

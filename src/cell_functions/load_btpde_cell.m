@@ -37,10 +37,16 @@ if nargin < 3
     nneurites = 0;
 end
 
+if isfield(setup,'saved_simul_loc')
+savepath_root= create_savepath(setup, "btpde",setup.saved_simul_loc);
+else
+savepath_root= create_savepath(setup, "btpde");
+end
+
 % Cell
 if include_cell
     savepath_cell = sprintf("%s/cell",savepath_root);
-    btpde_cell = load_mf(setup,savepath_cell,load_magnetization);
+    btpde_cell = load_btpde(setup,savepath_cell,load_magnetization);
 else
     btpde_cell = "Not assigned";
 end
@@ -48,7 +54,7 @@ end
 % Soma
 if include_soma
 savepath_soma = sprintf("%s/soma",savepath_root);
-btpde_soma = load_mf(setup,savepath_soma,load_magnetization);
+btpde_soma = load_btpde(setup,savepath_soma,load_magnetization);
 else
     btpde_soma = "Not assigned";
 end
@@ -57,7 +63,7 @@ if nneurites >0
     btpde_neurites = cell(nneurites,1);
     for ib = 1:nneurites
         savepath_neurite = sprintf('%s/neurite_%d',savepath_root,ib);
-        btpde_neurites{ib} = load_mf(setup,savepath_neurite,load_magnetization);
+        btpde_neurites{ib} = load_btpde(setup,savepath_neurite,load_magnetization);
     end
 else
     btpde_neurites = "Not assigned";

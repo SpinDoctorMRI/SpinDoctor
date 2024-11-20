@@ -6,3 +6,4 @@ saved_simul
 *.ps1
 /Private
 /mesh_files
+*.py
