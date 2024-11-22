@@ -7,3 +7,14 @@ saved_simul
 /Private
 /mesh_files
 *.py
+setups/setup_pgse_neuron_btpde.m
+setups/setup_pgse_neuron.m
+setups/setup_pgse_microglia_btpde.m
+setups/setup_pgse_microglia.m
+__pycache__/get_saved_simul.cpython-311.pyc
+mesh_files.txt
+saved_simul.txt
+setups/setup_pgse_microglia.m
+setups/setup_pgse_microglia_btpde.m
+setups/setup_pgse_neuron.m
+setups/setup_pgse_neuron_btpde.m

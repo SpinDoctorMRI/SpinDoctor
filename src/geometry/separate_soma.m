@@ -24,7 +24,7 @@ else
     soma_centres = swc.position_data(swc.type_data == 1,:)';
     soma_center = soma_centres(:,1);
     soma_radii = swc.radius_data(swc.type_data == 1)';
-    soma_mask = squeeze(any(vecnorm(p - soma_centres,2,1) < 1.3*soma_radii,2));
+    soma_mask = squeeze(any(vecnorm(p - soma_centres,2,1) < 1.1*soma_radii,2));
     mask_points = squeeze(p)';
 end
 
