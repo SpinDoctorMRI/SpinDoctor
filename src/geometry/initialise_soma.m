@@ -15,9 +15,9 @@ function femesh_soma = initialise_soma(points,e,soma_element_map)
     mask(unique(e(:,soma_element_map))) = true;
     %Storing information within the femesh
     soma_points = find(  mask );
-    dendrite_points = find(~mask);
-    femesh.soma_points = {soma_points};
-    femesh.dendrite_points = {dendrite_points};
+    % dendrite_points = find(~mask);
+    % femesh.soma_points = {soma_points};
+    % femesh.dendrite_points = {dendrite_points};
     indices_map = cumsum(mask);
     % Create the suface mesh and geometrical information of the soma.
     e =e(:,soma_element_map);

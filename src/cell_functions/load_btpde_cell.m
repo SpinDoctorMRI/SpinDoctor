@@ -1,64 +1,69 @@
-function [btpde_cell,btpde_soma,btpde_neurites] = load_btpde_cell(setup, savepath_root,load_magnetization,nneurites,include_soma,include_cell)
+function [btpde_cell,btpde_soma,btpde_neurites] = load_btpde_cell(setup,load_magnetization,nneurites,include_soma,include_cell)
 %LOAD_BTPDE_CELL Compute the solution to the BTPDE using Matrix Formalism.
 %
-%   LOAD_BTPDE_CELL(FEMESH, SETUP) solves the BTPDE and returns results.
-%
-%   LOAD_BTPDE_CELL(FEMESH, SETUP, SAVEPATH_ROOT) loads the results of each iteration from
-%   "<SAVEPATH_ROOT>/cell/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
-%
-%   LOAD_BTPDE_CELL(FEMESH, SETUP, SAVEPATH_ROOT, LOAD_MAGNETIZATION) also omits loading the magnetization field if LOAD_MAGNETIZATION is set to FALSE.
-%
-%   LOAD_BTPDE_CELL(FEMESH, SETUP, SAVEPATH_ROOT, LOAD_MAGNETIZATION,FEMESH_SOMA) eturns the results for the full cell 
-%   and for the simulation with only the soma. The soma signal is taken from
-%  "<SAVEPATH_ROOT>/soma/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT",
-%  and magnetization is loaded if LOAD_MAGNETIZATION is set to TRUE.
-%
-%   LOAD_BTPDE_CELL(FEMESH, SETUP, SAVEPATH_ROOT, LOAD_MAGNETIZATION,FEMESH_SOMA,FEMESH_NEURITES)  returns the results for the full cell 
-%   and for the simulation with only the soma and for the simulation with only each neurite branch. The ith neurite signal is from
-%  "<SAVEPATH_ROOT>/neurite_%i/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT",
-%  and magnetization is loaded if LOAD_MAGNETIZATION is set to TRUE.
-%
-%   LOAD_BTPDE_CELL(FEMESH, SETUP, SAVEPATH_ROOT,
-%   LOAD_MAGNETIZATION,FEMESH_SOMA,FEMESH_NEURITES,INCLUDE_CELL) if
-%   INCLUDE_CELL is set to FALSE then only the soma and neurite signals are
-%   loaded.
-%
-%
-%   femesh_cell: struct
-%   setup: struct
-%   savepath (optional): string
-%   load_magnetization (optional): logical. Defaults to true.
-%   femesh_soma (optional): struct 
-%   femesh_neurites (optional): struct
-%   include_cell (optional): logical. Defaults to true.
+%   LOAD_BTPDE_CELL(SETUP) solves the BTPDE and returns results. The results are taken from
+%   "saved_simul/cell/<GEOMETRYINFO>/<DIFFUSIONINFO>/btpde/<SOLVEROPTIONS>/<SEQUENCEINFO>.MAT".
+%   The directory saved_simul can be changed with setup.saved_simul_loc;
 
+%
+%   LOAD_BTPDE_CELL(SETUP, LOAD_MAGNETIZATION) also omits loading the magnetization field 
+%   if LOAD_MAGNETIZATION is set to FALSE.
+%
+%   LOAD_BTPDE_CELL(SETUP, LOAD_MAGNETIZATION,NNEURITES) 
+%   loads the results for the neurites from 1 to
+%   NNEURITES.
+% 
+%   LOAD_BTPDE_CELL(SETUP, SAVEPATH_ROOT,
+%   LOAD_MAGNETIZATION,NNEURITES,INCLUDE_SOMA) loads the results for the 
+%   soma if INCLUDE_SOMA is true and for the neurites from 1 to NNEURITES.
+% 
+%   LOAD_BTPDE_CELL(SETUP, SAVEPATH_ROOT,
+%   LOAD_MAGNETIZATION,NNEURITES,INCLUDE_SOMA) loads the results for the 
+%   cell if INCLUDE_CELL is true,
+%   the soma if INCLUDE_SOMA is true 
+%   and for the neurites from 1 to NNEURITES.
+
+%   setup: struct
+%   load_magnetization (optional): logical. Defaults to false.
+%   nneurites (optional): int. Defaults to 0.
+%   include_soma (optional): logical. Defaults to false
+%   include_cell (optional): logical. Defaults to false.
+
+
+load_magnetization = nargin >= 2 && load_magnetization; 
+include_cell = nargin<=2 || (nargin ==5 && include_cell);
+include_soma = nargin >=4 && include_soma;
+if nargin < 3
+    nneurites = 0;
+end
+
+savepath_root= create_savepath(setup, "btpde");
+
+
+% Cell
 if include_cell
-    save_path_cell = sprintf("%s/cell",savepath_root);
-    btpde_cell = load_btpde( setup,save_path_cell);
-elseif nargin >= 4 && nargin <= 6
-    save_path_cell = sprintf("%s/cell",savepath_root);
-    btpde_cell = load_btpde(setup,save_path_cell,load_magnetization);
-elseif nargin == 7 && include_cell
-    save_path_cell = sprintf("%s/cell",savepath_root);
-    btpde_cell = load_btpde( setup,save_path_cell,load_magnetization);
-else 
+    savepath_cell = sprintf("%s/cell",savepath_root);
+    btpde_cell = load_btpde(setup,savepath_cell,load_magnetization);
+else
     btpde_cell = "Not assigned";
 end
 
-if nargin >= 5
-    save_path_soma = sprintf("%s/soma",savepath_root);
-    btpde_soma = load_btpde(setup,save_path_soma,load_magnetization);
+% Soma
+if include_soma
+savepath_soma = sprintf("%s/soma",savepath_root);
+btpde_soma = load_btpde(setup,savepath_soma,load_magnetization);
 else
     btpde_soma = "Not assigned";
 end
-
-if nargin >= 6
-    ndendrites=length(femesh_neurites);
-    btpde_neurites = cell(ndendrites,1);
-    for i=1:ndendrites 
-        save_path_neurite= sprintf("%s/neurite_%d",savepath_root,i);
-        btpde_neurites{i} = load_btpde( setup,save_path_neurite,load_magnetization);
+% Neurites
+if nneurites >0
+    btpde_neurites = cell(nneurites,1);
+    for ib = 1:nneurites
+        savepath_neurite = sprintf('%s/neurite_%d',savepath_root,ib);
+        btpde_neurites{ib} = load_btpde(setup,savepath_neurite,load_magnetization);
     end
 else
     btpde_neurites = "Not assigned";
 end
+
+

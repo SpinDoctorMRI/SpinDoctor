@@ -34,7 +34,6 @@ else
 end
 
 setup.name=string(mesh);
-[~,cellname,~] = fileparts(setup.name);
 
 segment_cell = nargin == 4;
 if segment_cell
@@ -43,39 +42,27 @@ end
 
 
 [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
-savepath_root=sprintf('saved_simul/%s_tet%s',cellname,setup.geometry.tetgen_options);
-
-
-
-save_magnetization = false; 
 
 if segment_cell
-    disp("Running simulations for soma and neurites/processes only");
-    include_cell = false;
-    if isfield(setup,'mf')
-        [mf_cell,mf_soma,mf_neurites,~,~,~] = run_mf_cell(...
-            femesh_cell, setup, savepath_root,save_magnetization,femesh_soma,femesh_neurites,include_cell);
-        results.mf_cell = mf_cell; results.mf_soma = mf_soma;results.mf_neurites = mf_neurites;
-    end
-    
-    if isfield(setup,'btpde')
-       [btpde_cell,btpde_soma,btpde_neurites] = run_btpde_cell(...
-           femesh_cell, setup, savepath_root,save_magnetization,femesh_soma,femesh_neurites,include_cell);
-        results.btpde_cell = btpde_cell; results.btpde_soma = btpde_soma;results.btpde_neurites = btpde_neurites;
-    end
-else
-    disp("Running simulations for cell only");
-    if isfield(setup,'mf')
-        [mf_cell,~,~,~,~,~] = run_mf_cell(...
-            femesh_cell, setup, savepath_root,save_magnetization);
-        results.mf_cell = mf_cell; 
-    end
-    if isfield(setup,'btpde')
-       [btpde_cell,~,~] = run_btpde_cell(...
-           femesh_cell, setup, savepath_root,save_magnetization);
-        results.btpde_cell = btpde_cell; 
-    end
+    disp("Loading simulations for soma and neurites/processes only");
+    nneurites = length(femesh_neurites); 
+    include_soma = true; include_cell = false;
+else    
+    disp("Loading simulations for cell only");
+    nneurites = 0; include_soma = false; include_cell = true;
 end
+
+if isfield(setup,'mf')
+    [mf_cell,mf_soma,mf_neurites,~,~,~] = run_mf_cell(femesh_cell, setup,save_magnetization,femesh_soma,femesh_neurites,include_cell);
+    results.mf_cell = mf_cell; results.mf_soma = mf_soma;results.mf_neurites = mf_neurites;
+end
+
+
+if isfield(setup,'btpde')
+    [btpde_cell,btpde_soma,btpde_neurites] = run_btpde_cell(femesh_cell, setup,save_magnetization,femesh_soma,femesh_neurites,include_cell);
+    results.btpde_cell = btpde_cell; results.btpde_soma = btpde_soma;results.btpde_neurites = btpde_neurites;
+end
+
 
 results.setup = setup; 
 toc

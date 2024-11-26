@@ -16,14 +16,6 @@ addpath(genpath("src"));
 addpath(genpath("setups"));
 setup_camino;
 
-[~,cellname,~] = fileparts(setup.name);
-save_path = sprintf("saved_simul/%s",cellname);
-fprintf('Saving to %s\n',save_path);
-
-if ~isdir(save_path)
-    mkdir(save_path)
-end
-
 %% Prepare simulation
 [setup, femesh, surfaces, cells]  = prepare_simulation(setup);
 
@@ -34,10 +26,12 @@ free = compute_free_diffusion(setup.gradient.bvalues, setup.pde.diffusivity, ...
     femesh.volumes, setup.pde.initial_density);
 
 tic
+
 % Perform BTPDE experiments
 if isfield(setup, "btpde")
     % Solve BTPDE
-    btpde = solve_btpde(femesh, setup,save_path,true);
+    save_path = create_savepath(setup,"btpde");save_path = sprintf("%s/cell",save_path);
+    % btpde = solve_btpde(femesh, setup,save_path,true);
 end
 toc
 
@@ -45,6 +39,7 @@ tic
 % Perform BTPDE midpoint experiments
 if isfield(setup, "btpde_midpoint")
     % Solve BTPDE
+    save_path = create_savepath(setup,"btpde_midpoint");save_path = sprintf("%s/cell",save_path);
     btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path,true);
 end
 toc
@@ -53,22 +48,40 @@ toc
 % Perform Laplace eigendecomposition
 tic
 if isfield(setup,"mf")
-lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
-    
-% Compute MF magnetization
-mf = solve_mf(femesh, setup, lap_eig,save_path,false);
+    save_path = create_savepath(setup,"mf");save_path = sprintf("%s/cell",save_path);
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
+        
+    % Compute MF magnetization
+    mf = solve_mf(femesh, setup, lap_eig,save_path,false);
 end
 toc
 
 disp("Camino sequence results are stored in btpde, btpde_midpoint and mf");
 
 %% Plots
+
+addpath(genpath("drivers_postprocess"));
 do_plots = true;
 
 if ~do_plots
     return
 end
 
+% Plot sequence
+for iseq = 1
+    title_str = sprintf("Sequence %d of %d",iseq,setup.nsequence);
+    setup.gradient.sequences{iseq}.plot(title_str);
+end
+
+% Study B_tensor
+for iseq=1
+    B_tensor = setup.gradient.sequences{iseq}.get_B_tensor(setup.gamma);
+    fprintf("For sequence %d of %d:\n",iseq,setup.nsequence);
+    B_tensor
+    plot_tensor(B_tensor,sprintf("B tensor for sequence %d of %d",iseq, setup.nsequence));
+end
+
+%%
 % Plot surface triangulation
 plot_surface_triangulation(surfaces);
 
@@ -108,3 +121,5 @@ if isfield(setup, "mf")
     disp(signal_allcmpts_relerr);
 
 end
+
+

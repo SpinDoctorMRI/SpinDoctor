@@ -7,7 +7,7 @@ classdef SequenceCamino  < AbsSequence
         K
         g
         echotime
-        b_tensor
+        b_tensor_axis_symmetric
         name
     end
 
@@ -31,7 +31,7 @@ classdef SequenceCamino  < AbsSequence
         end
         
         function b = b_value(seq)
-            b = seq.b_tensor(1) + 2*seq.b_tensor(2);
+            b = seq.b_tensor_axis_symmetric(1) + 2*seq.b_tensor_axis_symmetric(2);
         end
 
         function f = call(seq, t)
@@ -113,22 +113,23 @@ classdef SequenceCamino  < AbsSequence
                 end
             end
             B = B + B'.*(1-eye(3));
-            
         end
 
 
-        function plot(seq)
-            %PLOT plot the sequence.
-            hold on;
+        function plot(seq,title_str)
+            %PLOT plot th,e sequence.
+            figure; grid on; hold on;
             t = seq.dt*(0:seq.K -1);
             g_x = seq.g(1,:); g_y = seq.g(2,:); g_z = seq.g(3,:);
             plot(t,g_x,'DisplayName','$g_x$');
             plot(t,g_y,'DisplayName','$g_y$');
             plot(t,g_z,'DisplayName','$g_z$');
-            xlabel("t / \mu" + "s")
-            ylabel("g / mT/m");
+            xlabel("t  (\mu" + "s)")
+            ylabel("g (mT/m)");
             legend(Interpreter='latex');
-            hold off
+            if nargin == 2
+                title(title_str);
+            end
         end
         function s = string(seq,vargin)
             s = seq.name;

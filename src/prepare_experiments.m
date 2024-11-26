@@ -245,6 +245,8 @@ function mf = check_mf(mf)
     if ~isfield(mf, 'rerun');           mf.rerun = false;           end
     if ~isfield(mf, 'rerun_eigen');     mf.rerun_eigen = false;     end
     if ~isfield(mf, 'surf_relaxation'); mf.surf_relaxation = false; end
+    if ~isfield(mf, 'save_eig');        mf.save_eig = true;         end
+    
     
     if isinf(mf.neig_max)
         % Infinite neig_max triggers eig instead of eigs

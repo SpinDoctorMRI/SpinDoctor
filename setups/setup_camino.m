@@ -42,7 +42,7 @@
 
 addpath(genpath('src'));
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
-setup.name = "mesh_files/spindle/whole_neurons/16o_spindle13aFI.stl";
+setup.name = "mesh_files/spindle/04b_spindle3aFI.ply";
 
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
@@ -54,7 +54,7 @@ setup.geometry.ecs_shape = "no_ecs";                    % Shape of ECS: "no_ecs"
 setup.geometry.ecs_ratio = 0.2;                         % ECS gap; percentage in side length
 
 % setup.geometry.refinement = 10;                       % Tetgen refinement parameter (comment for automatic)
-setup.geometry.tetgen_options = "-pqaVC";              % Tetgen options (priority is inferior to refinement)
+setup.geometry.tetgen_options = "-pq1.2a1.0O9VCn";              % Tetgen options (priority is inferior to refinement)
 
 %% PDE parameters
 setup.pde.diffusivity_in = 0.002;                       % Diffusion coefficient IN (scalar or 3x3-tensor)
@@ -77,7 +77,7 @@ seq = read_scheme('camino_sequences/test_scheme.scheme');
 % if isfile('camino_sequences/test_scheme.txt')           % Load tensors, unneccessary for simulations
 %     b_tensors = read_b_tensors('camino_sequences/test_scheme.txt');
 %     for i = 1:length(seq)
-%         seq{i}.b_tensor = b_tensors(:,i);
+%         seq{i}.b_tensor_axis_symmetric = b_tensors(:,i);
 %     end
 % end
 setup.gradient.sequences =seq;
@@ -92,9 +92,9 @@ setup.mf.length_scale =char_length_scale/5;             % Minimum length scale o
 setup.mf.neig_max = 1000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 200;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;
-setup.mf.rerun = true;
+setup.mf.rerun = false;
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
-setup.btpde.rerun = true;                               % Rerun simulation with or without saved results
+setup.btpde.rerun = false;                               % Rerun simulation with or without saved results

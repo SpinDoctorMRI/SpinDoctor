@@ -9,7 +9,12 @@ function savepath = create_savepath(setup, simulation_method, root_path)
 
 if nargin < nargin(@create_savepath)
     root_path = 'saved_simul';
+    if isfield(setup,'saved_simul_loc')
+        root_path = setup.saved_simul_loc;
+    end
 end
+
+
 
 % Create folder for saving results
 [~, name, ext] = fileparts(setup.name);
@@ -19,6 +24,8 @@ name = name + replace(ext, '.', '_');
 refinement_str = "";
 if isfield(setup.geometry, "refinement")
     refinement_str = sprintf("_refine%g", setup.geometry.refinement);
+elseif isfield(setup.geometry, "tetgen_options")
+    refinement_str = sprintf("_tet%s",setup.geometry.tetgen_options);
 end
 ecs_str = sprintf("_%s", setup.geometry.ecs_shape);
 if isfield(setup.geometry, 'ecs_ratio') && setup.geometry.ecs_shape ~= "no_ecs"

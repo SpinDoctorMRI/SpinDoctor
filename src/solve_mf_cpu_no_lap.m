@@ -1,16 +1,14 @@
-function results = solve_mf_cpu_no_lap(femesh, setup, savepath)
+function results = solve_mf_cpu_no_lap(setup, savepath)
 %SOLVE_MF_CPU_NO_LAP Compute the solution to the BTPDE using Matrix Formalism on CPU.
 %
 %
-%   SOLVE_MF_CPU_NO_LAP(FEMESH, SETUP, SAVEPATH) saves the results of each iteration at
+%   SOLVE_MF_CPU_NO_LAP(SETUP, SAVEPATH) saves the results of each iteration at
 %   "<SAVEPATH>/<GEOMETRYINFO>/<DIFFUSIONINFO>/<DMRIINFO>/<MF_INFO>/<SEQUENCEINFO>.MAT".
 %   If a result is already present in the iteration file, the solver loads
 %   the results instead of solving for that iteration.
 %
-%   femesh: struct
 %   setup: struct
 %   savepath: path string
-%   save_magnetization (optinal): logical. Defaults to true.
 %
 %   results: struct with fields. Split into the experiments for constant
 %   direction vector sequences (const) and those with varying direction
@@ -343,7 +341,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
         % Prepare mass, density, moments and relaxation matrices
         FEM = load(FEM_save_path);
         moments =FEM.moments;
-        npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
+        % npoint_cmpts = cellfun(@(x) size(x, 2), femesh.points);
 
         % Coefficients of initial spin density in Laplace eigenfunction basis
         nu0 = FEM.nu0;
@@ -454,7 +452,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
                 nu_list_camino(:, iseq) = nu;
 
                 % Save computational time
-                camino.itertimes(iseq) = toc(itertime) * npoint_cmpts / sum(npoint_cmpts);
+                camino.itertimes(iseq) = toc(itertime);% * npoint_cmpts / sum(npoint_cmpts);
             end
                 % end
             % Compute final magnetization
