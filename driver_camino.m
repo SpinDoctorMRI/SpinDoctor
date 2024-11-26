@@ -15,7 +15,7 @@ addpath(genpath("src"));
 % Get setup
 addpath(genpath("setups"));
 setup_camino;
-setup.saved_simul_loc = "C:\Users\amcsween\SpinDoctor_saved_simul";
+
 %% Prepare simulation
 [setup, femesh, surfaces, cells]  = prepare_simulation(setup);
 

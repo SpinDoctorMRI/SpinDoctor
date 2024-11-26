@@ -16,7 +16,6 @@ fprintf("Running %s.m\n",setup_file)
 
 [~,cellname,~] = fileparts(setup.name);
 
-setup.saved_simul = "C:\Users\amcsween\SpinDoctor_saved_simul";
 
 [setup, femesh_cell, ~, ~,femesh_soma,femesh_neurites]  = prepare_simulation(setup);
 
