@@ -45,11 +45,7 @@ if not(save_eig) && save_magnetization
     error("Cannot have setup.mf.save_eig = false and save magentization.");
 end
 
-if isfield(setup,'saved_simul_loc')
-savepath_root= create_savepath(setup, "mf",setup.saved_simul_loc);
-else
 savepath_root= create_savepath(setup, "mf");
-end
 
 fprintf("Simulations to be stored in:\n%s\n",savepath_root);
 

@@ -1,4 +1,4 @@
-function plot_inertia_tensor(I)
+function plot_tensor(I,title_str)
 
 [X,Y,Z]  = sphere(10);
 sz = size(X);
@@ -16,3 +16,6 @@ title('Inertia tensor')
 grid on;
 axis equal;
 view(3)
+if nargin ==2
+    title(title_str);
+end

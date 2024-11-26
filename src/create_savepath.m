@@ -9,7 +9,12 @@ function savepath = create_savepath(setup, simulation_method, root_path)
 
 if nargin < nargin(@create_savepath)
     root_path = 'saved_simul';
+    if isfield(setup,'saved_simul_loc')
+        root_path = setup.saved_simul_loc;
+    end
 end
+
+
 
 % Create folder for saving results
 [~, name, ext] = fileparts(setup.name);

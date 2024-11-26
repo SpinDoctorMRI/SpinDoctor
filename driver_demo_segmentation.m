@@ -30,11 +30,11 @@ save_magnetization = true; include_cell = true;
 
 %% Load simulations
 % 
-% load_magnetization = true; include_cell = true; include_soma= true;
-% nneurites= length(femesh_neurites);
-% 
-% [btpde_cell,btpde_soma,btpde_neurites] =load_btpde_cell(setup,load_magnetization,nneurites,include_soma,include_cell);
-% [mf_cell,mf_soma,mf_neurites] = load_btpde_cell(setup,load_magnetization,nneurites,include_soma,include_cell);
+load_magnetization = true; include_cell = true; include_soma= true;
+nneurites= length(femesh_neurites);
+
+[btpde_cell,btpde_soma,btpde_neurites] =load_btpde_cell(setup,load_magnetization,nneurites,include_soma,include_cell);
+[mf_cell,mf_soma,mf_neurites] = load_btpde_cell(setup,load_magnetization,nneurites,include_soma,include_cell);
 
 
 %% Visualize results

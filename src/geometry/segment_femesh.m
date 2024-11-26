@@ -35,7 +35,7 @@ function [femesh,femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,
         mask(femesh_soma.element_map) = false;
         dendrite_elements = find(mask);
         bins = bins(bins>0);
-        [femesh_dendrites,elementmarkers] = initialise_dendrites(p,e,bins,dendrite_elements);
+        [femesh_dendrites,~] = initialise_dendrites(p,e,bins,dendrite_elements);
         
         % Previous method, using comparts in one finite element mesh to
         % handle segmentation.
@@ -50,13 +50,13 @@ function [femesh,femesh_soma,femesh_dendrites] = segment_femesh(femesh,swc_file,
         swc = Swc(swc_file);neighbours =read_tetgen_neigh(string(tetgen_path));
         % Create soma mesh
         if nargin ==4
-             [femesh_soma,soma_element_map] = separate_soma(femesh,swc,neighbours,soma_mesh_path);
+             [femesh_soma,~] = separate_soma(femesh,swc,neighbours,soma_mesh_path);
         else
-             [femesh_soma,soma_element_map] = separate_soma(femesh,swc,neighbours);
+             [femesh_soma,~] = separate_soma(femesh,swc,neighbours);
         end
     
         % Create dendrites
-        [femesh_dendrites,elementmarkers] = find_dendrites_femesh(femesh,femesh_soma,neighbours);
+        [femesh_dendrites,~] = find_dendrites_femesh(femesh,femesh_soma,neighbours);
         ndendrites = length(femesh_dendrites);
         
         % Previous method, using comparts in one finite element mesh to

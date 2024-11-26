@@ -77,7 +77,7 @@ seq = read_scheme('camino_sequences/test_scheme.scheme');
 % if isfile('camino_sequences/test_scheme.txt')           % Load tensors, unneccessary for simulations
 %     b_tensors = read_b_tensors('camino_sequences/test_scheme.txt');
 %     for i = 1:length(seq)
-%         seq{i}.b_tensor = b_tensors(:,i);
+%         seq{i}.b_tensor_axis_symmetric = b_tensors(:,i);
 %     end
 % end
 setup.gradient.sequences =seq;
@@ -88,9 +88,9 @@ setup.mf.length_scale =char_length_scale/5;             % Minimum length scale o
 setup.mf.neig_max = 1000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 200;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;
-setup.mf.rerun = true;
+setup.mf.rerun = false;
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
-setup.btpde.rerun = true;                               % Rerun simulation with or without saved results
+setup.btpde.rerun = false;                               % Rerun simulation with or without saved results

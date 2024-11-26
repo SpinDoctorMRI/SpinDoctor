@@ -15,11 +15,7 @@ addpath(genpath("src"));
 % Get setup
 addpath(genpath("setups"));
 setup_camino;
-
-% [~,cellname,~] = fileparts(setup.name);
-
-% fprintf('Saving to %s\n',save_path);
-
+setup.saved_simul_loc = "C:\Users\amcsween\SpinDoctor_saved_simul";
 %% Prepare simulation
 [setup, femesh, surfaces, cells]  = prepare_simulation(setup);
 
@@ -31,13 +27,11 @@ free = compute_free_diffusion(setup.gradient.bvalues, setup.pde.diffusivity, ...
 
 tic
 
-savepath_root = "saved_simul/"
-Perform BTPDE experiments
+% Perform BTPDE experiments
 if isfield(setup, "btpde")
     % Solve BTPDE
-    save_path = create_savepath(setup,"btpde",savepath_root);
-    save_path_cell = sprintf("%s/cell",save_path);
-    btpde = solve_btpde(femesh, setup,save_path_cell,true);
+    save_path = create_savepath(setup,"btpde");save_path = sprintf("%s/cell",save_path);
+    % btpde = solve_btpde(femesh, setup,save_path,true);
 end
 toc
 
@@ -45,10 +39,8 @@ tic
 % Perform BTPDE midpoint experiments
 if isfield(setup, "btpde_midpoint")
     % Solve BTPDE
-    save_path = create_savepath(setup,"btpde_midpoint",savepath_root);
-    save_path_cell = sprintf("%s/cell",save_path);
-
-    btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path_cell,true);
+    save_path = create_savepath(setup,"btpde_midpoint");save_path = sprintf("%s/cell",save_path);
+    btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path,true);
 end
 toc
 
@@ -56,12 +48,11 @@ toc
 % Perform Laplace eigendecomposition
 tic
 if isfield(setup,"mf")
-    save_path = create_savepath(setup,"mf",savepath_root);
-    save_path_cell = sprintf("%s/cell",save_path);
-    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path_cell);
+    save_path = create_savepath(setup,"mf");save_path = sprintf("%s/cell",save_path);
+    lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
         
     % Compute MF magnetization
-    mf = solve_mf(femesh, setup, lap_eig,save_path_cell,false);
+    mf = solve_mf(femesh, setup, lap_eig,save_path,false);
 end
 toc
 
@@ -69,12 +60,29 @@ disp("Camino sequence results are stored in btpde.camino and mf.camino");
 disp("PGSE sequence results are stored in btpde.const and mf.const (const for constant direction vector).");
 
 %% Plots
+
+addpath(genpath("drivers_postprocess"));
 do_plots = true;
 
 if ~do_plots
     return
 end
 
+% Plot sequence
+for iseq = 1
+    title_str = sprintf("Sequence %d of %d",iseq,setup.nsequence);
+    setup.gradient.sequences{iseq}.plot(title_str);
+end
+
+% Study B_tensor
+for iseq=1
+    B_tensor = setup.gradient.sequences{iseq}.get_B_tensor(setup.gamma);
+    fprintf("For sequence %d of %d:\n",iseq,setup.nsequence);
+    B_tensor
+    plot_tensor(B_tensor,sprintf("B tensor for sequence %d of %d",iseq, setup.nsequence));
+end
+
+%%
 % Plot surface triangulation
 plot_surface_triangulation(surfaces);
 
@@ -114,3 +122,5 @@ if isfield(setup, "mf")
     disp(signal_allcmpts_relerr);
 
 end
+
+

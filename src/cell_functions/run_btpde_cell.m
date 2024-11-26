@@ -42,11 +42,7 @@ include_soma = nargin >= 4 && isstruct(femesh_soma);
 include_neurites = nargin >= 5 && (isstruct(femesh_neurites) || iscell(femesh_neurites));
 save_magnetization = (nargin <2) || save_magnetization;
 
-if isfield(setup,'saved_simul_loc')
-    savepath_root= create_savepath(setup, "btpde",setup.saved_simul_loc);
-else
-    savepath_root= create_savepath(setup, "btpde");
-end
+savepath_root= create_savepath(setup, "btpde");
 
 fprintf("Simulations to be stored in:\n%s\n",savepath_root);
 
@@ -58,7 +54,7 @@ else
 end
 
 if include_soma
-    savepath_soma = sprintf("%s/cell",savepath_root);
+    savepath_soma = sprintf("%s/soma",savepath_root);
     btpde_soma = solve_btpde(femesh_soma, setup,savepath_soma,save_magnetization);
 else
     btpde_soma = "Not assigned";
