@@ -61,48 +61,48 @@ elseif isa(seq, "DoublePGSE")
     end
     
     % Compute Laplace coefficients of final magnetization
-    % % first pulse
-    % K = expm(-seq.delta * K);
-    % nu = K * nu;
-    % % between pulses
-    % t = seq.Delta - seq.delta;
-    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
-    % % second pulse
-    % K = conj(K);
-    % nu = K * nu;
-    % % between pulses
-    % t = seq.tpause;
-    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
-    % % third pulse
-    % K = conj(K);
-    % nu = K * nu;
-    % % between pulses
-    % t = seq.Delta - seq.delta;
-    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
-    % % fourth pulse
-    % K = conj(K);
-    % nu = K * nu;
-
     % first pulse
-    nu = expmv(-seq.delta, K, nu);
+    K = expm(-seq.delta * K);
+    nu = K * nu;
     % between pulses
     t = seq.Delta - seq.delta;
     nu = between_pulses(t, nu, LT2, LT2_is_matrix);
     % second pulse
     K = conj(K);
-    nu = expmv(-seq.delta, K, nu);
+    nu = K * nu;
     % between pulses
     t = seq.tpause;
     nu = between_pulses(t, nu, LT2, LT2_is_matrix);
     % third pulse
     K = conj(K);
-    nu = expmv(-seq.delta, K, nu);
+    nu = K * nu;
     % between pulses
     t = seq.Delta - seq.delta;
     nu = between_pulses(t, nu, LT2, LT2_is_matrix);
     % fourth pulse
     K = conj(K);
-    nu = expmv(-seq.delta, K, nu);
+    nu = K * nu;
+
+    % first pulse
+    % nu = expmv(-seq.delta, K, nu);
+    % % between pulses
+    % t = seq.Delta - seq.delta;
+    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % % second pulse
+    % K = conj(K);
+    % nu = expmv(-seq.delta, K, nu);
+    % % between pulses
+    % t = seq.tpause;
+    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % % third pulse
+    % K = conj(K);
+    % nu = expmv(-seq.delta, K, nu);
+    % % between pulses
+    % t = seq.Delta - seq.delta;
+    % nu = between_pulses(t, nu, LT2, LT2_is_matrix);
+    % % fourth pulse
+    % K = conj(K);
+    % nu = expmv(-seq.delta, K, nu);
 
 elseif isa(seq, "SinOGSE") || isa(seq, "CosOGSE")
     % Transform Laplace coefficients using piecewise constant

@@ -53,11 +53,9 @@ else
     rerun = false;
 end
 % Extract domain parameters
-initial_density = setup.pde.initial_density;
 relaxation = setup.pde.relaxation;
 no_relaxation = all(isinf(relaxation));
-zero_permeability = all(setup.pde.permeability==0);
-multi_lap_eig = false;%length(lap_eig) > 1;
+multi_lap_eig = setup.ncompartment > 1; %length(lap_eig) > 1;
 if multi_lap_eig
     error("Not currently supported for multi_lap_eig");
 end
@@ -78,29 +76,22 @@ ncompartment = setup.ncompartment;
 namplitude = setup.namplitude;
 nsequence = setup.nsequence;
 ndirection = setup.ndirection;
-FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,multi_lap_eig,savepath);
+% FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,multi_lap_eig,savepath);
 
 if do_save
-    % Folder for saving
-    mf_str = sprintf("neig%g_ls%.4f", ...
-        setup.mf.neig_max, setup.mf.length_scale);
-    if setup.mf.surf_relaxation
-        mf_str = "surf_relaxation_" + mf_str;
-    end
-    if setup.mf.single
-        mf_str = mf_str + "_single";
-    end
-    if ~isinf(setup.mf.neig_max)
-        % if neig_max is inf, mf.eigs doesn't exist or is removed.
-        mf_str = mf_str + sprintf("_%s", DataHash(setup.mf.eigs, 6));
-    end
-    savepath = fullfile(savepath, mf_str);
-    if ~isfolder(savepath)
-        mkdir(savepath);
-    end
+    % Folder for saving and loading is the same
+    savepath = add_mf_str_savepath(savepath,setup.mf );
+    loadpath = savepath;
 else
-    savepath = "";
+    % No folder for saving, create folder for loading.
+    savepath = ""; loadpath = create_savepath(setup,"mf_no_lap_eig");
+    loadpath = add_mf_str_savepath(loadpath,setup.mf );
 end
+
+if ~isfolder(loadpath)
+    error("Finite element matrices must have already been saved to %s\nRun solve_mf with laplacian eigenfunctions.",savepath);
+end
+FEM_save_path = sprintf("%s/FEM_lap_eig.mat",loadpath);
 
 % Initialize output arguments
 const_sequences_ind = cellfun(@(x) ~isa(x,"SequenceCamino"),sequences,'UniformOutput',true);

@@ -97,19 +97,8 @@ ndirection = setup.ndirection;
 
 if do_save
     % Folder for saving
-    mf_str = sprintf("neig%g_ls%.4f", ...
-        setup.mf.neig_max, setup.mf.length_scale);
-    if setup.mf.surf_relaxation
-        mf_str = "surf_relaxation_" + mf_str;
-    end
-    if setup.mf.single
-        mf_str = mf_str + "_single";
-    end
-    if ~isinf(setup.mf.neig_max)
-        % if neig_max is inf, mf.eigs doesn't exist or is removed.
-        mf_str = mf_str + sprintf("_%s", DataHash(setup.mf.eigs, 6));
-    end
-    savepath = fullfile(savepath, mf_str);
+    savepath = add_mf_str_savepath(savepath,setup.mf );
+    
     if ~isfolder(savepath)
         mkdir(savepath);
     end

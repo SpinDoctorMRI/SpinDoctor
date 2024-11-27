@@ -92,9 +92,9 @@ setup.gradient.sequences = {                            % Gradient sequences {1 
     % SinOGSE(1000, 5000, 4,7000, "symmetric")            % SinOGSE with period 4  and echotime 700 and initial pause to make signal symmetric
     % SinOGSE(1000, 5000, 4,100,200)                      % SinOGSE with period 4  and echotime 700 and initial pause 100 ad final pause 200
     DoublePGSE(5000, 10000)
-    DoublePGSE(5000, 10000,1000)                        % DoublePGSE with tpause = 1000
-    DoublePGSE(100, 1000,100,3000)                      % DoublePGSE with tpause = 100 and fixed echotime = 30000
-    DoublePGSE(200, 1000,100,200,400)                   % DoublePGSE with tpause = 100 and initial pause 200 and end pause 400
+    % DoublePGSE(5000, 10000,1000)                        % DoublePGSE with tpause = 1000
+    % DoublePGSE(100, 1000,100,3000)                      % DoublePGSE with tpause = 100 and fixed echotime = 30000
+    % DoublePGSE(200, 1000,100,200,400)                   % DoublePGSE with tpause = 100 and initial pause 200 and end pause 400
 }';
 setup.gradient.directions = [1.0; 0.0; 0.0];            % Gradient directions [3 x ndirection]
 

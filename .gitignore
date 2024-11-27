@@ -2,5 +2,5 @@
 output
 saved_simul
 *.mex*
-/Private
-/mesh_files
+Private
+mesh_files  

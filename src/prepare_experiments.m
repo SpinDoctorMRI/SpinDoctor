@@ -247,7 +247,9 @@ function mf = check_mf(mf)
     if ~isfield(mf, 'surf_relaxation'); mf.surf_relaxation = false; end
     if ~isfield(mf, 'save_eig');        mf.save_eig = true;         end
     
-    
+    if ~mf.save_eig 
+        warning("Eigenfunctions will not be saved. Once computed and if used the moment matrices needed to run simulations will be saved.\nThis takes significantly less storage with the same signal accuracy, however means the full magnetization field is lost.")
+    end
     if isinf(mf.neig_max)
         % Infinite neig_max triggers eig instead of eigs
         mf = rmfields(mf, {'eigs'});

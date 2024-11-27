@@ -12,10 +12,12 @@ classdef DoublePGSE < Sequence
     end
     
     methods
-        function obj = DoublePGSE(delta, Delta, varargin)
+        function seq = DoublePGSE(delta, Delta, varargin)
             %DoublePGSE Construct an instance of the DoublePGSE class.
             % varargin = tpause, optional arguments for indvidual PGSE
             %   `tpause` is the pause between the two PGSE sequences.
+            seq@Sequence(delta,Delta);
+        
             if nargin ==2
                 tpause = 0;
                 varargin = {0};
@@ -23,56 +25,56 @@ classdef DoublePGSE < Sequence
                 tpause = varargin{1};   
             end
             assert(tpause >= 0);
-            obj.tpause = tpause;
-            if length(varargin) == 1
-                  obj.t1 = 0;  
-                  obj.TE = obj.echotime;
+            seq.tpause = tpause;
+            if length(varargin) <= 1
+                  seq.t1 = 0;  
+                  seq.TE = seq.echotime;
             elseif length(varargin) == 2
-                obj.TE = varargin{2};
-                obj.t1 = 0;
+                seq.TE = varargin{2};
+                seq.t1 = 0;
             elseif length(varargin) == 3
                 if isnumeric(varargin{3})
-                    obj.t1 = varargin{2};
-                    obj.TE = obj.echotime;
+                    seq.t1 = varargin{2};
+                    seq.TE = seq.echotime;
                 elseif varargin{3} == "Symmetric" || varargin{3} == "symmetric" 
-                    obj.TE = varargin{2};
-                    obj.t1 = (obj.TE - 2 * (Delta + delta) - obj.tpause)/2;
+                    seq.TE = varargin{2};
+                    seq.t1 = (seq.TE - 2 * (Delta + delta) - seq.tpause)/2;
                 else
                     error("Error: invalid input into Sequence")
                 end
             else
                 error("Error: invalid input into Sequence")
             end
-            
+
         end
         
-        function TE = echotime(obj)
+        function TE = echotime(seq)
             %ECHOTIME Get the echo time of the DoublePGSE sequence.
             %   The echo time is twice the normal echo time.
-            TE = obj.t1 + 2 * obj.Delta + 2 * obj.delta + obj.tpause;
+            TE = seq.t1 + 2 * seq.Delta + 2 * seq.delta + seq.tpause;
         end
         
-        function f = call(obj, t)
+        function f = call(seq, t)
             %CALL Call the DoublePGSE time profile at time t.
             %   The function is vectorized.
-            d = obj.delta;
-            D = obj.Delta;
-            p = obj.tpause;
-            t = t-obj.t1;
+            d = seq.delta;
+            D = seq.Delta;
+            p = seq.tpause;
+            t = t-seq.t1;
             f = (0 <= t & t < d) ...
                 - (D <= t & t < D + d) ...
                 + (p + D + d <= t & t < p + D + 2 * d) ...
                 - (p + 2 * D + d <= t & t <= p + 2 * D + 2 * d);
         end
         
-        function F = integral(obj, t)
+        function F = integral(seq, t)
             %INTEGRAL Compute the integral of the time profile from 0 to t.
             %   For the DoublePGSE sequence, an analytical expression is
             %   available.
-            d = obj.delta;
-            D = obj.Delta;
-            p = obj.tpause;
-            t = t-obj.t1;
+            d = seq.delta;
+            D = seq.Delta;
+            p = seq.tpause;
+            t = t-seq.t1;
             F = (0 <= t & t < d) .* t ...
                 + (d <= t & t < D + d) .* d ...
                 - (D <= t & t < D + d) .* (t - D) ...
@@ -81,22 +83,22 @@ classdef DoublePGSE < Sequence
                 - (p + 2 * D + d <= t & t <= p + 2 * D + 2 * d) .* (t - (p + 2 * D + d));
         end
         
-        function int = integral_F2(obj)
-            %INTEGRAL_F2 Compute the temporal integration of F^2 (F = integral(obj, t)).
+        function int = integral_F2(seq)
+            %INTEGRAL_F2 Compute the temporal integration of F^2 (F = integral(seq, t)).
             %   An analytical expression is available for the DoublePGSE sequence.
-            int = 2 * obj.delta^2 * (obj.Delta - obj.delta / 3);
+            int = 2 * seq.delta^2 * (seq.Delta - seq.delta / 3);
         end
         
-        function t = diffusion_time(obj)
+        function t = diffusion_time(seq)
             %DIFFUSION_TIME Get diffusion time of the DoublePGSE sequence.
-            t = 2 * (obj.Delta - obj.delta / 3);
+            t = 2 * (seq.Delta - seq.delta / 3);
         end
         
-        function t = diffusion_time_sta(obj)
+        function t = diffusion_time_sta(seq)
             %DIFFUSION_TIME_STA Get STA diffusion time of the DoublePGSE sequence.
-            d = obj.delta;
-            D = obj.Delta;
-            tm = obj.delta + obj.tpause;
+            d = seq.delta;
+            D = seq.Delta;
+            tm = seq.delta + seq.tpause;
             out = (2 / 35) * ( ...
                         + (2*D + tm + d)^(7 / 2) ...
                         + (2*D + tm - d)^(7 / 2) ...
@@ -115,12 +117,12 @@ classdef DoublePGSE < Sequence
             t = out^2;
         end
         
-        function jn = J(obj, lambda)
+        function jn = J(seq, lambda)
             %J Compute the quantity J(lambda) for the sequence
             %   An analytical expression is available for the DoublePGSE sequence
-            d = obj.delta;
-            D = obj.Delta;
-            tm = obj.tpause + obj.delta;
+            d = seq.delta;
+            D = seq.Delta;
+            tm = seq.tpause + seq.delta;
             
             if lambda < 1e-7
                 % Use Taylor expansion when lambda is close to 0 
@@ -152,16 +154,16 @@ classdef DoublePGSE < Sequence
             end
         end
 
-        function [timelist, interval_str, timeprofile_str] = intervals(obj)
+        function [timelist, interval_str, timeprofile_str] = intervals(seq)
             %INTERVALS Get intervals of the sequence.
             %   This function returns a list of important time steps (including
             %   start and stop), a list of strings representing the intervals
             %   between these time steps and a list of strings representing the
             %   behavior of the sequence on each of these intervals.
-            d = obj.delta;
-            D = obj.Delta;
-            p = obj.tpause;
-            t1 = obj.t1;
+            d = seq.delta;
+            D = seq.Delta;
+            p = seq.tpause;
+            t1 = seq.t1;
             timelist = [t1, t1+d, t1+D, t1+D+d, t1+p+D+d, t1+p+D+2*d, t1+p+2*D+d, t1+p+2*(D+d)];
             interval_str = ["[t1,t1+delta]", ...
                 "[t1+delta, t1+Delta]", ...
@@ -190,12 +192,12 @@ classdef DoublePGSE < Sequence
                 interval_str(2) = [];
                 timeprofile_str(2) = [];
             end
-            if obj.TE > obj.t1 + 2*(obj.Delta+obj.delta) +obj.tpause
-                timelist = [timelist, obj.TE];
+            if seq.TE > seq.t1 + 2*(seq.Delta+seq.delta) +seq.tpause
+                timelist = [timelist, seq.TE];
                 interval_str = [interval_str,"[t1+tpause+2*(Delta+delta),TE]"];
                 timeprofile_str = [timeprofile_str,"f(t) = 0 (constant)"];
             end
-            if obj.t1 > 0
+            if seq.t1 > 0
                 timelist = [0,timelist];
                 interval_str = ["[0,t1]",interval_str];
                 timeprofile_str = ["f(t) = 0 (constant)",timeprofile_str];
@@ -203,26 +205,17 @@ classdef DoublePGSE < Sequence
 
         end
         
-        function s = string(obj, simplified)
+        function s = string(seq, simplified)
             %STRING Convert sequence to string.
             if nargin == 2 && simplified
-                s = sprintf("%s_d%g_D%g_tm%g", class(obj), ...
-                    obj.delta, obj.Delta, obj.delta+obj.tpause);
+                s = sprintf("%s_d%g_D%g_tpause%g", class(seq), ...
+                    seq.delta, seq.Delta,seq.tpause);
             else
-                s = sprintf("%s(delta=%g, Delta=%g, tm=%g,TE=%g, t1=%g)", class(obj), ...
-                    obj.delta, obj.Delta, obj.delta+obj.tpause,obj.TE,obj.t1);
+                s = sprintf("%s(delta=%g, Delta=%g, tpause=%g,TE=%g, t1=%g)", class(seq), ...
+                    seq.delta, seq.Delta, seq.tpause,seq.TE,seq.t1);
             end
         end
         
-        function s = string(obj, simplified)
-            %STRING Convert sequence to string.
-            if nargin == 2 && simplified
-                s = sprintf("%s_d%g_D%g_tm%g", class(obj), ...
-                    obj.delta, obj.Delta, obj.delta+obj.tpause);
-            else
-                s = sprintf("%s(delta=%g, Delta=%g, tm=%g)", class(obj), ...
-                    obj.delta, obj.Delta, obj.delta+obj.tpause);
-            end
-        end
+       
     end
 end

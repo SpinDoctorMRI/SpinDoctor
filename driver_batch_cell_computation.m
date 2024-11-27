@@ -15,9 +15,10 @@ addpath(genpath("src"));
 setup_file='setup_batch';
 
 meshes = ["mesh_files\selected\1-2-2.CNG.ply",
-    "mesh_files\spindle\04b_spindle3aFI.ply",
-    "mesh_files\Alzheimer_study\Ramified\ctrl_010319_13_826-2_1.ply"
+    "mesh_files\spindle\whole_neurons\04b_spindle3aFI.ply",
 ];
+
+
 % Different cells may need different refinement levels for the meshes.
 % the default from the setup file can be overriden here/
 tetgen_options= [

@@ -92,27 +92,20 @@ nsequence = setup.nsequence;
 ndirection = setup.ndirection;
 
 if do_save
-    % Save path for finite element matrices
-    FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,multi_lap_eig,savepath);
-
+    % % Save path for finite element matrices.
+    % if ~multi_lap_eig
+    % % FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,multi_lap_eig,savepath);
+    % end
     % Folder for saving
-    mf_str = sprintf("neig%g_ls%.4f", ...
-        setup.mf.neig_max, setup.mf.length_scale);
-    if setup.mf.surf_relaxation
-        mf_str = "surf_relaxation_" + mf_str;
-    end
-    if setup.mf.single
-        mf_str = mf_str + "_single";
-    end
-    if ~isinf(setup.mf.neig_max)
-        % if neig_max is inf, mf.eigs doesn't exist or is removed.
-        mf_str = mf_str + sprintf("_%s", DataHash(setup.mf.eigs, 6));
-    end
-    savepath = fullfile(savepath, mf_str);
+    savepath = add_mf_str_savepath(savepath,setup.mf );
+
     if ~isfolder(savepath)
         mkdir(savepath);
     end
-
+    % Save path for finite element matrices.
+    if ~multi_lap_eig
+    FEM_save_path = sprintf("%s/FEM_lap_eig.mat",savepath);
+    end
 
 else
     savepath = "";
@@ -529,7 +522,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
             % Compute final magnetization
             nu_list_const = nu_list_const(:, no_result_flag_const);
             mag_const= funcs * double(nu_list_const);
-            nu2signal = sum(M_cmpts{1}'*funcs,1);
+            nu2signal = sum(M'*funcs,1);
             % Final magnetization coefficients in finite element nodal basis
             idx = 1;
             allinds = [namplitude nsequence_const ndirection];
@@ -584,7 +577,7 @@ if any(no_result_flag_camino, 'all') || any(no_result_flag_const, 'all')
             % Compute final magnetization
             nu_list_camino = nu_list_camino(:, no_result_flag_camino);
             mag = funcs * double(nu_list_camino);
-            nu2signal = sum(M_cmpts{1}'*funcs,1);
+            nu2signal = sum(M'*funcs,1);
             % Final magnetization coefficients in finite element nodal basis
             idx = 1;
 
@@ -608,7 +601,13 @@ if do_save && any(no_result_flag_const, 'all')
         seq = sequences_const{iseq};
         filename = sprintf("%s/%s.mat", savepath, seq.string(true));
         fprintf("Save %s\n", filename);
+        disp("Saving!")
+        if ~isfile(filename)
+            dummyVar = -1;
+            save(filename, 'dummyVar');
+        end
         mfile = matfile(filename, "Writable", true);
+        disp("Made it through mfile")
         for iamp = 1:namplitude
             for idir = 1:ndirection
                 if no_result_flag_const(iamp, iseq, idir)
@@ -619,20 +618,21 @@ if do_save && any(no_result_flag_const, 'all')
                     data.ug = directions(:, idir);
                     data.g = gvalues(iamp,iseq);
                     data.signal = const.signal(:,iamp, iseq, idir);
-                    data.itertimes = const.itertimes(iamp,iseq,idir);
+                    data.itertimes = const.itertimes(iamp,iseq,idir)
                     if save_magnetization
                         data.magnetization = const.magnetization(:,iamp,iseq,idir);
                     end
 
                     % Save results to MAT-file
                     gradient_field = gradient_fieldstring(data.ug, data.b);
+
                     mfile.(gradient_field) = data;
 
                     % dMRI signal is centrosymmetric
                     data.ug = -data.ug;
                     % convert negative zeros to positive zeros
                     data.ug(data.ug == 0) = +0;
-                    gradient_field = gradient_fieldstring(data.ug, data.b);
+                    gradient_field = gradient_fieldstring(data.ug, data.b)
                     if ~hasfield(mfile, gradient_field)
                         mfile.(gradient_field) = data;
                     end
@@ -647,6 +647,10 @@ if do_save && any(no_result_flag_camino, 'all')
         seq = sequences_camino{iseq};
         filename = sprintf("%s/%s.mat", savepath, seq.string(true));
         fprintf("Save %s\n", filename);
+        if ~isfile(filename)
+            dummyVar = -1;
+            save(filename, 'dummyVar');
+        end
         mfile = matfile(filename, "Writable", true);
        
         if no_result_flag_camino(iseq, 1)
@@ -670,8 +674,6 @@ end
 if do_save && ~multi_lap_eig && exist("moments") && ~isfile(FEM_save_path)
     % Save mass, density, moments and relaxation matrices
     save(FEM_save_path,"moments","LQT2","nu2signal","nu0");
-elseif ~exist("moments") && ~isfile(FEM_save_path)
-    warning("Finite element matrices not saved. Set setup.mf.rerun = true to save matrices.")
 end
 
 

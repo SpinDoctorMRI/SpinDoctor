@@ -54,9 +54,10 @@ fprintf("Simulations to be stored in:\n%s\n",savepath_root);
 % Cell
 if include_cell
     savepath_cell = sprintf("%s/cell",savepath_root);
-    FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_cell);
+    % FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_cell);
+    FEM_save_path = sprintf("%s/FEM_lap_eig.mat",add_mf_str_savepath(savepath_cell,setup.mf ));
     compute_eig = ~isfile(FEM_save_path);
-    if compute_eig || save_magnetization
+    if compute_eig | save_magnetization
         lap_eig_cell = compute_laplace_eig(femesh_cell, setup.pde, setup.mf,savepath_cell,save_eig);  
         mf_cell = solve_mf(femesh_cell, setup, lap_eig_cell,savepath_cell,save_magnetization);
     else
@@ -72,10 +73,10 @@ end
 % Soma
 if include_soma
     savepath_soma= sprintf("%s/soma",savepath_root);
-    FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_soma);
+    % FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_soma);
+    FEM_save_path = sprintf("%s/FEM_lap_eig.mat",add_mf_str_savepath(savepath_soma,setup.mf ));
     compute_eig = ~isfile(FEM_save_path);
-    if compute_eig || save_magnetization
-        disp("Computing eigenfunctions but not saving.")
+    if compute_eig | save_magnetization
         lap_eig_soma = compute_laplace_eig(femesh_soma, setup.pde, setup.mf,savepath_soma,save_eig);  
         mf_soma = solve_mf(femesh_soma, setup, lap_eig_soma,savepath_soma,save_magnetization);
     else
@@ -95,9 +96,11 @@ if include_neurites
     lap_eig_neurites = cell(nneurites,1);
     for ib = 1:nneurites
         savepath_neurite= sprintf("%s/neurite_%d",savepath_root,ib);
-        FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_neurite);
+        % FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_neurite);
+        FEM_save_path = sprintf("%s/FEM_lap_eig.mat",add_mf_str_savepath(savepath_neurite,setup.mf ));
+
         compute_eig = ~isfile(FEM_save_path);
-        if compute_eig || save_magnetization
+        if compute_eig | save_magnetization
              lap_eig_neurites{ib}= compute_laplace_eig(femesh_neurites{ib}, setup.pde, setup.mf,savepath_neurite,save_eig);  
             mf_neurites{ib} = solve_mf(femesh_neurites{ib}, setup,  lap_eig_neurites{ib},savepath_neurite,save_magnetization);
         else

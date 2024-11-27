@@ -1,0 +1,5 @@
+No errors in setup_camino:
+No errors in setup_cylinders_mini_settings:
+No errors in setup_spheres_mini_settings:
+No errors in setup_cylinders_full_settings:
+No errors in setup_spheres_full_settings:

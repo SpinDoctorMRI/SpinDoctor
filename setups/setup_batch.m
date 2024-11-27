@@ -46,7 +46,6 @@
 %% Saved simulation location
 % setup.saved_simul_loc= "path/to/saved_simul";
 
-
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
 setup.geometry.ncell = 1;                               % Number of cells
@@ -86,8 +85,8 @@ setup.mf.length_scale =3;                               % Minimum length scale o
 setup.mf.neig_max = 4000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 400;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;
-setup.mf.rerun=false;
-
+setup.mf.rerun=false;                                   % Rerun simulation with or without saved results  
+setup.mf.save_eig = false;                              % Flag to save eigenfunctions. If set to false, moment matrices are saved instead, which are O(N_eig x N_eig) instead of O(N_eig X N_node);
 %% BTPDE experiment parameters (comment block to skip experiment)
 % setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 % setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver

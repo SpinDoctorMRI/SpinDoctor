@@ -83,7 +83,7 @@ if ismember(simulation_method, ["btpde", "btpde_midpoint"])
     % Construct the final path
     savepath = fullfile(save_dir_path_geometry, pde_str, simulation_method);
 
-elseif ismember(simulation_method, ["lap_eig", "mf"])
+elseif ismember(simulation_method, ["lap_eig", "mf","mf_no_lap_eig"])
     save_dir_path_geometry = fullfile(root_path, name + refinement_str + ecs_str);
 
     zero_permeability = all(setup.pde.permeability==0);

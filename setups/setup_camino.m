@@ -42,7 +42,7 @@
 
 addpath(genpath('src'));
 %% File name to load or store cell description, surface geometry, mesh, and simulation results
-setup.name = "mesh_files/spindle/04b_spindle3aFI.ply";
+setup.name = "mesh_files/spindle/whole_neurons/04b_spindle3aFI.ply";
 
 %% Geometry parameters
 setup.geometry.cell_shape = "neuron";                   % Cell shape; "sphere", "cylinder" or "neuron"
@@ -73,7 +73,7 @@ setup.pde.permeability_out = 0;                         % Permeability OUT bound
 setup.pde.permeability_ecs = 0;                         % Permeability ECS boundary
 
 %% Gradient sequences
-seq = read_scheme('camino_sequences/test_scheme.scheme');
+seq = read_scheme("camino_sequences/test_scheme.scheme");
 % if isfile('camino_sequences/test_scheme.txt')           % Load tensors, unneccessary for simulations
 %     b_tensors = read_b_tensors('camino_sequences/test_scheme.txt');
 %     for i = 1:length(seq)
@@ -92,7 +92,7 @@ setup.mf.length_scale =char_length_scale/5;             % Minimum length scale o
 setup.mf.neig_max = 1000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 200;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;
-setup.mf.rerun = false;
+setup.mf.rerun = true;
 %% BTPDE experiment parameters (comment block to skip experiment)
 setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
 setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver

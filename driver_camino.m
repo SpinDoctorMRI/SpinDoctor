@@ -40,7 +40,7 @@ tic
 if isfield(setup, "btpde_midpoint")
     % Solve BTPDE
     save_path = create_savepath(setup,"btpde_midpoint");save_path = sprintf("%s/cell",save_path);
-    btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path,true);
+    % btpde_midpoint = solve_btpde_midpoint(femesh, setup,save_path,true);
 end
 toc
 

@@ -1,4 +1,4 @@
-%DRIVER_SPINDOCTOR Solve BTPDE, HADC, MF or analytical.
+clcc%DRIVER_SPINDOCTOR Solve BTPDE, HADC, MF or analytical.
 %   Compare different ADC. Plot results in many directions.
 %
 %   It is highly recommended to read this driver to understand the workflow
@@ -35,7 +35,7 @@ setup_1sphere_analytical;
 
 %% Perform small experiments
 % Short time approximation (STA) of the ADC
-% [sta_adc, sta_adc_allcmpts] = compute_adc_sta(femesh, setup);
+[sta_adc, sta_adc_allcmpts] = compute_adc_sta(femesh, setup);
 % Free diffusion signal
 free = compute_free_diffusion(setup.gradient.bvalues, setup.pde.diffusivity, ...
     femesh.volumes, setup.pde.initial_density);

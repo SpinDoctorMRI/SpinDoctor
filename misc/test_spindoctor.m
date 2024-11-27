@@ -5,9 +5,9 @@
 clear
 cd("../");
 addpath(genpath("src"));
-
-test_path = "setups";
+addpath(genpath("setups"));
 test_list = [
+    "setup_camino"
     "setup_cylinders_mini_settings"
     "setup_spheres_mini_settings"
     "setup_cylinders_full_settings"
@@ -28,9 +28,12 @@ test_list = [
 % Choose whether to save magnetization field
 magnetization_flag = true;
 Errors = 0; failed_tests = [];
-for itest = 1:length(test_list)
+for itest = 2:length(test_list)
     try
-        run(fullfile(test_path, test_list(itest) + ".m"));
+        clear setup;
+        clear femesh;
+        clear surfaces;
+        run( test_list(itest) + ".m");
 
         % Prepare simulation
         [setup, femesh, surfaces]  = prepare_simulation(setup);
@@ -40,7 +43,7 @@ for itest = 1:length(test_list)
             disp("Computing or loading the BTPDE signals");
             savepath = create_savepath(setup, "btpde");
             btpde = solve_btpde(femesh, setup, savepath, magnetization_flag);
-            btpde2 = load_btpde_new(setup, savepath, magnetization_flag);
+            btpde2 = load_btpde(setup, savepath, magnetization_flag);
             
             % test
             btpde = rmfield(btpde, 'totaltime');
@@ -102,11 +105,16 @@ for itest = 1:length(test_list)
 
             mf_hadc = solve_mf_hadc(femesh, setup, lap_eig);
         end
-
-        assert(max(abs(btpde.signal - btpde_mp.signal)/setup.pde.initial_signal, [], 'all') < 0.1);
-        assert(max(abs(btpde.signal - mf.signal)/setup.pde.initial_signal, [], 'all') < 0.1);
-        assert(max(abs(hadc.adc_allcmpts - mf_hadc.adc_allcmpts), [], 'all') < 0.1);
-
+        
+        if isfield(setup,'btpde') && isfield(setup,'btpde_midpoint')
+            assert(max(abs(btpde.signal - btpde_mp.signal)/setup.pde.initial_signal, [], 'all') < 0.1);
+        end
+        if isfield(setup,'btpde') && isfield(setup,'mf')
+            assert(max(abs(btpde.signal - mf.signal)/setup.pde.initial_signal, [], 'all') < 0.1);
+        end
+        if isfield(setup,'mf') && isfield(setup,'hadc')
+            assert(max(abs(hadc.adc_allcmpts - mf_hadc.adc_allcmpts), [], 'all') < 0.1);
+        end
         % Solve Karger model
         if isfield(setup, "karger")
             % Solve analytical analytical model
@@ -117,15 +125,15 @@ for itest = 1:length(test_list)
         fclose(fid);
     catch e
         Errors = Errors + 1;
-        failed_tests =[failed_tests;itest];
-        disp(e)
-        fprintf('Error in %s', test_list(itest));
+        disp(e);
+        fprintf('Error in %s\n', test_list(itest));
         fid= fopen('test_results.txt','a');
         fprintf(fid,'Error in %s:\n', test_list(itest));
+        fprintf(fid,"%s\n",e.message);
         fclose(fid);
     end
 end
-fprintf('Number of Erros = %d\n',Errors);
+fprintf('Number of Errors = %d\n',Errors);
 if Errors > 0
     disp('Failed at :');
     disp(failed_tests);

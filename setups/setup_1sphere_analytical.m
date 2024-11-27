@@ -87,8 +87,8 @@ setup.btpde.reltol = 1e-4;                              % Relative tolerance for
 setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
 
 %% BTPDE midpoint experiment parameters (comment block to skip experiment)
-% setup.btpde_midpoint.implicitness = 0.5;              % Theta-parameter: 0.5 for Crank-Nicolson
-% setup.btpde_midpoint.timestep = 5;                    % Time step dt
+setup.btpde_midpoint.implicitness = 0.5;              % Theta-parameter: 0.5 for Crank-Nicolson
+setup.btpde_midpoint.timestep = 5;                    % Time step dt
 
 %% HADC experiment parameters (comment block to skip experiment)
 setup.hadc.ode_solver = @ode15s;                        % ODE solver for HADC
@@ -96,9 +96,9 @@ setup.hadc.reltol = 1e-4;                               % Relative tolerance for
 setup.hadc.abstol = 1e-4;                               % Absolute tolerance for ODE solver
 
 %% MF experiment parameters (comment block to skip experiment)
-% setup.mf.length_scale = 2;                              % Minimum length scale of eigenfunctions
-% setup.mf.neig_max = 400;                                % Requested number of eigenvalues
-% setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE)
+setup.mf.length_scale = 2;                              % Minimum length scale of eigenfunctions
+setup.mf.neig_max = 400;                                % Requested number of eigenvalues
+setup.mf.ninterval = 500;                               % Number of intervals to discretize time profile in MF (if not PGSE)
 
 %% Analytical experiment parameters (comment block to skip experiment)
 setup.analytical.length_scale = 1;                      % Minimum length scale of eigenfunctions
