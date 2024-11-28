@@ -83,9 +83,9 @@ seq = read_scheme("camino_sequences/morez_Q3_camino.scheme");
 % end
 setup.gradient.sequences =seq;
 %% BTPDE midpoint experiment parameters (comment block to skip experiment)
-setup.btpde_midpoint.implicitness = 0.5;                % Theta-parameter: 0.5 for Crank-Nicolson
-setup.btpde_midpoint.timestep = 2;                      % Time step dt
-setup.btpde.rerun = true;    
+% setup.btpde_midpoint.implicitness = 0.5;                % Theta-parameter: 0.5 for Crank-Nicolson
+% setup.btpde_midpoint.timestep = 2;                      % Time step dt
+% setup.btpde.rerun = true;    
 %% MF experiment parameters (comment block to skip experiment)
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
 char_length_scale = sqrt(2*3*setup.pde.diffusivity_in*1000*101);
@@ -95,7 +95,7 @@ setup.mf.ninterval = 200;                               % Number of intervals to
 setup.mf.eigs.sigma = 1e-8;
 setup.mf.rerun = false;
 %% BTPDE experiment parameters (comment block to skip experiment)
-setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
-setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
-setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
-setup.btpde.rerun = false;                               % Rerun simulation with or without saved results
+% setup.btpde.ode_solver = @ode15s;                       % ODE solver for BTPDE
+% setup.btpde.reltol = 1e-4;                              % Relative tolerance for ODE solver
+% setup.btpde.abstol = 1e-6;                              % Absolute tolerance for ODE solver
+% setup.btpde.rerun = false;                               % Rerun simulation with or without saved results

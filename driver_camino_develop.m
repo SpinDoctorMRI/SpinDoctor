@@ -11,35 +11,19 @@ addpath(genpath("src"));
 addpath(genpath("drivers_postprocess"));
 
 %% Define inputs
+mesh =  "C:\Users\amcsween\SpinDoctor_mesh_files/spindle/whole_neurons/04b_spindle3aFI.ply";
 
-% Get setup
-addpath(genpath("setups"));
-setup_camino_develop;
+%% Run simulation
+[results,femesh,~,~]= run_simulations_neuron(mesh,"setup_camino_develop");
 
-%% Prepare simulation
-[setup, femesh, surfaces, cells]  = prepare_simulation(setup);
-
-nsequence = setup.nsequence;
-%% Perform experiments
-
-% Perform MF experiments
-% Perform Laplace eigendecomposition
-tic
-save_path = create_savepath(setup,"mf");save_path = sprintf("%s/cell",save_path);
-lap_eig = compute_laplace_eig(femesh, setup.pde, setup.mf,save_path);
-    
-% Compute MF magnetization
-mf = solve_mf(femesh, setup, lap_eig,save_path,false);
-toc
-
+mf = results.mf_cell;
+setup = results.setup; nsequence = setup.nsequence;
 disp("Camino sequence results are stored in mf");
 
 %% Plot Geometry
 do_plots = true;
 
 if do_plots
-    % Plot surface triangulation
-    plot_surface_triangulation(surfaces);
     
     % Plot the finite element mesh
     plot_femesh(femesh, setup.pde.compartments);
