@@ -22,21 +22,21 @@ function FEM_save_path = make_FEM_save_path(pde,mf,multi_lap_eig,savepath)
     end
     
 
-    if no_relaxation
-        % Set paths for finding matrices.
-         relaxation_str = "no_relaxation_";
-    else
-        relaxation_str = sprintf("relaxation%f_",pde.relaxation);
-    end
+    % if no_relaxation
+    %     % Set paths for finding matrices.
+    %      relaxation_str = "no_relaxation_";
+    % else
+    %     relaxation_str = sprintf("relaxation%f_",pde.relaxation);
+    % end
 
-    if zero_permeability
-        permeability_str = "zero_permeability_";
-    else
-        permeability_str = sprintf("permeability%f_",pde.permeability);
-    end
+    % if zero_permeability
+    %     permeability_str = "zero_permeability_";
+    % else
+    %     permeability_str = sprintf("permeability%f_",pde.permeability);
+    % end
 
     % Set paths for finding matrices.
 
-    FEM_save_path = sprintf("%s/FEM_%s%slap_eig_lengthscale%.4f_neigmax%g.mat", ...
-                savepath,relaxation_str,permeability_str, mf.length_scale, mf.neig_max);
+    FEM_save_path = sprintf("%s/FEM_lap_eig.mat", ...
+                savepath);
 end

@@ -60,7 +60,7 @@ if include_cell
     savepath_cell = sprintf("%s/cell",savepath_root);
     FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_cell);
     compute_eig = ~isfile(FEM_save_path);
-    if compute_eig || save_magnetization
+    if compute_eig | save_magnetization
         lap_eig_cell = compute_laplace_eig(femesh_cell, setup.pde, setup.mf,savepath_cell,save_eig);  
         mf_cell = solve_mf(femesh_cell, setup, lap_eig_cell,savepath_cell,save_magnetization);
     else
@@ -78,7 +78,7 @@ if include_soma
     savepath_soma= sprintf("%s/soma",savepath_root);
     FEM_save_path = make_FEM_save_path(setup.pde,setup.mf,false,savepath_soma);
     compute_eig = ~isfile(FEM_save_path);
-    if compute_eig || save_magnetization
+    if compute_eig | save_magnetization
         disp("Computing eigenfunctions.")
         lap_eig_soma = compute_laplace_eig(femesh_soma, setup.pde, setup.mf,savepath_soma,save_eig);  
         mf_soma = solve_mf(femesh_soma, setup, lap_eig_soma,savepath_soma,save_magnetization);
