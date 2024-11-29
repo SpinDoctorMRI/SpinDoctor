@@ -601,13 +601,11 @@ if do_save && any(no_result_flag_const, 'all')
         seq = sequences_const{iseq};
         filename = sprintf("%s/%s.mat", savepath, seq.string(true));
         fprintf("Save %s\n", filename);
-        disp("Saving!")
         if ~isfile(filename)
             dummyVar = -1;
             save(filename, 'dummyVar');
         end
         mfile = matfile(filename, "Writable", true);
-        disp("Made it through mfile")
         for iamp = 1:namplitude
             for idir = 1:ndirection
                 if no_result_flag_const(iamp, iseq, idir)
@@ -618,7 +616,7 @@ if do_save && any(no_result_flag_const, 'all')
                     data.ug = directions(:, idir);
                     data.g = gvalues(iamp,iseq);
                     data.signal = const.signal(:,iamp, iseq, idir);
-                    data.itertimes = const.itertimes(iamp,iseq,idir)
+                    data.itertimes = const.itertimes(iamp,iseq,idir);
                     if save_magnetization
                         data.magnetization = const.magnetization(:,iamp,iseq,idir);
                     end
@@ -632,7 +630,7 @@ if do_save && any(no_result_flag_const, 'all')
                     data.ug = -data.ug;
                     % convert negative zeros to positive zeros
                     data.ug(data.ug == 0) = +0;
-                    gradient_field = gradient_fieldstring(data.ug, data.b)
+                    gradient_field = gradient_fieldstring(data.ug, data.b);
                     if ~hasfield(mfile, gradient_field)
                         mfile.(gradient_field) = data;
                     end
