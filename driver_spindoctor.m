@@ -1,4 +1,4 @@
-clcc%DRIVER_SPINDOCTOR Solve BTPDE, HADC, MF or analytical.
+%DRIVER_SPINDOCTOR Solve BTPDE, HADC, MF or analytical.
 %   Compare different ADC. Plot results in many directions.
 %
 %   It is highly recommended to read this driver to understand the workflow
