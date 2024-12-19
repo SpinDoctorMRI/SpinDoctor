@@ -85,7 +85,7 @@ setup.gradient.values_type  = "b";
 % Length scale hard-coded for these experiments from the diffusivity values and sequence length.
 % char_length_scale = sqrt(2*3*setup.pde.diffusivity_in*1000*101);
 setup.mf.length_scale =3;                               % Minimum length scale of eigenfunctions
-setup.mf.neig_max = 4000;                               % Requested number of eigenvalues
+setup.mf.neig_max = 2000;                               % Requested number of eigenvalues
 setup.mf.ninterval = 400;                               % Number of intervals to discretize time profile in MF (if not PGSE and doublePGSE)
 setup.mf.eigs.sigma = 1e-8;
 setup.mf.rerun=false;

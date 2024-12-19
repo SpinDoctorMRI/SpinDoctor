@@ -54,15 +54,16 @@ else
     disp("Loading simulations for cell only");
     nneurites = 0; include_soma = false; include_cell = true;
 end
+load_magnetization= true;
 
 if isfield(setup,'mf')
-    [mf_cell,mf_soma,mf_neurites] = load_mf_cell(setup,false,nneurites,include_soma,include_cell);
+    [mf_cell,mf_soma,mf_neurites] = load_mf_cell(setup,load_magnetization,nneurites,include_soma,include_cell);
     results.mf_cell = mf_cell; results.mf_soma = mf_soma;results.mf_neurites = mf_neurites;
 end
 
 
 if isfield(setup,'btpde')
-    [btpde_cell,btpde_soma,btpde_neurites] = load_btpde_cell(setup,false,nneurites,include_soma,include_cell);
+    [btpde_cell,btpde_soma,btpde_neurites] = load_btpde_cell(setup,load_magnetization,nneurites,include_soma,include_cell);
     results.btpde_cell = btpde_cell; results.btpde_soma = btpde_soma;results.btpde_neurites = btpde_neurites;
 end
 results.setup = setup; 
