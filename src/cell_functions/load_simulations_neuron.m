@@ -54,7 +54,7 @@ else
     disp("Loading simulations for cell only");
     nneurites = 0; include_soma = false; include_cell = true;
 end
-load_magnetization= true;
+load_magnetization= false;
 
 if isfield(setup,'mf')
     [mf_cell,mf_soma,mf_neurites] = load_mf_cell(setup,load_magnetization,nneurites,include_soma,include_cell);

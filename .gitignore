@@ -1,2 +1,4 @@
 saved_simul
 mesh_files
+*.txt
+*.sh
