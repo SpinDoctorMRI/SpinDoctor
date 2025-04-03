@@ -16,7 +16,7 @@ Load and save full cell simulations
 bvals = results.setup.gradient.bvalues;namplitude = length(bvals);
 mf =results.mf_cell;
 signals = real(mf.signal/femesh_cell.total_volume);
-save("neuron_meshing_paper\neuron_output\1-2-2.CNG_signals.mat",'bvals','signals');
+save("neuron_meshing_paper/neuron_output/1-2-2.CNG_signals.mat",'bvals','signals');
 
 % Refinement level 1
 mesh='mesh_files/selected/1-2-2.CNG_level1.ply';
@@ -27,7 +27,7 @@ Load and save full cell simulations
 bvals = results.setup.gradient.bvalues;namplitude = length(bvals);
 mf =results.mf_cell;
 signals = real(mf.signal/femesh_cell.total_volume);
-save("neuron_meshing_paper\neuron_output\1-2-2.CNG_level1_signals.mat",'bvals','signals');
+save("neuron_meshing_paper/neuron_output/1-2-2.CNG_level1_signals.mat",'bvals','signals');
 
 % Refinement level 2
 mesh='mesh_files/selected/1-2-2.CNG_level2.ply';
@@ -38,7 +38,7 @@ run_simulations_neuron(mesh,setup_file,tetgen_options);
 bvals = results.setup.gradient.bvalues;namplitude = length(bvals);
 mf =results.mf_cell;
 signals = real(mf.signal/femesh_cell.total_volume);
-save("neuron_meshing_paper\neuron_output\1-2-2.CNG_level2_signals.mat",'bvals','signals');
+save("neuron_meshing_paper/neuron_output/1-2-2.CNG_level2_signals.mat",'bvals','signals');
 
 
 %%Old section
@@ -63,5 +63,5 @@ save("neuron_meshing_paper\neuron_output\1-2-2.CNG_level2_signals.mat",'bvals','
 
 % signals_neurites = signals_neurites/volume_neurite_cmpt;
 
-% save("neuron_meshing_paper\neuron_output\1-2-2._seg.mat",'bvals','signals_soma','signal_neurites');
+% save("neuron_meshing_paper/neuron_output/1-2-2._seg.mat",'bvals','signals_soma','signal_neurites');
 
