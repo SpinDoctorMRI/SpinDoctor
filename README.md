@@ -10,16 +10,7 @@ The sequences, cell geometry and experimental parameters can be adjusted in the 
 
 The simulations for the neuron 1-2-2.CNG can be done by running:
 ```
-driver_run_neuron_simulations;
-```
-
-The simulations for the human microglia cells can be done by running:
-```
-driver_run_microglia_simulations; 
-```
-and comparing the signals of individual compartments is done in:
-```
-driver_compare_microlgia_simulations_segmented;
+driver_run_neuron_simulations_final;
 ```
 
 The figures for the paper were plotted using plot_data.ipynb.

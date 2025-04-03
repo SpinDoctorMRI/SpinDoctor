@@ -1,6 +1,0 @@
-mesh_files/Alzheimer_study/Ramified/826_6_3.ply
-mesh_files/Alzheimer_study/Ramified/ctrl_010319_13_826-2_1.ply
-mesh_files/Alzheimer_study/Amoeboid/714_3_2.ply
-mesh_files/Alzheimer_study/Amoeboid/714_3_3.ply
-mesh_files/Alzheimer_study/Amoeboid/766_4_3.ply
-mesh_files/Alzheimer_study/Amoeboid/818_1_3.ply
