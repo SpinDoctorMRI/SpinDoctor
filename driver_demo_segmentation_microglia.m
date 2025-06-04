@@ -57,3 +57,15 @@ for ib = 1:nneruites
 plot_field_everywhere(femesh_neurites{ib}, btpde_neurites{ib}.magnetization, sprintf('Neurite %d BTPDE Magentization, b = %.1f',ib,setup.gradient.bvalues(ifield)), ifield);
 plot_field_everywhere(femesh_neurites{ib}, mf_neurites{ib}.magnetization, sprintf('Neurite %d MF Magentization, b = %.1f',ib,setup.gradient.bvalues(ifield)), ifield);
 end
+
+
+%%Version which is single line for batch processing
+mesh="mesh_files/microglia/Ramified/826_5_3.ply";
+setup_file="setup_camino"; %% Change setup file to change sequences and parameters of mf/btpde, permeability, diffusivity etc.
+tetgen_options="-pq1.2a1.0O9VCn";
+swc_file="swc_files/826_5_3.swc";
+soma_file="mesh_files/microglia/Soma/826_5_3.ply";
+[results,femesh_cell,femesh_soma,femesh_neurites]= run_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
+
+%%Load results
+[results,femesh_cell,femesh_soma,femesh_neurites]= load_simulations_microglia(mesh,setup_file,tetgen_options,swc_file,soma_file);
